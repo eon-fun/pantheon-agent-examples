@@ -37,6 +37,7 @@ End the summary with an engaging closing line like "Stay tuned for updates! 🚀
 db = RedisDB()
 bot = Bot(token=TELEGRAM_BOT_TOKEN)
 dp = Dispatcher()
+message_queue = asyncio.Queue()
 timeout = ClientTimeout(total=10)
 
 
