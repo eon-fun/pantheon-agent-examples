@@ -9,7 +9,7 @@ from aiogram.filters import Command
 from database.redis.redis_client import RedisDB
 from services.ai_tools.openai_client import send_openai_request
 
-# Constants remain the same...
+# Constants
 TELEGRAM_BOT_TOKEN = "8039253205:AAEFwlG0c2AmhwIXnqC9Q5TsBo_x-7jM2a0"
 TELEGRAM_CHANNEL_ID = "@panteoncryptonews"
 TWITTER_BEARER_TOKEN = 'AAAAAAAAAAAAAAAAAAAAAALFxQEAAAAAccmjfpy9O9AoKsiWm3EiKRmlYW0%3DKxQgwMPoButLHfAL1Zoledy4bdko6ufQNLTQuxDpCfZxfgthkI'
@@ -38,18 +38,13 @@ bot = Bot(token=TELEGRAM_BOT_TOKEN)
 dp = Dispatcher()
 
 
-def get_redis_set_items(redis_key):
-    """Helper function to get items from Redis set and convert them to strings"""
-    items = db.get_set(redis_key)
-    return {item.decode('utf-8') if isinstance(item, bytes) else str(item) for item in items}
-
-
-@ray.remote
+# @ray.remote
 class TweetProcessor:
     def __init__(self):
         self.headers = {"Authorization": f"Bearer {TWITTER_BEARER_TOKEN}"}
 
     async def _fetch_with_retry(self, url):
+        """Fetch data from Twitter API with retries."""
         for attempt in range(5):
             try:
                 async with aiohttp.ClientSession() as session:
@@ -62,9 +57,9 @@ class TweetProcessor:
                 await asyncio.sleep(2)
 
     async def fetch_tweets(self, account, processed_tweet_ids):
+        """Fetch tweets for a given account."""
         try:
             print(f"🔍 Fetching tweets for @{account}")
-
             processed_ids = {str(id) for id in processed_tweet_ids}
 
             user_url = f"https://api.twitter.com/2/users/by/username/{account}"
@@ -98,60 +93,26 @@ class TweetProcessor:
             print(f"❌ Error for @{account}: {e}")
             return []
 
+    async def process_new_tweets(self):
+        """Fetch and process tweets from all subscribed accounts."""
+        accounts = self.get_redis_set_items(REDIS_SUBSCRIBED_TWITTER_ACCOUNTS)
+        processed_tweet_ids = self.get_redis_set_items(REDIS_LAST_PROCESSED_TWEETS)
 
-async def process_tweets(accounts, processed_tweet_ids):
-    """Process tweets with proper async handling"""
-    try:
-        processor = TweetProcessor.remote()
-        futures = []
-
-        # Convert accounts to list of strings if they're bytes
-        accounts = [acc.decode('utf-8') if isinstance(acc, bytes) else str(acc) for acc in accounts]
-
-        # Create futures for each account
-        for account in accounts:
-            future = processor.fetch_tweets.remote(account, processed_tweet_ids)
-            futures.append(future)
-
-        # Get results one by one to avoid gathering issues
         all_tweets = []
-        for future in futures:
-            try:
-                tweets = await asyncio.to_thread(ray.get, future)
-                all_tweets.extend(tweets)
-            except Exception as e:
-                print(f"Error processing future: {e}")
-                continue
+        for account in accounts:
+            tweets = await self.fetch_tweets(account, processed_tweet_ids)
+            all_tweets.extend(tweets)
 
         return all_tweets
-    except Exception as e:
-        print(f"Error in process_tweets: {e}")
-        return []
 
-
-@dp.message(Command("add_account"))
-async def add_account(message: Message):
-    accounts = message.text.split()[1:]
-    if not accounts:
-        await message.reply("❌ Please specify accounts to add.")
-        return
-    for account in accounts:
-        db.add_to_set(REDIS_SUBSCRIBED_TWITTER_ACCOUNTS, account.strip("@"))
-    await message.reply(f"✅ Accounts added: {', '.join(accounts)}")
-
-
-@dp.message(Command("remove_account"))
-async def remove_account(message: Message):
-    accounts = message.text.split()[1:]
-    if not accounts:
-        await message.reply("❌ Please specify accounts to remove.")
-        return
-    for account in accounts:
-        db.r.srem(REDIS_SUBSCRIBED_TWITTER_ACCOUNTS, account.strip("@"))
-    await message.reply(f"✅ Accounts removed: {', '.join(accounts)}")
+    def get_redis_set_items(self, redis_key):
+        """Helper function to get items from Redis set and convert them to strings."""
+        items = db.get_set(redis_key)
+        return {item.decode('utf-8') if isinstance(item, bytes) else str(item) for item in items}
 
 
 async def summarize_tweets(tweets):
+    """Summarize tweets using AI."""
     if not tweets:
         return None
 
@@ -171,24 +132,15 @@ async def summarize_tweets(tweets):
 
 
 async def periodic_task():
+    """Periodic task to fetch and process tweets."""
+    processor = TweetProcessor.remote()
     while True:
         try:
             print("🔄 Checking for new tweets...")
-
-            # Get accounts and processed tweet IDs
-            accounts = get_redis_set_items(REDIS_SUBSCRIBED_TWITTER_ACCOUNTS)
-            processed_tweet_ids = get_redis_set_items(REDIS_LAST_PROCESSED_TWEETS)
-
-            if not accounts:
-                print("ℹ️ No accounts to process")
-                await asyncio.sleep(30)
-                continue
-
-            # Get new tweets with proper async handling
-            new_tweets = await process_tweets(accounts, processed_tweet_ids)
+            new_tweets_future = processor.process_new_tweets.remote()
+            new_tweets = await ray.get(new_tweets_future)
 
             if new_tweets:
-                # Create and send summary
                 summary = await summarize_tweets(new_tweets)
                 if summary:
                     try:
@@ -211,19 +163,15 @@ async def periodic_task():
 
         except Exception as e:
             print(f"❌ Periodic task error: {str(e)}")
-            import traceback
-            print(traceback.format_exc())
-
         await asyncio.sleep(30)
 
 
 async def main():
-    # Initialize Ray
+    """Main function to start the bot and periodic task."""
     if not ray.is_initialized():
         ray.init(ignore_reinit_error=True)
         print("Ray initialized successfully!")
 
-    # Start periodic task and bot
     asyncio.create_task(periodic_task())
     await dp.start_polling(bot)
 
