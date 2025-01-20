@@ -9,6 +9,7 @@ from telethon.tl.types import InputPeerEmpty
 
 from simple_ai_agents.ai_dialogue_manager.ray_dialogue_manager import MessageProcessor
 from simple_ai_agents.ai_twitter_summary.ray_twitter_summary import TweetProcessor
+from simple_ai_agents.ai_avatar.ray_avatar import AvatarAgent
 
 # Configuration
 API_ID = "26012476"
@@ -26,6 +27,7 @@ class AgentOrchestrator:
 
         self.message_processor = MessageProcessor.remote()
         self.tweet_processor = TweetProcessor.remote()
+        self.avatar_agent = AvatarAgent.remote()
         self.telethon_client = TelegramClient(SESSION_NAME, int(API_ID), API_HASH)
         self.aiogram_bot = Bot(token=TELEGRAM_BOT_TOKEN)
         self.dp = Dispatcher()
@@ -83,7 +85,6 @@ class AgentOrchestrator:
                 sender = await event.get_sender()
                 chat = await event.get_chat()
 
-                # Проверяем, что sender существует
                 if sender is None:
                     print(f"⚠️ Message from unknown sender in chat {chat.title if chat else 'Unknown Chat'}")
                     sender_username = "Unknown User"
@@ -121,6 +122,38 @@ class AgentOrchestrator:
             except Exception as e:
                 print(f"❌ Error adding account: {e}")
                 await message.answer("❌ Failed to add accounts. Please try again.")
+
+        @self.telethon_client.on(events.NewMessage(pattern='/new_style'))
+        async def handle_new_style_command(event):
+            """Handle the /new_style command."""
+            try:
+                success = await self.avatar_agent.update_user_style.remote(
+                    self.telethon_client, event.sender_id
+                )
+                if success:
+                    await event.respond("✅ Communication style updated successfully!")
+                else:
+                    await event.respond("❌ Failed to update communication style.")
+            except Exception as e:
+                print(f"❌ Error handling new style command: {e}")
+                await event.respond("❌ An error occurred while updating style.")
+
+        @self.telethon_client.on(events.NewMessage)
+        async def handle_avatar_message(event):
+            """Handle messages for AI avatar."""
+            if event.out or event.text.startswith('/'):
+                return
+
+            try:
+                message_data = {
+                    'user_id': event.sender_id,
+                    'text': event.text
+                }
+                response = await self.avatar_agent.process_message.remote(message_data)
+                await event.respond(response)
+            except Exception as e:
+                print(f"❌ Error handling avatar message: {e}")
+                await event.respond("❌ An error occurred while processing your message.")
 
     async def process_tweets_periodically(self):
         """Process tweets at regular intervals."""
