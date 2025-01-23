@@ -2,12 +2,13 @@ import ray
 import asyncio
 from telethon import TelegramClient, events, functions
 from telethon.errors import SessionPasswordNeededError
-from aiogram import Bot, Dispatcher
+from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram.enums import ParseMode
 from telethon.tl.types import InputPeerEmpty
 
 from simple_ai_agents.ai_dialogue_manager.ray_dialogue_manager import MessageProcessor
+from simple_ai_agents.ai_smm_manager.ray_news_agent import NewsAgent
 from simple_ai_agents.ai_twitter_summary.ray_twitter_summary import TweetProcessor
 from simple_ai_agents.ai_avatar.ray_avatar import AvatarAgent
 
@@ -18,6 +19,9 @@ TELEGRAM_BOT_TOKEN = "8039253205:AAEFwlG0c2AmhwIXnqC9Q5TsBo_x-7jM2a0"
 SESSION_NAME = "my_telegram_session"
 TELEGRAM_CHANNEL_ID = "@panteoncryptonews"
 
+NEWS_TELEGRAM_BOT_TOKEN = "7633131821:AAForOPCLS045IFHihMf49UozGwKL7IMbpU"
+NEWS_TELEGRAM_CHANNEL_ID = "@pantheoncryptotest"
+
 
 class AgentOrchestrator:
     def __init__(self):
@@ -25,11 +29,16 @@ class AgentOrchestrator:
             ray.init(ignore_reinit_error=True)
             print("✅ Ray initialized successfully!")
 
-        self.message_processor = MessageProcessor.remote()
+        # Initialize all agents
+        self.news_agent = NewsAgent.remote()
         self.tweet_processor = TweetProcessor.remote()
+        self.message_processor = MessageProcessor.remote()
         self.avatar_agent = AvatarAgent.remote()
+
+        # Initialize bots and clients
         self.telethon_client = TelegramClient(SESSION_NAME, int(API_ID), API_HASH)
         self.aiogram_bot = Bot(token=TELEGRAM_BOT_TOKEN)
+        self.aiogram_bot_news = Bot(token=NEWS_TELEGRAM_BOT_TOKEN)
         self.dp = Dispatcher()
 
     async def get_read_messages_data(self):
@@ -62,6 +71,11 @@ class AgentOrchestrator:
         """Setup command handlers for both Telethon and Aiogram bots."""
         print("🔧 Setting up handlers...")
 
+        # Регистрируем обработчики команд для aiogram
+        self.dp.message.register(self.handle_add_account, Command("add_account"))
+        self.dp.message.register(self.handle_add_news_site, Command("add_news_site"))
+
+        # Обработчики для Telethon
         @self.telethon_client.on(events.NewMessage(pattern="/summary"))
         async def handle_summary_command(event):
             """Handle the /summary command."""
@@ -104,25 +118,6 @@ class AgentOrchestrator:
             except Exception as e:
                 print(f"❌ Error handling new message: {e}")
 
-        @self.dp.message(Command("add_account"))
-        async def handle_add_account(message):
-            """Handle the /add_account command."""
-            try:
-                accounts = message.text.split()[1:]
-                if not accounts:
-                    await message.answer("❌ Please specify accounts to add.")
-                    return
-
-                results = []
-                for account in accounts:
-                    account = account.strip("@")
-                    success = await self.tweet_processor.add_account.remote(account)
-                    results.append(f"{'✅' if success else '❌'} @{account}")
-                await message.answer("\n".join(results))
-            except Exception as e:
-                print(f"❌ Error adding account: {e}")
-                await message.answer("❌ Failed to add accounts. Please try again.")
-
         @self.telethon_client.on(events.NewMessage(pattern='/new_style'))
         async def handle_new_style_command(event):
             """Handle the /new_style command."""
@@ -155,6 +150,51 @@ class AgentOrchestrator:
                 print(f"❌ Error handling avatar message: {e}")
                 await event.respond("❌ An error occurred while processing your message.")
 
+    async def handle_add_account(self, message: types.Message):
+        """Handle the /add_account command."""
+        try:
+            accounts = message.text.split()[1:]
+            if not accounts:
+                await message.answer("❌ Please specify accounts to add.")
+                return
+
+            results = []
+            for account in accounts:
+                account = account.strip("@")
+                success = await self.tweet_processor.add_account.remote(account)
+                results.append(f"{'✅' if success else '❌'} @{account}")
+
+            response = "\n".join(results)
+            print(f"Adding accounts response: {response}")
+            await message.answer(response)
+
+        except Exception as e:
+            error_msg = f"❌ Error adding account: {str(e)}"
+            print(error_msg)
+            await message.answer(error_msg)
+
+    async def handle_add_news_site(self, message: types.Message):
+        """Handle the /add_news_site command."""
+        try:
+            sites = message.text.split()[1:]
+            if not sites:
+                await message.answer("❌ Please specify news sites to add.")
+                return
+
+            results = []
+            for site in sites:
+                success = await self.news_agent.add_news_site.remote(site)
+                results.append(f"{'✅' if success else '❌'} {site}")
+
+            response = "\n".join(results)
+            print(f"Adding news sites response: {response}")
+            await message.answer(response)
+
+        except Exception as e:
+            error_msg = f"❌ Error adding news site: {str(e)}"
+            print(error_msg)
+            await message.answer(error_msg)
+
     async def process_tweets_periodically(self):
         """Process tweets at regular intervals."""
         while True:
@@ -174,9 +214,40 @@ class AgentOrchestrator:
                 print(f"❌ Error processing tweets: {e}")
             await asyncio.sleep(30)
 
+    async def process_news_periodically(self):
+        """Process news at regular intervals."""
+        try:
+            while True:
+                try:
+                    print("🔄 Checking for new articles...")
+                    summaries = await self.news_agent.process_new_content.remote()
+
+                    if summaries:
+                        print("✅ News summaries generated")
+                        for summary in summaries:
+                            try:
+                                await self.aiogram_bot_news.send_message(
+                                    chat_id=NEWS_TELEGRAM_CHANNEL_ID,
+                                    text=summary,
+                                    parse_mode=ParseMode.MARKDOWN
+                                )
+                                await asyncio.sleep(2)
+                            except Exception as e:
+                                print(f"❌ Error sending message to Telegram: {e}")
+                    else:
+                        print("ℹ️ No new articles to process")
+                except Exception as e:
+                    print(f"❌ Error processing news: {e}")
+
+                await asyncio.sleep(30)
+        except Exception as e:
+            print(f"❌ Fatal error in news processing: {e}")
+
     async def start(self):
         """Start the orchestrator."""
         print("🚀 Starting orchestrator...")
+
+        # Инициализация Telethon клиента
         await self.telethon_client.connect()
         if not await self.telethon_client.is_user_authorized():
             print("⏳ Authorization required")
@@ -189,11 +260,24 @@ class AgentOrchestrator:
                 password = input("Enter your cloud password (2FA): ").strip()
                 await self.telethon_client.sign_in(password=password)
         print("✅ Telethon client connected successfully!")
+
+        # Настройка обработчиков
         await self.setup_handlers()
+
+        # Запуск всех компонентов
+        dp_task_1 = asyncio.create_task(self.dp.start_polling(self.aiogram_bot))
+        dp_task_2 = asyncio.create_task(self.dp.start_polling(self.aiogram_bot_news))
+        tweets_task = asyncio.create_task(self.process_tweets_periodically())
+        news_task = asyncio.create_task(self.process_news_periodically())
+        telethon_task = asyncio.create_task(self.telethon_client.run_until_disconnected())
+
+        # Ждем завершения всех задач
         await asyncio.gather(
-            self.process_tweets_periodically(),
-            self.dp.start_polling(self.aiogram_bot),
-            self.telethon_client.run_until_disconnected()
+            dp_task_1,
+            dp_task_2,
+            tweets_task,
+            news_task,
+            telethon_task
         )
 
 
