@@ -7,6 +7,7 @@ import asyncio
 from aiohttp import ClientSession
 
 from infrastructure.configs.config import settings
+from simple_ai_agents.ai_predicts_manager.results import AsyncResultsAnalyzer
 from technical import TechnicalAnalysis, MarketStructure
 from collector import AsyncDataCollector
 
@@ -472,45 +473,58 @@ class AsyncCryptoAISystem:
         self.logger = logging.getLogger(__name__)
 
     async def run_analysis(self, num_coins: int = 5) -> Dict:
-        """Run complete market analysis with improved error handling"""
-        try:
-            async with self.data_collector:
-                # Get top coins
-                self.logger.info(f"Fetching top {num_coins} coins...")
-                coins = await self.data_collector.get_top_coins(num_coins)
+        """Run complete market analysis in continuous mode"""
+        # Create results analyzer instance once
+        results_analyzer = AsyncResultsAnalyzer()
 
-                if not coins:
-                    raise ValueError("Failed to fetch top coins")
+        while True:
+            try:
+                async with self.data_collector:
+                    # Get top coins
+                    logger.info(f"Fetching top {num_coins} coins...")
+                    coins = await self.data_collector.get_top_coins(num_coins)
 
-                self.logger.info(f"Retrieved coins: {[coin['symbol'].upper() for coin in coins]}")
+                    if not coins:
+                        raise ValueError("Failed to fetch top coins")
 
-                # Collect data for each coin
-                market_data = []
-                tasks = [self._collect_coin_data(coin['symbol'].upper()) for coin in coins]
-                results = await asyncio.gather(*tasks, return_exceptions=True)
+                    logger.info(f"Retrieved coins: {[coin['symbol'].upper() for coin in coins]}")
 
-                for result in results:
-                    if isinstance(result, Exception):
-                        self.logger.error(f"Error collecting data: {str(result)}")
-                    elif result:
-                        market_data.append(result)
+                    # Collect data for each coin
+                    market_data = []
+                    tasks = [self._collect_coin_data(coin['symbol'].upper()) for coin in coins]
+                    results = await asyncio.gather(*tasks, return_exceptions=True)
 
-                if not market_data:
-                    raise ValueError("No valid market data collected")
+                    for result in results:
+                        if isinstance(result, Exception):
+                            logger.error(f"Error collecting data: {str(result)}")
+                        elif result:
+                            market_data.append(result)
 
-                # Run AI analysis
-                self.logger.info("Running AI analysis...")
-                analysis = await self.ai_analyzer.analyze_data(market_data)
+                    if not market_data:
+                        raise ValueError("No valid market data collected")
 
-                return analysis
+                    # Run AI analysis
+                    logger.info("Running AI analysis...")
 
-        except Exception as e:
-            self.logger.error(f"Error in analysis run: {str(e)}")
-            return {
-                'error': str(e),
-                'trading_signals': [],
-                'market_analysis': {}
-            }
+                    # Get Claude's analysis
+                    analysis = await self.ai_analyzer.analyze_data(market_data)
+
+                    # Process results and save to Redis
+                    results = await results_analyzer.process_and_save_signals(market_data, analysis)
+
+                    # Format and log the results
+                    output = await results_analyzer.format_output(results)
+                    print(output)
+
+                    # Wait before next iteration (5 minutes by default)
+                    wait_time = 30  # 300 seconds = 5 minutes
+                    logger.info(f"Waiting {wait_time} seconds until next analysis...")
+                    await asyncio.sleep(wait_time)
+
+            except Exception as e:
+                logger.error(f"Error in analysis run: {str(e)}")
+                # Wait a minute before retrying after error
+                await asyncio.sleep(60)
 
     async def _collect_coin_data(self, symbol: str) -> Optional[Dict]:
         """Collect comprehensive data for a single coin with validation"""
@@ -660,26 +674,12 @@ class AsyncCryptoAISystem:
             self.logger.error(f"Error in debug printing: {str(e)}")
 
 
-async def main():
-    """Main execution function with proper error handling"""
-    try:
-        # Initialize with your API key
-        system = AsyncCryptoAISystem(settings.ANTHROPIC_API_KEY)
-
-        # Run analysis
-        analysis = await system.run_analysis(num_coins=2)
-
-        # Print results
-        if 'error' in analysis:
-            print(f"\nError in analysis: {analysis['error']}")
-            return
-
-        print(f"{analysis}")
-
-    except Exception as e:
-        logging.error(f"Fatal error in main execution: {str(e)}")
-        raise
-
-
 if __name__ == "__main__":
-    asyncio.run(main())
+    # Set up logging
+    logging.basicConfig(level=logging.INFO)
+
+    # Create system instance
+    system = AsyncCryptoAISystem(settings.ANTHROPIC_API_KEY)
+
+    # Run the analysis loop
+    asyncio.run(system.run_analysis(num_coins=2))
