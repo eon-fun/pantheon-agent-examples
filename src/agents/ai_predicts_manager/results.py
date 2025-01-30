@@ -5,8 +5,17 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import random
 import time
+import json
+
+import redis
+
 from database.redis.redis_client import db
 
+# Set up logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 
@@ -18,35 +27,37 @@ class AsyncResultsAnalyzer:
         """Cleanup executor on deletion"""
         self.executor.shutdown(wait=False)
 
-    def save_signal_to_redis(self, symbol: str, direction: str, timestamp: int = None):
-        """Сохраняет сигнал в Redis с уникальной временной меткой"""
-        if timestamp is None:
-            timestamp = int(time.time())
+    async def debug_signal_storage(self, symbol: str, direction: str):
+        """Отладочная функция для проверки состояния сигналов в Redis"""
+        try:
+            # Получаем все сигналы для данного символа
+            signals = db.r.zrangebyscore(
+                'trading_signals',
+                '-inf',
+                '+inf',
+                withscores=True
+            )
 
-        # Добавляем микросекунды для уникальности
-        unique_timestamp = timestamp + (hash(f"{symbol}:{direction}") % 1000) / 1000.0
+            matching_signals = [
+                (s.decode('utf-8'), score) for s, score in signals
+                if s.decode('utf-8').startswith(f"{symbol}:{direction}")
+            ]
 
-        # Сохраняем в сортированном множестве с уникальной временной меткой
-        db.add_to_sorted_set(
-            'trading_signals',
-            unique_timestamp,
-            f"{symbol}:{direction}"
-        )
+            logger.info(f"Current signals for {symbol}:{direction}:")
+            for signal, score in matching_signals:
+                logger.info(f"  - {signal} at {datetime.fromtimestamp(int(score))}")
 
-        # Сохраняем также последний сигнал отдельно
-        signal_data = {
-            'symbol': symbol,
-            'direction': direction,
-            'timestamp': timestamp
-        }
-        db.set(f'last_signal:{symbol}', signal_data)
+            return len(matching_signals)
 
-        logger.info(f"Saved signal to Redis: {signal_data} with unique timestamp {unique_timestamp}")
+        except Exception as e:
+            logger.error(f"Error checking signals: {str(e)}")
+            return 0
 
     async def process_and_save_signals(self, market_data: List[Dict], claude_analysis: str) -> Dict[str, Dict]:
-        """Обработка данных и сохранение сигналов"""
+        """Обработка данных и сохранение сигналов с отладкой"""
         try:
             simplified_results = {}
+            current_timestamp = int(time.time())
 
             # Парсим данные от Claude
             claude_data = await self._parse_claude_analysis(claude_analysis)
@@ -56,31 +67,91 @@ class AsyncResultsAnalyzer:
             tasks = []
             for coin_data in market_data:
                 symbol = coin_data.get('symbol', '')
+                if not symbol:
+                    continue
+
                 coin_claude_data = claude_data.get(symbol, {})
                 logger.info(f"Processing {symbol} with Claude data: {coin_claude_data}")
 
                 task = asyncio.create_task(self._process_coin_data(coin_data, coin_claude_data))
-                tasks.append(task)
+                tasks.append((symbol, task))
 
-            results = await asyncio.gather(*tasks)
-            current_timestamp = int(time.time())
+            # Собираем результаты с сохранением порядка
+            for symbol, task in tasks:
+                try:
+                    symbol, direction, confidence, reasons = await task
 
-            # Собираем и сохраняем результаты
-            for symbol, direction, confidence, reasons in results:
-                simplified_results[symbol] = {
-                    'predicted_direction': direction,
-                    'confidence': confidence,
-                    'key_reasons': reasons,
-                    'timestamp': current_timestamp
-                }
-                # Сохраняем в Redis
-                self.save_signal_to_redis(symbol, direction, current_timestamp)
+                    # Проверяем текущее состояние сигналов
+                    current_signals = await self.debug_signal_storage(symbol, direction)
+                    logger.info(f"Current signals count for {symbol}:{direction}: {current_signals}")
+
+                    # Сохраняем результат
+                    simplified_results[symbol] = {
+                        'predicted_direction': direction,
+                        'confidence': confidence,
+                        'key_reasons': reasons,
+                        'timestamp': current_timestamp
+                    }
+
+                    # Сохраняем в Redis с обработкой ошибок
+                    try:
+                        await self._save_signal_to_redis(
+                            symbol,
+                            direction,
+                            confidence,
+                            reasons,
+                            current_timestamp
+                        )
+                        logger.info(f"Successfully saved signal to Redis: {symbol}:{direction}")
+
+                        # Проверяем, что сигнал действительно сохранился
+                        new_signals = await self.debug_signal_storage(symbol, direction)
+                        logger.info(f"Updated signals count for {symbol}:{direction}: {new_signals}")
+
+                    except Exception as redis_error:
+                        logger.error(f"Failed to save signal to Redis for {symbol}: {str(redis_error)}")
+
+                except Exception as e:
+                    logger.error(f"Error processing results for {symbol}: {str(e)}")
+                    continue
 
             return simplified_results
 
         except Exception as e:
-            logger.error(f"Error in analysis: {e}")
+            logger.error(f"Error in analysis: {str(e)}")
             return {}
+
+    async def _save_signal_to_redis(
+            self,
+            symbol: str,
+            direction: str,
+            confidence: float,
+            reasons: List[str],
+            timestamp: int = None
+    ):
+        """Сохранение сигнала в Redis с уникальным идентификатором"""
+        if timestamp is None:
+            timestamp = int(time.time())
+
+        try:
+            # Создаем уникальный timestamp с миллисекундами
+            unique_timestamp = timestamp + (time.time_ns() % 1000) / 1000.0
+
+            # Создаем уникальный ключ, включающий время
+            signal_key = f"{symbol}:{direction}:{unique_timestamp}"
+
+            # Сохраняем в сортированном множестве
+            db.add_to_sorted_set(
+                'trading_signals',
+                unique_timestamp,
+                signal_key
+            )
+
+            logger.info(f"Successfully saved signal to Redis: {signal_key} at {unique_timestamp}")
+
+        except Exception as e:
+            logger.error(f"Failed to save signal to Redis for {symbol}: {str(e)}")
+            raise
 
     async def _parse_claude_analysis(self, claude_analysis: str) -> Dict[str, Dict]:
         """Парсит анализ от Claude"""
@@ -169,7 +240,7 @@ class AsyncResultsAnalyzer:
 
         except Exception as e:
             logger.error(f"Error processing coin data for {symbol}: {e}")
-            return symbol, "UP", 0.51, ["Ошибка обработки данных"]
+            return symbol, "NEUTRAL", 0.51, ["Ошибка обработки данных"]
 
     async def _collect_signals(self, coin_data: Dict) -> Dict[str, float]:
         """Собирает все сигналы"""
@@ -251,14 +322,14 @@ class AsyncResultsAnalyzer:
 
     async def _determine_direction(self, technical_signals: Dict[str, float], claude_data: Dict) -> Tuple[
         str, float, List[str]]:
-        """Определение направления движения"""
+        """Определение направления движения с улучшенной обработкой сигналов"""
         try:
             total_score = 0
             total_weight = 0
             signals_weight = []
             reasons = []
 
-            # Веса для разных сигналов
+            # Базовые веса для разных типов сигналов
             base_weights = {
                 'momentum_1h': 1.0,
                 'momentum_4h': 0.8,
@@ -274,14 +345,21 @@ class AsyncResultsAnalyzer:
 
             # Обработка технических сигналов
             for signal_name, signal_value in technical_signals.items():
+                if abs(signal_value) < 0.1:  # Игнорируем слишком слабые сигналы
+                    continue
+
                 base_weight = base_weights.get(signal_name, 1.0)
-                # Добавляем небольшую случайность к весам
+                # Добавляем контролируемую случайность к весам
                 weight = base_weight * (1.0 + (random.random() - 0.5) * 0.1)
                 importance = abs(signal_value * weight)
 
                 if abs(signal_value) >= 0.5:
                     direction_text = "бычий" if signal_value > 0 else "медвежий"
-                    signals_weight.append((importance, f"{signal_name}: {direction_text}"))
+                    signal_strength = "сильный" if abs(signal_value) > 0.8 else "умеренный"
+                    signals_weight.append((
+                        importance,
+                        f"{signal_name}: {signal_strength} {direction_text} сигнал"
+                    ))
 
                 total_score += signal_value * weight
                 total_weight += weight

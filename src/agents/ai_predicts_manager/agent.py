@@ -517,7 +517,7 @@ class AsyncCryptoAISystem:
                     print(output)
 
                     # Wait before next iteration (5 minutes by default)
-                    wait_time = 30  # 300 seconds = 5 minutes
+                    wait_time = 1800  # 300 seconds = 5 minutes
                     logger.info(f"Waiting {wait_time} seconds until next analysis...")
                     await asyncio.sleep(wait_time)
 
@@ -682,4 +682,4 @@ if __name__ == "__main__":
     system = AsyncCryptoAISystem(settings.ANTHROPIC_API_KEY)
 
     # Run the analysis loop
-    asyncio.run(system.run_analysis(num_coins=2))
+    asyncio.run(system.run_analysis(num_coins=5))
