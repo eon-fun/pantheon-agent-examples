@@ -3,7 +3,7 @@ import aiohttp
 import json
 from html import escape
 from database.redis.redis_client import RedisDB
-from services.ai_tools.openai_client import send_openai_request
+from services.ai_connectors.openai_client import send_openai_request
 
 TWITTER_PROMPT = """
 You are a social media analyst and news summarizer for a cryptocurrency and celebrity news channel. Your task is to monitor tweets and create concise summaries that highlight key events, their potential consequences, and the involved parties.

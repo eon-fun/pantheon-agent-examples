@@ -7,7 +7,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.types import Message
 from aiogram.filters import Command
 from database.redis.redis_client import RedisDB
-from services.ai_tools.openai_client import send_openai_request
+from services.ai_connectors.openai_client import send_openai_request
 
 # Constants
 TELEGRAM_BOT_TOKEN = "8039253205:AAEFwlG0c2AmhwIXnqC9Q5TsBo_x-7jM2a0"

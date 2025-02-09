@@ -8,7 +8,7 @@ from tenacity import retry, stop_after_attempt, wait_fixed
 from aiogram.enums import ParseMode
 
 from database.redis.redis_client import RedisDB
-from services.ai_tools.openai_client import send_openai_request
+from services.ai_connectors.openai_client import send_openai_request
 
 PROMPT = """
 You are a Telegram post author for a cryptocurrency news channel. 
