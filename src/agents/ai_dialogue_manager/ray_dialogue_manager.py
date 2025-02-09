@@ -3,7 +3,7 @@ import json
 from telethon import functions, types
 from telethon.tl.types import InputPeerEmpty, PeerUser, PeerChannel, PeerChat
 from database.redis.redis_client import RedisDB  # Ваш клиент Redis
-from services.ai_tools.openai_client import send_openai_request  # Ваш OpenAI клиент
+from services.ai_connectors.openai_client import send_openai_request  # Ваш OpenAI клиент
 
 TELEGRAM_PROMPT = """
 You are an assistant summarizing messages in a chat. 

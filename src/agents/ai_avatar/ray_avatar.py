@@ -1,6 +1,6 @@
 import ray
 from telethon import events
-from services.ai_tools.openai_client import send_openai_request
+from services.ai_connectors.openai_client import send_openai_request
 from database.redis.redis_client import RedisDB
 
 OPENAI_PROMPT_TEMPLATE = (

@@ -11,6 +11,7 @@ from simple_ai_agents.ai_dialogue_manager.ray_dialogue_manager import MessagePro
 from simple_ai_agents.ai_smm_manager.ray_news_agent import NewsAgent
 from simple_ai_agents.ai_twitter_summary.ray_twitter_summary import TweetProcessor
 from simple_ai_agents.ai_avatar.ray_avatar import AvatarAgent
+from simple_ai_agents.wallet_tracker_agent.ray_wallet_tracker import WalletTrackingAgent
 
 # Configuration
 API_ID = "26012476"
@@ -34,6 +35,7 @@ class AgentOrchestrator:
         self.tweet_processor = TweetProcessor.remote()
         self.message_processor = MessageProcessor.remote()
         self.avatar_agent = AvatarAgent.remote()
+        self.wallet_agent = WalletTrackingAgent.remote()
 
         # Initialize bots and clients
         self.telethon_client = TelegramClient(SESSION_NAME, int(API_ID), API_HASH)
@@ -74,6 +76,9 @@ class AgentOrchestrator:
         # Регистрируем обработчики команд для aiogram
         self.dp.message.register(self.handle_add_account, Command("add_account"))
         self.dp.message.register(self.handle_add_news_site, Command("add_news_site"))
+        self.dp.message.register(self.handle_add_wallet, Command("add_wallet"))
+        self.dp.message.register(self.handle_remove_wallet, Command("remove_wallet"))
+        self.dp.message.register(self.handle_list_wallets, Command("list_wallets"))
 
         # Обработчики для Telethon
         @self.telethon_client.on(events.NewMessage(pattern="/summary"))
@@ -195,6 +200,40 @@ class AgentOrchestrator:
             print(error_msg)
             await message.answer(error_msg)
 
+    async def handle_add_wallet(self, message: types.Message):
+        """Handle the /add_wallet command."""
+        try:
+            wallet = message.text.split()[1]
+            success = await self.wallet_agent.add_wallet.remote(wallet)
+            if success:
+                await message.answer(f"✅ Кошелек {wallet} добавлен в список отслеживания!")
+            else:
+                await message.answer("❌ Некорректный адрес кошелька. Укажите правильный адрес.")
+        except IndexError:
+            await message.answer("❌ Укажите адрес кошелька после команды.")
+
+    async def handle_remove_wallet(self, message: types.Message):
+        """Handle the /remove_wallet command."""
+        try:
+            wallet = message.text.split()[1]
+            success = await self.wallet_agent.remove_wallet.remote(wallet)
+            if success:
+                await message.answer(f"✅ Кошелек {wallet} удален из списка отслеживания")
+            else:
+                await message.answer("❌ Ошибка при удалении кошелька")
+        except IndexError:
+            await message.answer("❌ Укажите адрес кошелька после команды")
+
+    async def handle_list_wallets(self, message: types.Message):
+        """Handle the /list_wallets command."""
+        wallets = await self.wallet_agent.get_wallet_list.remote()
+        if not wallets:
+            await message.answer("📝 Список отслеживаемых кошельков пуст")
+            return
+
+        wallet_list = "\n".join([f"• `{w}`" for w in wallets])
+        await message.answer(f"📝 Отслеживаемые кошельки:\n{wallet_list}")
+
     async def process_tweets_periodically(self):
         """Process tweets at regular intervals."""
         while True:
@@ -243,6 +282,28 @@ class AgentOrchestrator:
         except Exception as e:
             print(f"❌ Fatal error in news processing: {e}")
 
+    async def process_wallets_periodically(self):
+        """Process wallets at regular intervals."""
+        while True:
+            try:
+                print("🔄 Checking wallets for new transactions...")
+                messages = await self.wallet_agent.process_wallets.remote()
+
+                if messages:
+                    print(f"✅ Found {len(messages)} new transactions")
+                    for msg_data in messages:
+                        await self.aiogram_bot.send_message(
+                            chat_id=TELEGRAM_CHANNEL_ID,
+                            text=msg_data["message"],
+                            parse_mode=ParseMode.MARKDOWN
+                        )
+                else:
+                    print("ℹ️ No new transactions")
+            except Exception as e:
+                print(f"❌ Error processing wallets: {e}")
+
+            await asyncio.sleep(10)
+
     async def start(self):
         """Start the orchestrator."""
         print("🚀 Starting orchestrator...")
@@ -270,6 +331,7 @@ class AgentOrchestrator:
         tweets_task = asyncio.create_task(self.process_tweets_periodically())
         news_task = asyncio.create_task(self.process_news_periodically())
         telethon_task = asyncio.create_task(self.telethon_client.run_until_disconnected())
+        wallet_task = asyncio.create_task(self.process_wallets_periodically())
 
         # Ждем завершения всех задач
         await asyncio.gather(
@@ -277,7 +339,8 @@ class AgentOrchestrator:
             dp_task_2,
             tweets_task,
             news_task,
-            telethon_task
+            telethon_task,
+            wallet_task
         )
 
 
