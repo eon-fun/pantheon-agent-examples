@@ -1,3 +1,4 @@
+import asyncio
 import time
 import json
 import requests
@@ -6,16 +7,16 @@ from contextlib import asynccontextmanager
 from urllib.parse import urljoin
 from fastapi import FastAPI
 from ray import serve
+from aiogram.types import Message
 
-from infrastructure.configs.config import get_settings
-from simple_ai_agents.ai_apy_agent_ray_deployment.src.commands import dp, bot
-
-settings = get_settings()
+from agents.apy_agent.src import config
+from agents.apy_agent.src.commands import dp, bot
+from agents.apy_agent.templates.messages import recommendation_message
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await dp.start_polling(bot)
+    asyncio.create_task(bot_polling())
     yield
 
 
@@ -25,19 +26,32 @@ app = FastAPI(lifespan=lifespan)
 @serve.deployment
 @serve.ingress(app)
 class APYAgent:
-    def __init__(self):
-        self.base_url = "https://api.enso.finance/api/v1"
-        self.api_key = settings.ENSO_API_TEST_KEY
-        self.headers = {
-            "accept": "application/json",
-            "Authorization": f"Bearer {self.api_key}"
-        }
-
     @app.post("/{goal}")
-    def handle(self, goal: str, plan: dict | None = None):
+    def handle(self, goal: str, message: Message, plan: dict | None = None):
         """This is one of the most important endpoint of MAS.
         It handles all requests made by handoff from other agents or by user."""
-        pass
+        print(f"\n🤖 Получена команда поиска пулов от пользователя {message.from_user.username}")
+        try:
+            token_address = message.text.split()[1]
+            print(f"📝 Получен адрес токена: {token_address}")
+        except IndexError:
+            print("⚠️ Пользователь не указал адрес токена")
+            await message.answer(
+                "⚠️ Пожалуйста, укажите адрес токена.\nПример: `/find_pools 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48`",
+                parse_mode="Markdown")
+            return
+        status_message = await message.answer("🔍 Ищу лучшие пулы для инвестирования...")
+
+        try:
+            best_pool = await self.find_best_pool(token_address)
+
+            recommendation = self.format_investment_recommendation(best_pool)
+            await status_message.edit_text(recommendation, parse_mode="Markdown")
+
+        except Exception as e:
+            error_message = f"❌ Произошла ошибка при поиске пулов: {str(e)}"
+            await status_message.edit_text(error_message)
+
 
     def handoff(self, endpoint: str, goal: str, plan: dict):
         """This method means that agent can't find a solution (wrong route/wrong plan/etc)
@@ -46,8 +60,8 @@ class APYAgent:
 
     def get_token_price(self, token_address: str, chain_id: int = 1) -> Dict:
         """Gets token price information"""
-        url = f"{self.base_url}/prices/{chain_id}/{token_address}"
-        response = requests.get(url, headers=self.headers)
+        url = f"{config.BASE_URL}/prices/{chain_id}/{token_address}"
+        response = requests.get(url, headers=config.HEADERS)
         return response.json() if response.status_code == 200 else None
 
     def is_token_active(self, token_address: str, chain_id: int = 1) -> bool:
@@ -77,7 +91,7 @@ class APYAgent:
 
     def get_protocols(self) -> List[Dict]:
         """Gets list of supported protocols"""
-        response = requests.get(f"{self.base_url}/protocols", headers=self.headers)
+        response = requests.get(f"{config.BASE_URL}/protocols", headers=config.HEADERS)
         return response.json()
 
     def get_defi_tokens(self, chain_id: int = 1, protocol_slug: Optional[str] = None) -> Dict:
@@ -90,7 +104,7 @@ class APYAgent:
         if protocol_slug:
             params["protocolSlug"] = protocol_slug
 
-        response = requests.get(f"{self.base_url}/tokens", headers=self.headers, params=params)
+        response = requests.get(f"{config.BASE_URL}/tokens", headers=config.HEADERS, params=params)
         return response.json()
 
     def is_valid_pool(self, token: Dict, apy: float) -> bool:
@@ -229,32 +243,14 @@ class APYAgent:
             for pool in sorted_pools
         ])
 
-        recommendation = f"""
-🏆 *Investment pools found:*
-
-{pools_text}
-
-📊 *Best pool details:*
-• Protocol: `{best_pool['protocol_name']}`
-• APY: `{best_pool['apy']:.2f}%`
-• Type: `{best_pool['type']}`
-• Pool address: `{best_pool['token_address']}`
-• Contract: `{best_pool['primary_address']}`
-
-💰 *Pool tokens:*
-{tokens_info}
-
-💡 _Safety conditions:_
-• Realistic APY (0.1% - 100%)
-• All tokens have current price
-• Active trading volume
-• Regular price updates
-"""
+        recommendation = recommendation_message(best_pool=best_pool, pools_text=pools_text, tokens_info=tokens_info)
         return recommendation
 
 
-agent = APYAgent()
-app = APYAgent().bind()
+async def bot_polling():
+    await dp.start_polling(bot)
+
+app = APYAgent.bind()
 
 if __name__ == "__main__":
     serve.run(app, route_prefix="/")
