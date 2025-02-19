@@ -2,10 +2,10 @@ from aiogram import Dispatcher, Bot
 from aiogram.types import Message
 from aiogram.filters import Command
 
-import config
+from .config import get_settings
 
 
-bot = Bot(token=config.TELEGRAM_BOT_TOKEN_2)
+bot = Bot(token=get_settings().TELEGRAM_BOT_TOKEN_2)
 dp = Dispatcher()
 
 

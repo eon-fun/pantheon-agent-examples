@@ -9,9 +9,14 @@ from fastapi import FastAPI
 from ray import serve
 from aiogram.types import Message
 
-from agents.apy_agent.src import config
 from agents.apy_agent.src.commands import dp, bot
-from agents.apy_agent.templates.messages import recommendation_message
+from agents.apy_agent.templates.messages import render_recommendation_message
+from .src.config import get_settings
+
+HEADERS = {
+    "accept": "application/json",
+    "Authorization": f"Bearer {get_settings().ENSO_API_KEY}"
+}
 
 
 @asynccontextmanager
@@ -52,7 +57,6 @@ class APYAgent:
             error_message = f"❌ Произошла ошибка при поиске пулов: {str(e)}"
             await status_message.edit_text(error_message)
 
-
     def handoff(self, endpoint: str, goal: str, plan: dict):
         """This method means that agent can't find a solution (wrong route/wrong plan/etc)
         and decide to handoff the task to another agent. """
@@ -60,8 +64,8 @@ class APYAgent:
 
     def get_token_price(self, token_address: str, chain_id: int = 1) -> Dict:
         """Gets token price information"""
-        url = f"{config.BASE_URL}/prices/{chain_id}/{token_address}"
-        response = requests.get(url, headers=config.HEADERS)
+        url = f"{get_settings().BASE_URL}/prices/{chain_id}/{token_address}"
+        response = requests.get(url, headers=HEADERS)
         return response.json() if response.status_code == 200 else None
 
     def is_token_active(self, token_address: str, chain_id: int = 1) -> bool:
@@ -91,7 +95,7 @@ class APYAgent:
 
     def get_protocols(self) -> List[Dict]:
         """Gets list of supported protocols"""
-        response = requests.get(f"{config.BASE_URL}/protocols", headers=config.HEADERS)
+        response = requests.get(f"{get_settings().BASE_URL}/protocols", headers=HEADERS)
         return response.json()
 
     def get_defi_tokens(self, chain_id: int = 1, protocol_slug: Optional[str] = None) -> Dict:
@@ -104,7 +108,7 @@ class APYAgent:
         if protocol_slug:
             params["protocolSlug"] = protocol_slug
 
-        response = requests.get(f"{config.BASE_URL}/tokens", headers=config.HEADERS, params=params)
+        response = requests.get(f"{get_settings().BASE_URL}/tokens", headers=HEADERS, params=params)
         return response.json()
 
     def is_valid_pool(self, token: Dict, apy: float) -> bool:
@@ -242,13 +246,26 @@ class APYAgent:
             f"  - Contract: `{pool['primary_address']}`"
             for pool in sorted_pools
         ])
+        result_data = {
+            "pools_text": pools_text,
+            "best_pool": {
+                "protocol_name": best_pool['protocol_name'],
+                "apy": best_pool['apy'],
+                'type': best_pool['type'],
+                'token_address': best_pool['token_address'],
+                'primary_address': best_pool['primary_address'],
+            },
+            'tokens_info': tokens_info
+        }
 
-        recommendation = recommendation_message(best_pool=best_pool, pools_text=pools_text, tokens_info=tokens_info)
+        recommendation = render_recommendation_message(template_path="./templates/recommendation_message.md.j2",
+                                                       data=result_data)
         return recommendation
 
 
 async def bot_polling():
     await dp.start_polling(bot)
+
 
 app = APYAgent.bind()
 

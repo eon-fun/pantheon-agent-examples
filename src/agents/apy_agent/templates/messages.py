@@ -1,22 +1,22 @@
-def recommendation_message(best_pool, pools_text, tokens_info):
-    return f"""
-🏆 *Investment pools found:*
+from jinja2 import Template, Environment, FileSystemLoader
 
-{pools_text}
 
-📊 *Best pool details:*
-• Protocol: `{best_pool['protocol_name']}`
-• APY: `{best_pool['apy']:.2f}%`
-• Type: `{best_pool['type']}`
-• Pool address: `{best_pool['token_address']}`
-• Contract: `{best_pool['primary_address']}`
+def render_recommendation_message(template_path, data):
+    env = Environment(loader=FileSystemLoader('./templates'))
 
-💰 *Pool tokens:*
-{tokens_info}
+    template = env.get_template(template_path)
 
-💡 _Safety conditions:_
-• Realistic APY (0.1% - 100%)
-• All tokens have current price
-• Active trading volume
-• Regular price updates
-"""
+    template_data = {
+        'pools_text': data['pools_text'],
+        'best_pool': {
+            'protocol_name': data['best_pool']['protocol_name'],
+            'apy': data['best_pool']['apy'],
+            'type': data['best_pool']['type'],
+            'token_address': data['best_pool']['token_address'],
+            'primary_address': data['best_pool']['primary_address']
+        },
+        'tokens_info': data['tokens_info']
+    }
+
+    rendered_text = template.render(**template_data)
+    return rendered_text
