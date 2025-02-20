@@ -1,7 +1,6 @@
 from contextlib import asynccontextmanager
-from urllib.parse import urljoin
 
-import requests
+from agent.ray_entrypoint import BaseAgent
 from fastapi import FastAPI
 from ray import serve
 
@@ -28,28 +27,13 @@ class SubAgent:
 
 @serve.deployment
 @serve.ingress(app)
-class ExampleAgent:
-    """This is a core agent and entrypoint to this multi agent system.
-    It's recommended to spin only one agent for each ray serve application.
-    The reason is that implementation of multi agent system on this level does not allow us
-    to use a communication between agents in swarm mode.
-    Possible use cases - we can implement a team of agents on this level like a CrewAI did.
-    In this case the agent should control a flow as orchestrator and validate execution logic of team by itself.
-    """
-    def __init__(self, *args, **kwargs):
-        """Initializes agent with some params passed to `bind` method"""
-        pass
+class ExampleAgent(BaseAgent):
 
     @app.post("/{goal}")
     def handle(self, goal: str, plan: dict | None = None):
         """This is one of the most important endpoint of MAS.
         It handles all requests made by handoff from other agents or by user."""
         pass
-
-    def handoff(self, endpoint: str, goal: str, plan: dict):
-        """This method means that agent can't find a solution (wrong route/wrong plan/etc)
-        and decide to handoff the task to another agent. """
-        return requests.post(urljoin(endpoint, goal), json=plan).json()
 
 
 
