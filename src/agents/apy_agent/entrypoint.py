@@ -8,6 +8,7 @@ from urllib.parse import urljoin
 from fastapi import FastAPI
 from ray import serve
 from aiogram.types import Message
+from agent.ray_entrypoint import BaseAgent
 
 from agents.apy_agent.src.commands import dp, bot
 from agents.apy_agent.templates.messages import render_recommendation_message
@@ -30,11 +31,9 @@ app = FastAPI(lifespan=lifespan)
 
 @serve.deployment
 @serve.ingress(app)
-class APYAgent:
+class APYAgent(BaseAgent):
     @app.post("/{goal}")
     def handle(self, goal: str, message: Message, plan: dict | None = None):
-        """This is one of the most important endpoint of MAS.
-        It handles all requests made by handoff from other agents or by user."""
         print(f"\n🤖 Получена команда поиска пулов от пользователя {message.from_user.username}")
         try:
             token_address = message.text.split()[1]
@@ -56,11 +55,6 @@ class APYAgent:
         except Exception as e:
             error_message = f"❌ Произошла ошибка при поиске пулов: {str(e)}"
             await status_message.edit_text(error_message)
-
-    def handoff(self, endpoint: str, goal: str, plan: dict):
-        """This method means that agent can't find a solution (wrong route/wrong plan/etc)
-        and decide to handoff the task to another agent. """
-        return requests.post(urljoin(endpoint, goal), json=plan).json()
 
     def get_token_price(self, token_address: str, chain_id: int = 1) -> Dict:
         """Gets token price information"""
