@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "apy-agent"
+name = "twitter-summarizer"
 version = "0.1.0"
 description = ""
 authors = ["k1llzzy <gekachan04@gmail.com>"]
