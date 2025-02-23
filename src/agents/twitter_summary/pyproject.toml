@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "apy-agent"
+version = "0.1.0"
+description = ""
+authors = ["k1llzzy <gekachan04@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+aiogram = "3.16.0"
+ray = { version = ">=2.42.1,<3.0.0", extras = ["serve"] }
+fastapi = ">=0.115.8,<0.116.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.4"
+
+[project.entry-points."agent.entrypoint"]
+target = "entrypoint:agent_builder"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
