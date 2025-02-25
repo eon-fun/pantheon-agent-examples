@@ -8,11 +8,11 @@ from aiogram.enums import ParseMode
 from fastapi import FastAPI
 from ray import serve
 from base_agent.ray_entrypoint import BaseAgent
+from redis_client.ray_entrypoint import main as redis_client
+from openai_request.ray_entrypoint import main as send_openai_request
 
-from twitter_summary.config import db, HEADERS, get_settings, bot
+from twitter_summary.config import HEADERS, get_settings, bot
 from twitter_summary.src.prompts import AI_PROMPT
-from services.ai_connectors.openai_client import send_openai_request  # Вынести в либу
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -20,6 +20,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+db = redis_client()
 
 
 @serve.deployment
