@@ -1,14 +1,17 @@
+import asyncio
 from html import escape
 
 import aiohttp
 from contextlib import asynccontextmanager
+
+from aiogram.enums import ParseMode
 from fastapi import FastAPI
 from ray import serve
-from agent.ray_entrypoint import BaseAgent
+from base_agent.ray_entrypoint import BaseAgent
 
-from agents.twitter_summary.src.config import db, HEADERS, get_settings
-from agents.twitter_summary.src.prompts import AI_PROMPT
-from services.ai_connectors.openai_client import send_openai_request
+from twitter_summary.config import db, HEADERS, get_settings, bot
+from twitter_summary.src.prompts import AI_PROMPT
+from services.ai_connectors.openai_client import send_openai_request  # Вынести в либу
 
 
 @asynccontextmanager
@@ -22,6 +25,25 @@ app = FastAPI(lifespan=lifespan)
 @serve.deployment
 @serve.ingress(app)
 class TweetProcessor(BaseAgent):
+    @app.post("/{goal}")
+    def handle(self, goal: str, plan: dict | None = None):
+        while True:
+            try:
+                print("🔄 Checking for new tweets...")
+                summary = await self.process_new_tweets()
+                if summary:
+                    print("✅ Tweet summary generated")
+                    await bot.send_message(
+                        chat_id=get_settings().TELEGRAM_CHANNEL_ID,
+                        text=summary,
+                        parse_mode=ParseMode.HTML
+                    )
+                else:
+                    print("ℹ️ No new tweets to process")
+            except Exception as e:
+                print(f"❌ Error processing tweets: {e}")
+            await asyncio.sleep(21600)
+
     def _decode_redis_set(self, redis_set):
         result = set()
         for item in redis_set:
@@ -33,7 +55,7 @@ class TweetProcessor(BaseAgent):
 
     async def add_account(self, account):
         try:
-            db.r.sadd("subscribed_twitter_accounts", account)
+            db.r.sadd(get_settings().REDIS_SUBSCRIBED_TWITTER_ACCOUNTS, account)
             print(f"✅ Account added: {account}")
             return True
         except Exception as e:
@@ -43,7 +65,7 @@ class TweetProcessor(BaseAgent):
     async def fetch_tweets(self, account):
         try:
             print(f"🔄 Fetching tweets for @{account}...")
-            processed_ids = self._decode_redis_set(db.get_set("last_processed_tweets"))
+            processed_ids = self._decode_redis_set(db.get_set(get_settings().REDIS_LAST_PROCESSED_TWEETS))
 
             user_url = f"https://api.twitter.com/2/users/by/username/{account}"
             async with aiohttp.ClientSession() as session:
@@ -78,7 +100,7 @@ class TweetProcessor(BaseAgent):
     async def process_new_tweets(self):
         try:
             print("🔄 Processing new tweets...")
-            accounts = self._decode_redis_set(db.get_set("subscribed_twitter_accounts"))
+            accounts = self._decode_redis_set(db.get_set(get_settings().REDIS_SUBSCRIBED_TWITTER_ACCOUNTS))
 
             if not accounts:
                 print("⚠️ No accounts to process")
@@ -100,7 +122,7 @@ class TweetProcessor(BaseAgent):
 
                 summary = await send_openai_request(messages)
                 for tweet in all_tweets:
-                    db.r.sadd("last_processed_tweets", tweet['id'])
+                    db.r.sadd(get_settings().REDIS_LAST_PROCESSED_TWEETS, tweet['id'])
                 print("✅ Tweets processed and summary generated")
                 return escape(summary.strip())
 

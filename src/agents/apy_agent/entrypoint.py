@@ -4,15 +4,13 @@ import json
 import requests
 from typing import Dict, List, Optional
 from contextlib import asynccontextmanager
-from urllib.parse import urljoin
 from fastapi import FastAPI
 from ray import serve
-from aiogram.types import Message
-from agent.ray_entrypoint import BaseAgent
+from base_agent.ray_entrypoint import BaseAgent
 
-from agents.apy_agent.src.commands import dp, bot
-from agents.apy_agent.templates.messages import render_recommendation_message
-from .src.config import get_settings
+from apy_agent.commands import dp, bot
+from apy_agent.templates.messages import render_recommendation_message
+from apy_agent.config import get_settings
 
 HEADERS = {
     "accept": "application/json",
@@ -33,7 +31,7 @@ app = FastAPI(lifespan=lifespan)
 @serve.ingress(app)
 class APYAgent(BaseAgent):
     @app.post("/{goal}")
-    def handle(self, goal: str, message: Message, plan: dict | None = None):
+    def handle(self, goal: str, plan: dict | None = None):
         print(f"\n🤖 Получена команда поиска пулов от пользователя {message.from_user.username}")
         try:
             token_address = message.text.split()[1]

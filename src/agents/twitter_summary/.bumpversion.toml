@@ -3,7 +3,7 @@ current_version = "0.0.1"
 message = "Bump version of twitter-summary: {current_version} → {new_version}"
 commit = false
 tag = false
-tag_name = "twitter-summary-v{new_version}"
+tag_name = "agents/twitter-summary-v{new_version}"
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"
