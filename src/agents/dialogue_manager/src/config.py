@@ -21,4 +21,14 @@ def get_settings():
     return Settings()
 
 
-telethon_client = TelegramClient(get_settings().SESSION_NAME, int(get_settings().API_ID), get_settings().API_HASH)
+
+def create_telethon_client():
+    return TelegramClient(
+        get_settings().SESSION_NAME,
+        int(get_settings().API_ID),
+        get_settings().API_HASH
+    )
+
+
+def get_telethon_client():
+    return create_telethon_client()

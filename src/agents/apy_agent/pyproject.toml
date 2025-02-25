@@ -18,7 +18,7 @@ dependencies = [
 packages = [{include = "*", from="src"}]
 
 [project.entry-points."agent.entrypoint"]
-target = "entrypoint:app"
+target = "apy_agent.entrypoint:app"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"

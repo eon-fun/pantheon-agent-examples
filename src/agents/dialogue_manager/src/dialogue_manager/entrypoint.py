@@ -6,9 +6,9 @@ from ray import serve
 from base_agent.ray_entrypoint import BaseAgent
 from telethon import events
 
-from dialogue_manager.config import db, get_settings, telethon_client
-from dialogue_manager.src.prompts import AI_PROMPT
-from dialogue_manager.src.commands import telethon_auth, get_read_messages_data
+from dialogue_manager.config import db, get_settings, get_telethon_client
+from dialogue_manager.prompts import AI_PROMPT
+from dialogue_manager.commands import telethon_auth, get_read_messages_data
 from services.ai_connectors.openai_client import send_openai_request  # Вынести в либу
 
 
@@ -18,13 +18,14 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+telethon_client = get_telethon_client()
 
 
 @serve.deployment
 @serve.ingress(app)
 class DialogueManager(BaseAgent):
     @app.post("/{goal}")
-    def handle(self, goal: str, plan: dict | None = None):
+    async def handle(self, goal: str, plan: dict | None = None):
         await telethon_auth()
 
         @telethon_client.on(events.NewMessage(pattern="/summary"))

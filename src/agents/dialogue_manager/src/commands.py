@@ -2,7 +2,9 @@ from telethon import functions
 from telethon.errors import SessionPasswordNeededError, PhoneCodeInvalidError, PhoneNumberUnoccupiedError
 from telethon.tl.types import PeerUser, PeerChannel, PeerChat, InputPeerEmpty
 
-from config import telethon_client as client
+from config import get_telethon_client
+
+client = get_telethon_client()
 
 
 async def get_read_messages_data(client):
@@ -38,15 +40,15 @@ async def telethon_auth():
         await client.connect()
         if not await client.is_user_authorized():
             print("⏳ Требуется авторизация")
-            phone = input("Введите ваш номер телефона: ").strip()
+            phone = input("Введите ваш номер телефона: ").strip()  # Заменим позже
             try:
                 await client.send_code_request(phone)
-                code = input("Введите код из SMS: ").strip()
+                code = input("Введите код из SMS: ").strip()  # Заменим позже
                 try:
                     await client.sign_in(phone=phone, code=code)
                 except SessionPasswordNeededError:
                     print("🔒 Требуется облачный пароль (2FA)")
-                    password = input("Введите ваш облачный пароль: ").strip()
+                    password = input("Введите ваш облачный пароль: ").strip()  # Заменим позже
                     await client.sign_in(password=password)
                     print("✅ Успешная авторизация с облачным паролем!")
             except PhoneCodeInvalidError:

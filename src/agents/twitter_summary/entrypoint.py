@@ -26,7 +26,7 @@ app = FastAPI(lifespan=lifespan)
 @serve.ingress(app)
 class TweetProcessor(BaseAgent):
     @app.post("/{goal}")
-    def handle(self, goal: str, plan: dict | None = None):
+    async def handle(self, goal: str, plan: dict | None = None):
         while True:
             try:
                 print("🔄 Checking for new tweets...")

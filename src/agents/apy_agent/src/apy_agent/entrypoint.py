@@ -31,18 +31,18 @@ app = FastAPI(lifespan=lifespan)
 @serve.ingress(app)
 class APYAgent(BaseAgent):
     @app.post("/{goal}")
-    def handle(self, goal: str, plan: dict | None = None):
-        print(f"\n🤖 Получена команда поиска пулов от пользователя {message.from_user.username}")
+    async def handle(self, goal: str, plan: dict | None = None):
+        print(f"\n🤖 Получена команда поиска пулов от пользователя {goal.from_user.username}")
         try:
-            token_address = message.text.split()[1]
+            token_address = goal.text.split()[1]
             print(f"📝 Получен адрес токена: {token_address}")
         except IndexError:
             print("⚠️ Пользователь не указал адрес токена")
-            await message.answer(
+            await goal.answer(
                 "⚠️ Пожалуйста, укажите адрес токена.\nПример: `/find_pools 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48`",
                 parse_mode="Markdown")
             return
-        status_message = await message.answer("🔍 Ищу лучшие пулы для инвестирования...")
+        status_message = await goal.answer("🔍 Ищу лучшие пулы для инвестирования...")
 
         try:
             best_pool = await self.find_best_pool(token_address)
@@ -250,7 +250,7 @@ class APYAgent(BaseAgent):
             'tokens_info': tokens_info
         }
 
-        recommendation = render_recommendation_message(template_path="./templates/recommendation_message.md.j2",
+        recommendation = render_recommendation_message(template_path="../../templates/recommendation_message.md.j2",
                                                        data=result_data)
         return recommendation
 
