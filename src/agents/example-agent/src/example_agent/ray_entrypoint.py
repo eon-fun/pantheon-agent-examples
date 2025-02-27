@@ -27,12 +27,7 @@ class SubAgent:
 @serve.deployment
 @serve.ingress(app)
 class ExampleAgent(BaseAgent):
-
-    @app.post("/{goal}")
-    def handle(self, goal: str, plan: dict | None = None):
-        """This is one of the most important endpoint of MAS.
-        It handles all requests made by handoff from other agents or by user."""
-        pass
+    pass
 
 
 
