@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-from agent.ray_entrypoint import BaseAgent
+from base_agent.ray_entrypoint import BaseAgent
 from fastapi import FastAPI
 from ray import serve
 

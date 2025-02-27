@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [project.entry-points."agent.entrypoint"]
-target = "example_agent.entrypoint:app"
+target = "example_agent.ray_entrypoint:app"
 
 
 [tool.poetry]
