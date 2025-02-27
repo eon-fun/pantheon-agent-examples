@@ -24,7 +24,6 @@ class SubAgent:
         pass
 
 
-
 @serve.deployment
 @serve.ingress(app)
 class ExampleAgent(BaseAgent):
