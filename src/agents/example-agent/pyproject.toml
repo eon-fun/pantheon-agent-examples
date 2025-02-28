@@ -1,6 +1,6 @@
 [project]
 name = "example-agent"
-version = "0.0.1"
+version = "0.1.0"
 description = "This is a tool that use a combination of Ray Serve and FastAPI to communicate with the agents and execute a tools."
 authors = [
     {name = "Your Name",email = "you@example.com"}
