@@ -27,7 +27,9 @@ class SubAgent:
 @serve.deployment
 @serve.ingress(app)
 class ExampleAgent(BaseAgent):
-    pass
+    @app.post("/{goal}")
+    async def handle(self, goal: str, plan: dict | None = None):
+        return super().handle(goal, plan)
 
 
 
