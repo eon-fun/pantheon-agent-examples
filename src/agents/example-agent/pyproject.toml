@@ -1,0 +1,28 @@
+[project]
+name = "example-agent"
+version = "0.0.1"
+description = "This is a tool that use a combination of Ray Serve and FastAPI to communicate with the agents and execute a tools."
+authors = [
+    {name = "Your Name",email = "you@example.com"}
+]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi (>=0.115.8,<0.116.0)",
+]
+
+[project.entry-points."agent.entrypoint"]
+target = "example_agent.ray_entrypoint:app"
+
+
+[tool.poetry]
+packages = [{include = "*", from="src"}]
+
+
+[tool.poetry.group.dev.dependencies]
+ray = {extras = ["serve"], version = "^2.42.1"}
+pytest = "^8.3.4"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
