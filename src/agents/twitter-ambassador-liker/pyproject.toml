@@ -1,33 +1,29 @@
 [project]
 name = "twitter-ambassador-liker"
-version = "0.0.1"
-description = "Agent that likes posts"
-authors = [{ name = "k1llzzy", email = "gekachan04@gmail.com" }]
+version = "0.1.0"
+description = "TwitterAmbassadorLiker"
+authors = [{name = "k1llzzy",email = "gekachan04@gmail.com"}]
 readme = "README.md"
-requires-python = ">=3.9,<4.0"
+requires-python = ">=3.10,<4"
+
 dependencies = [
-    "fastapi (>=0.115.8,<1.0.0)",
-    "openai (>=1.63.2,<2.0.0)",
-    "langchain (>=0.3.19,<0.4.0)",
-    "jinja2 (>=3.1.5,<4.0.0)",
-    "pydantic-settings (>=2.8.0,<3.0.0)",
-    "langfuse (>=2.59.3,<3.0.0)",
-    "langchain-openai (>=0.3.6,<0.4.0)",
+    "fastapi (>=0.115.8,<0.116.0)",
+    "pydantic-settings (>=2.7.1,<3.0.0)",
+    "aiogram (>=3.16.0)",
+    "requests (>=2.32.3)",
+    "jinja2 (==3.1.5)",
 ]
 
 [tool.poetry]
-packages = [{ include = "*", from = "src" }]
-
-[project.entry-points."agent.prompt.entrypoint"]
-basic = "twitter-ambassador-liker.prompt:prompt_builder"
+packages = [{include = "*", from="src"}]
 
 [project.entry-points."agent.entrypoint"]
-basic = "twitter-ambassador-liker.ray_entrypoint:agent_builder"
+target = "twitter_ambassador_liker.entrypoint:app"
 
 [tool.poetry.group.dev.dependencies]
-ray = { extras = ["serve"], version = "^2.42.1" }
 pytest = "^8.3.4"
+ray = { version = ">=2.42.1,<3.0.0", extras = ["serve"] }
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
