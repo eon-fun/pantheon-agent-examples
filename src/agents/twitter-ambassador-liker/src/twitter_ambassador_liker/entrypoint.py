@@ -1,5 +1,6 @@
 import asyncio
 from random import randint
+import re
 
 from typing import List
 from contextlib import asynccontextmanager
@@ -28,10 +29,11 @@ class TwitterLikerAgent(BaseAgent):
 
     async def set_likes(
             self,
-            my_username: str,
-            keywords: List[str],
-            themes: List[str]
+            goal: str
     ) -> bool:
+        my_username = goal.split(".")[0]
+        keywords = re.findall(r'[a-zA-Z0-9]+', goal.split(".")[1])
+        themes = re.findall(r'[a-zA-Z0-9]+', goal.split(".")[2])
         try:
             print(f'set_likes {my_username=} {keywords=} {themes=}')
 
