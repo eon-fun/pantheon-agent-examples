@@ -1,0 +1,11 @@
+[tool.bumpversion]
+current_version = "0.0.1"
+message = "Bump version of twitter-ambassador-comments-answerer: {current_version} → {new_version}"
+commit = false
+tag = false
+tag_name = "agents/twitter-ambassador-comments-answerer-v{new_version}"
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = "version = \"{current_version}\""
+replace = "version = \"{new_version}\""
