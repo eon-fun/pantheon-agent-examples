@@ -1,7 +1,5 @@
 from send_openai_request.main import send_openai_request
 
-from typing import List
-
 
 async def check_answer_is_needed(twitter_comment: str, my_username: str, prompt: str = "") -> bool:
     messages = [
@@ -16,8 +14,8 @@ async def check_answer_is_needed(twitter_comment: str, my_username: str, prompt:
 
 async def create_comment_to_comment(
         comment_text: str,
-        keywords: List[str],
-        themes: List[str],
+        keywords: list[str],
+        themes: list[str],
         my_username: str,
         prompt: str = ""
 ) -> str:
