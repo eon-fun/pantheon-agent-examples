@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from ray import serve
 from base_agent.ray_entrypoint import BaseAgent
 
-from twitter_ambassador_utils.main import create_post, Tweet, TwitterAuthClient
+from twitter_ambassador_utils.main import create_post, TwitterAuthClient
 from tweetscout_utils.main import fetch_user_tweets
 from twitter_ambassador_commentator.commands import create_comment_to_post
 from redis_client.main import db, ensure_delay_between_posts, Post
