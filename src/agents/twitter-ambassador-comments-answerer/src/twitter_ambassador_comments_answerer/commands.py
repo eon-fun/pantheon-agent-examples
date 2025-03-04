@@ -1,4 +1,4 @@
-from services.ai_connectors.openai_client import send_openai_request
+from send_openai_request.main import send_openai_request
 
 from typing import List
 
@@ -34,5 +34,5 @@ async def create_comment_to_comment(
         }
     ]
     result = await send_openai_request(messages=messages, temperature=1.0)
-    logger.info(f'Created comment with prompt: {formatted_prompt}')
+    print(f'Created comment with prompt: {formatted_prompt}')
     return result
