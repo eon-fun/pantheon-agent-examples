@@ -9,6 +9,7 @@ readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
     "fastapi (>=0.115.8,<0.116.0)",
+    "example-package (>=0.0.3,<0.0.4)",
 ]
 
 [project.entry-points."agent.entrypoint"]
@@ -23,6 +24,15 @@ packages = [{include = "*", from="src"}]
 ray = {extras = ["serve"], version = "^2.42.1"}
 pytest = "^8.3.4"
 
+
+[[tool.poetry.source]]
+name = "pantheon"
+url = "https://pantheon-688567299207.d.codeartifact.eu-west-1.amazonaws.com/pypi/pantheon/simple/"
+priority = "supplemental"
+
+
+[tool.poetry.dependencies]
+example-package = {source = "pantheon"}
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
