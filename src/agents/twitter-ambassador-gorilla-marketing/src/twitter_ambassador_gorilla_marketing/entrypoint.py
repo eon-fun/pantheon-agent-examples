@@ -104,7 +104,9 @@ class TwitterGorillaMarketingAgent(BaseAgent):
             return False
 
 
-app = TwitterGorillaMarketingAgent.bind()
+def get_agent(agent_args: dict):
+    return TwitterGorillaMarketingAgent.bind(**agent_args)
+
 
 if __name__ == "__main__":
     serve.run(app, route_prefix="/")

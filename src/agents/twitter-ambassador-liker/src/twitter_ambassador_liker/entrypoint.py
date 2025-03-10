@@ -81,8 +81,9 @@ class TwitterLikerAgent(BaseAgent):
             return False
 
 
+def get_agent(agent_args: dict):
+    return TwitterLikerAgent.bind(**agent_args)
 
-app = TwitterLikerAgent.bind()
 
 if __name__ == "__main__":
     serve.run(app, route_prefix="/")

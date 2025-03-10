@@ -32,8 +32,9 @@ redis-client = {source = "pantheon"}
 twitter-ambassador-utils = {source = "pantheon"}
 base-agent = {source = "pantheon"}
 tweetscout-utils = {source = "pantheon"}
+
 [project.entry-points."agent.entrypoint"]
-target = "twitter_ambassador_liker.entrypoint:app"
+target = "twitter_ambassador_liker.entrypoint:get_agent"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"

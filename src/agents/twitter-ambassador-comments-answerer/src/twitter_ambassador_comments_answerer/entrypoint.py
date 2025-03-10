@@ -97,8 +97,9 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
             raise error
 
 
+def get_agent(agent_args: dict):
+    return TwitterAmbassadorCommentsAnswerer.bind(**agent_args)
 
-app = TwitterAmbassadorCommentsAnswerer.bind()
 
 if __name__ == "__main__":
     serve.run(app, route_prefix="/")

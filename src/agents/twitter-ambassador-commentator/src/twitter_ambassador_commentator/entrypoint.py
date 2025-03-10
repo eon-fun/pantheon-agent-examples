@@ -73,7 +73,9 @@ class TwitterCommentatorAgent(BaseAgent):
             raise error
 
 
-app = TwitterCommentatorAgent.bind()
+def get_agent(agent_args: dict):
+    return TwitterCommentatorAgent.bind(**agent_args)
+
 
 if __name__ == "__main__":
     serve.run(app, route_prefix="/")

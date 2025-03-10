@@ -4,6 +4,8 @@ message = "Bump version of twitter-ambassador-commentator: {current_version} →
 commit = false
 tag = false
 tag_name = "agents/twitter-ambassador-commentator-v{new_version}"
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)(\\.(?P<dev>dev\\d+)\\+(?P<branch>.*))?"
+serialize = ["{major}.{minor}.{patch}.{dev}+{branch}", "{major}.{minor}.{patch}"]
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"

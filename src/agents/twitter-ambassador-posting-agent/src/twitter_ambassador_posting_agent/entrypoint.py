@@ -5,7 +5,8 @@ from ray import serve
 from base_agent import BaseAgent
 
 from tweetscout_utils.main import fetch_user_tweets
-from twitter_ambassador_posting_agent.commands import _handle_regular_tweet, _handle_news_tweet, _fetch_quoted_tweet_ids, \
+from twitter_ambassador_posting_agent.commands import _handle_regular_tweet, _handle_news_tweet, \
+    _fetch_quoted_tweet_ids, \
     _find_tweet_for_quote, _handle_quote_tweet
 from redis_client.main import db, Post, ensure_delay_between_posts
 
@@ -65,7 +66,9 @@ class TwitterPostingAgent(BaseAgent):
             raise error
 
 
-app = TwitterPostingAgent.bind()
+def get_agent(agent_args: dict):
+    return TwitterPostingAgent.bind(**agent_args)
+
 
 if __name__ == "__main__":
     serve.run(app, route_prefix="/")
