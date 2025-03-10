@@ -3,7 +3,8 @@ from datetime import datetime, timedelta
 
 from tweetscout_utils.main import Tweet
 from redis_client.main import db, Post
-from twitter_ambassador_utils.main import create_post, TwitterAuthClient, search_tweets
+from twitter_ambassador_utils.main import create_post, TwitterAuthClient
+from tweetscout_utils.main import search_tweets
 from send_openai_request.main import send_openai_request
 
 

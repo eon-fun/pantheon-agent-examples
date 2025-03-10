@@ -2,10 +2,10 @@ import re
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from ray import serve
-from base_agent.ray_entrypoint import BaseAgent
+from base_agent import BaseAgent
 
 from tweetscout_utils.main import fetch_user_tweets
-from twitter_ambassador_posting_agent.main import _handle_regular_tweet, _handle_news_tweet, _fetch_quoted_tweet_ids, \
+from twitter_ambassador_posting_agent.commands import _handle_regular_tweet, _handle_news_tweet, _fetch_quoted_tweet_ids, \
     _find_tweet_for_quote, _handle_quote_tweet
 from redis_client.main import db, Post, ensure_delay_between_posts
 

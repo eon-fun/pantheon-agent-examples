@@ -2,7 +2,7 @@ import time
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from ray import serve
-from base_agent.ray_entrypoint import BaseAgent
+from base_agent import BaseAgent
 
 from twitter_ambassador_utils.main import create_post, TwitterAuthClient
 from tweetscout_utils.main import fetch_user_tweets
