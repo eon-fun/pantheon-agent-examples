@@ -1,54 +1,48 @@
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import PostgresDsn
 from agents_tools_logger.main import log
 
-from dotenv import load_dotenv
-import os
+
+class DBSettings(BaseSettings):
+    user: str
+    password: str = "postgres"
+    host: str = "localhost"
+    port: str = "5432"
+    name: str = "postgres"
+
+    @property
+    def url(self) -> str:
+        return f"postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.name}"
+
+    model_config = SettingsConfigDict(env_prefix="DB_")  # Автоматически подтягивает переменные с префиксом DB_
 
 
-
-load_dotenv()
-
-
-class Config:
-    APP_TITLE = "follow_unfollow_bot"
-    APP_DESCRIPTION = "API for follow_unfollow_bot"
-    APP_VERSION = "0.0.1"
-    APP_DOCS_URL = "hidden"
-
-    MAX_FOLLOWERS_PER_DAY = 400
-
-    class DB:
-        DB_USER = os.getenv("DB_USER", "")
-        DB_PASSWORD = os.getenv("DB_PASSWORD", "postgres")
-        DB_HOST = os.getenv("DB_HOST", "localhost")
-        DB_PORT = os.getenv("DB_PORT", "5432")
-        DB_NAME = os.getenv("DB_NAME", "postgres")
-        URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-
-    class FASTAPI:
-        ALLOWED_ORIGINS = [
-            "http://localhost:8080",
-        ]
-
-        ALLOWED_METHODS = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
-        ALLOWED_HEADERS = [
-            "Access-Control-Allow-Headers",
-            "Content-Type",
-            "Authorization",
-            "Access-Control-Allow-Origin",
-        ]
-
-        ALLOWED_CREDENTIALS = True
+class FastAPISettings(BaseSettings):
+    allowed_origins: list[str] = ["http://localhost:8080"]
+    allowed_methods: list[str] = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
+    allowed_headers: list[str] = [
+        "Access-Control-Allow-Headers",
+        "Content-Type",
+        "Authorization",
+        "Access-Control-Allow-Origin",
+    ]
+    allowed_credentials: bool = True
 
 
-    @classmethod
-    def check_configuration(cls):
-        required_env_vars = {
-            "DB_USER": cls.DB.DB_USER,
+class Config(BaseSettings):
+    app_title: str = "follow_unfollow_bot"
+    app_description: str = "API for follow_unfollow_bot"
+    app_version: str = "0.0.1"
+    app_docs_url: str = "hidden"
 
-        }
-        for var_name, var_value in required_env_vars.items():
-            if not var_value or var_value == "":
-                log.warning(f"Environment variable {var_name} is not set!")
+    max_followers_per_day: int = 400
+
+    db: DBSettings = DBSettings()
+    fastapi: FastAPISettings = FastAPISettings()
+
+    def check_configuration(self):
+        if not self.db.user:
+            log.warning("Environment variable DB_USER is not set!")
 
 
 config = Config()

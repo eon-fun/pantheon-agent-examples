@@ -1,8 +1,10 @@
 from DB.managers.tracked_accounts_manager import AlchemyTrackedAccountsManager
 from DB.managers.user_manager import AlchemyUsersManager
 from DB.sqlalchemy_database_manager import get_db
-from config.config import config
+
 from agents_tools_logger.main import log
+
+from config.config import config
 from services.twitter.actions.follow import follow
 from services.twitter.actions.get_likes_on_post import get_likes_on_post
 from services.twitter.auth_client import TwitterAuthClient
@@ -17,7 +19,7 @@ async def process_follow_for_like():
 
         for user in users:
             log.info(f"Processing user {user.username}({user.id})")
-            if user.followers_today >= config.MAX_FOLLOWERS_PER_DAY:
+            if user.followers_today >= config.max_followers_per_day:
                 log.info(f"User {user.username}({user.id}) has reached the limit of followers for today")
                 continue
 
