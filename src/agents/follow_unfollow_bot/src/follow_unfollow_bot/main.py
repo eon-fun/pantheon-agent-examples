@@ -8,7 +8,7 @@ from starlette.middleware.cors import CORSMiddleware
 from DB.managers.user_manager import AlchemyUsersManager
 from DB.sqlalchemy_database_manager import init_models, get_db
 from config.config import config
-from custom_logs.custom_logs import log
+from agents_tools_logger.main import log
 from routers.users_route import user_router
 from tools.follow_for_like import process_follow_for_like
 from ray import serve

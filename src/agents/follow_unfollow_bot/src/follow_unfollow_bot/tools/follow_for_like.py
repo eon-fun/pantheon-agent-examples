@@ -2,7 +2,7 @@ from DB.managers.tracked_accounts_manager import AlchemyTrackedAccountsManager
 from DB.managers.user_manager import AlchemyUsersManager
 from DB.sqlalchemy_database_manager import get_db
 from config.config import config
-from custom_logs.custom_logs import log
+from agents_tools_logger.main import log
 from services.twitter.actions.follow import follow
 from services.twitter.actions.get_likes_on_post import get_likes_on_post
 from services.twitter.auth_client import TwitterAuthClient
