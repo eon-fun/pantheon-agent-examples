@@ -11,7 +11,7 @@ from typing_extensions import AsyncGenerator
 from config.config import config
 from agents_tools_logger.main import log
 
-DATABASE_URL = config.DB.URL
+DATABASE_URL = config.db.url
 
 
 class Base(DeclarativeBase):
