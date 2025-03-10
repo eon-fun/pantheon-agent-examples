@@ -1,6 +1,6 @@
 -- Удаление всех таблиц и их зависимостей
-DROP TABLE IF EXISTS tracked_accounts CASCADE;
-DROP TABLE IF EXISTS users CASCADE;
+-- DROP TABLE IF EXISTS tracked_accounts CASCADE;
+-- DROP TABLE IF EXISTS users CASCADE;
 
 -- Таблица пользователей
 CREATE TABLE users (
