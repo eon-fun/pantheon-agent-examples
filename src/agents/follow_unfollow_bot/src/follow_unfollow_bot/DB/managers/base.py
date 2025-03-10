@@ -5,8 +5,6 @@ from sqlalchemy import select, update, delete, text, insert
 from typing import Optional, Type, List, TypeVar
 
 
-from custom_logs.custom_logs import log
-
 ModelType = TypeVar("ModelType")  # Тип модели для аннотаций
 
 

@@ -1,4 +1,4 @@
-import logging
+from agents_tools_logger.main import log
 
 from dotenv import load_dotenv
 import os
@@ -47,7 +47,7 @@ class Config:
         }
         for var_name, var_value in required_env_vars.items():
             if not var_value or var_value == "":
-                logging.warning(f"Environment variable {var_name} is not set!")
+                log.warning(f"Environment variable {var_name} is not set!")
 
 
 config = Config()
