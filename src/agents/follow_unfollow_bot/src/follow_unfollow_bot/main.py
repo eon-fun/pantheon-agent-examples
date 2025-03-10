@@ -4,14 +4,15 @@ from typing import List
 import datetime
 from fastapi import FastAPI, APIRouter
 from starlette.middleware.cors import CORSMiddleware
-
-from DB.managers.user_manager import AlchemyUsersManager
-from DB.sqlalchemy_database_manager import init_models, get_db
-from config.config import config
 from agents_tools_logger.main import log
-from routers.users_route import user_router
-from tools.follow_for_like import process_follow_for_like
 from ray import serve
+
+from follow_unfollow_bot.DB.managers.user_manager import AlchemyUsersManager
+from follow_unfollow_bot.DB.sqlalchemy_database_manager import init_models, get_db
+from follow_unfollow_bot.config.config import config
+from follow_unfollow_bot.routers.users_route import user_router
+from follow_unfollow_bot.tools.follow_for_like import process_follow_for_like
+
 from base_agent.ray_entrypoint import BaseAgent
 
 

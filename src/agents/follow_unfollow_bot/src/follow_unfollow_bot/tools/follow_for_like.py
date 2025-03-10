@@ -1,10 +1,10 @@
-from DB.managers.tracked_accounts_manager import AlchemyTrackedAccountsManager
-from DB.managers.user_manager import AlchemyUsersManager
-from DB.sqlalchemy_database_manager import get_db
+from follow_unfollow_bot.DB.managers.tracked_accounts_manager import AlchemyTrackedAccountsManager
+from follow_unfollow_bot.DB.managers.user_manager import AlchemyUsersManager
+from follow_unfollow_bot.DB.sqlalchemy_database_manager import get_db
 
 from agents_tools_logger.main import log
 
-from config.config import config
+from follow_unfollow_bot.config.config import config
 from services.twitter.actions.follow import follow
 from services.twitter.actions.get_likes_on_post import get_likes_on_post
 from services.twitter.auth_client import TwitterAuthClient

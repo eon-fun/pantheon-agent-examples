@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from sqlalchemy.orm import DeclarativeBase
 from typing_extensions import AsyncGenerator
 
-from config.config import config
+from follow_unfollow_bot.config.config import config
 from agents_tools_logger.main import log
 
 DATABASE_URL = config.db.url

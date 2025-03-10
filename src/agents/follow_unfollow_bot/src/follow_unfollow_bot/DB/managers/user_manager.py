@@ -4,9 +4,9 @@ from sqlalchemy import select, update
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from DB.managers.base import BaseAlchemyManager
-from DB.models import AlchemyUser
-from DB.models.users_model import PGUserModel
+from follow_unfollow_bot.DB.managers.base import BaseAlchemyManager
+from follow_unfollow_bot.DB.models import AlchemyUser
+from follow_unfollow_bot.DB.models.users_model import PGUserModel
 
 
 class AlchemyUsersManager(BaseAlchemyManager):

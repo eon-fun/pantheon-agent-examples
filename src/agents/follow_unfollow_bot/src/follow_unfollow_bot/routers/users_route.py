@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from DB.managers.user_manager import AlchemyUsersManager
-from DB.sqlalchemy_database_manager import get_db
+from follow_unfollow_bot.DB.managers.user_manager import AlchemyUsersManager
+from follow_unfollow_bot.DB.sqlalchemy_database_manager import get_db
 
 user_router = APIRouter(prefix="/user", tags=["user"])
 
