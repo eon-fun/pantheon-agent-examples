@@ -19,9 +19,13 @@ from base_agent.ray_entrypoint import BaseAgent
 async def background_task():
     """Фоновая задача, работающая бесконечно"""
     while True:
-        log.info("Background task is running...")
-        await process_follow_for_like()
+        try:
+            log.info("Background task is running...")
+            await process_follow_for_like()
+        except Exception as e:
+            log.exception(f"Exception in background_task: {e}")
         await asyncio.sleep(3600)
+
 
 
 async def daily_task():
