@@ -17,9 +17,6 @@ class AlchemyUser(Base):
     tracked_accounts = relationship("AlchemyTrackedAccount", back_populates="user")
 
 
-
-
-
 # Pydantic модели
 class PGUserModel(BaseModel):
     id: int
@@ -29,5 +26,3 @@ class PGUserModel(BaseModel):
 
     class Config:
         from_attributes = True
-
-
