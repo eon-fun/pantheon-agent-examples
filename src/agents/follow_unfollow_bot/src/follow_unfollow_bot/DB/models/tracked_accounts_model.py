@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from sqlalchemy import BigInteger, Column, ForeignKey, Integer, TIMESTAMP
 from sqlalchemy.orm import relationship
 
-from DB.sqlalchemy_database_manager import Base
+from follow_unfollow_bot.DB.sqlalchemy_database_manager import Base
 
 
 class AlchemyTrackedAccount(Base):

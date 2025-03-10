@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from DB.managers.base import BaseAlchemyManager
-from DB.models import AlchemyTrackedAccount
-from DB.models.tracked_accounts_model import PGTrackedAccount
+from follow_unfollow_bot.DB.managers.base import BaseAlchemyManager
+from follow_unfollow_bot.DB.models import AlchemyTrackedAccount
+from follow_unfollow_bot.DB.models.tracked_accounts_model import PGTrackedAccount
 
 
 class AlchemyTrackedAccountsManager(BaseAlchemyManager):
