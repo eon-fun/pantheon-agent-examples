@@ -30,21 +30,27 @@ async def background_task():
 
 async def daily_task():
     while True:
-        now = datetime.datetime.now()
-        next_run = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        try:
+            now = datetime.datetime.now()
+            next_run = now.replace(hour=0, minute=0, second=0, microsecond=0)
 
-        # Если уже после полуночи, берем следующее 00:00
-        if now > next_run:
-            next_run += datetime.timedelta(days=1)
+            # Если уже после полуночи, берем следующее 00:00
+            if now > next_run:
+                next_run += datetime.timedelta(days=1)
 
-        sleep_seconds = (next_run - now).total_seconds()
-        log.info(f"Daily task will run in {sleep_seconds:.2f} seconds...")
+            sleep_seconds = (next_run - now).total_seconds()
+            log.info(f"Daily task will run in {sleep_seconds:.2f} seconds...")
 
-        await asyncio.sleep(sleep_seconds)  # Ждем до 00:00
-        log.info("Running daily task...")
-        async for session in get_db():
-            user_manager = AlchemyUsersManager(session)
-            await user_manager.reset_followers_today()
+            await asyncio.sleep(sleep_seconds)  # Ждем до 00:00
+            log.info("Running daily task...")
+
+            async for session in get_db():
+                user_manager = AlchemyUsersManager(session)
+                await user_manager.reset_followers_today()
+        except Exception as e:
+            log.exception(f"Exception in daily_task: {e}")
+            await asyncio.sleep(10)  # Задержка перед повторной попыткой в случае ошибки
+
 
 
 @asynccontextmanager
