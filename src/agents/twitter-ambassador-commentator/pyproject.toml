@@ -12,11 +12,11 @@ dependencies = [
     "aiogram (>=3.16.0)",
     "requests (>=2.32.3)",
     "jinja2 (==3.1.5)",
-    "redis-client (==0.0.1.*)",
     "twitter-ambassador-utils (==0.0.1.*)",
     "base-agent (>=0.1.1,<0.2.0)",
     "tweetscout-utils (==0.0.1.*)",
     "send-openai-request (==0.0.1.*)",
+    "redis-client (==0.0.1.dev0+pan.82.7cccc2f)",
 ]
 
 [tool.poetry]
@@ -29,11 +29,11 @@ priority = "primary"
 
 
 [tool.poetry.dependencies]
-redis-client = {source = "pantheon"}
 twitter-ambassador-utils = {source = "pantheon"}
 base-agent = {source = "pantheon"}
 tweetscout-utils = {source = "pantheon"}
 send-openai-request = {source = "pantheon"}
+redis-client = {source = "pantheon"}
 
 [project.entry-points."agent.entrypoint"]
 target = "twitter_ambassador_commentator.entrypoint:get_agent"
