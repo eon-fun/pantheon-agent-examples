@@ -52,22 +52,22 @@ async def daily_task():
             await asyncio.sleep(10)  # Задержка перед повторной попыткой в случае ошибки
 
 
-
 @asynccontextmanager
 async def lifespan(application: FastAPI):
     await init_models()
-    task = asyncio.create_task(background_task())
-    task2 = asyncio.create_task(daily_task())
+
+    # Запуск фоновых задач
+    tasks = [
+        asyncio.create_task(background_task()),
+        asyncio.create_task(daily_task())
+    ]
+    try:
+        await asyncio.gather(*tasks)
+    except asyncio.CancelledError:
+        log.info("Background tasks cancelled")
     log.info("Application startup")
 
     yield
-    task.cancel()
-    task2.cancel()
-    try:
-        await task
-        await task2
-    except asyncio.CancelledError:
-        log.info("Background task cancelled")
     log.info("Application shutdown")
 
 
