@@ -2,7 +2,8 @@ import asyncio
 from contextlib import asynccontextmanager
 from typing import List
 import datetime
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.middleware.cors import CORSMiddleware
 from agents_tools_logger.main import log
 from ray import serve
@@ -10,7 +11,8 @@ from ray import serve
 from follow_unfollow_bot.DB.managers.user_manager import AlchemyUsersManager
 from follow_unfollow_bot.DB.sqlalchemy_database_manager import init_models, get_db
 from follow_unfollow_bot.config.config import config
-from follow_unfollow_bot.routers.users_route import user_router
+
+from follow_unfollow_bot.service.user_service import add_user_service, delete_user_service
 from follow_unfollow_bot.tools.follow_for_like import process_follow_for_like
 
 from base_agent.ray_entrypoint import BaseAgent
@@ -71,8 +73,6 @@ async def lifespan(application: FastAPI):
     log.info("Application shutdown")
 
 
-ROUTERS: List[APIRouter] = [user_router]
-
 app = FastAPI(
     lifespan=lifespan,
     title=config.app_title,
@@ -94,13 +94,17 @@ app.add_middleware(
 @serve.deployment
 @serve.ingress(app)
 class FollowUnfollowBot(BaseAgent):
-    def __init__(self):
-        for router in ROUTERS:
-            app.include_router(router)
+    @app.post("/{goal}")
+    async def handle(self, goal: str, plan: dict | None = None,
+                     session: AsyncSession = Depends(get_db)):
+        twitter_id = int(goal.split(".")[0])
+        action = goal.split(".")[1]
+        if action.lower() is "add":
+            await add_user_service(session, twitter_id)
+        elif action.lower() is "delete":
+            await delete_user_service(session, twitter_id)
 
-    @app.get("/")
-    async def read_root(self):
-        return {"message": f"Welcome to the {config.APP_TITLE} API!"}
+
 
 
 
