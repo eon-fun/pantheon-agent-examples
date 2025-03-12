@@ -7,7 +7,7 @@ from DB.managers.users_manager import AlchemyUsersManager
 from DB.models.tracked_accounts_models import PGTrackedAccount
 from DB.sqlalchemy_database_manager import get_db
 from config.promts import get_prompt_for_create_user_prompt
-from custom_logs.custom_logs import log
+from agents_tools_logger.main import log
 from services.ai_connectors.openai_client import send_openai_request
 from services.twitter.tweetscout_requests import fetch_user_tweets, Tweet
 

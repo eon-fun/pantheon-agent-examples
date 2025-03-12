@@ -10,7 +10,7 @@ from DB.models.user_tweet_matches_models import PGUserTweetMatch
 from DB.models.users_models import PGUser
 from DB.sqlalchemy_database_manager import get_db
 from config.promts import get_prompt_by_user_for_creating_tweet
-from custom_logs.custom_logs import log
+from agents_tools_logger.main import log
 from services.ai_connectors.openai_client import send_openai_request
 from services.twitter.actions.create_post import post_tweet
 from services.twitter.auth_client import TwitterAuthClient
