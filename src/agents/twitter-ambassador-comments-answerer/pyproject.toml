@@ -1,5 +1,5 @@
 [project]
-name = "twitter-ambassador-comments-answerer"
+name = "tw-amb-comments-answerer"
 version = "0.0.1"
 description = "TwitterAmbassadorCommentsAnswerer"
 authors = [{name = "k1llzzy",email = "gekachan04@gmail.com"}]
