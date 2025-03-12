@@ -11,10 +11,7 @@ from typing_extensions import AsyncGenerator
 from config.config import config
 from agents_tools_logger.main import log
 
-DATABASE_URL = (
-    f"postgresql+asyncpg://{config.DB.DB_USER}:{config.DB.DB_PASSWORD}@"
-    f"{config.DB.DB_HOST}:{config.DB.DB_PORT}/{config.DB.DB_NAME}"
-)
+DATABASE_URL = config.db.url
 
 
 class Base(DeclarativeBase):
