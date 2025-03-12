@@ -1,15 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from follow_unfollow_bot.DB.managers.user_manager import AlchemyUsersManager
-from follow_unfollow_bot.DB.sqlalchemy_database_manager import get_db
-
-user_router = APIRouter(prefix="/user", tags=["user"])
 
 
-@user_router.post("/add")
-async def add_user(user_twitter_id: int,
-                   session: AsyncSession = Depends(get_db), ):
+async def add_user_service(session:AsyncSession,user_twitter_id: int):
     user_manager = AlchemyUsersManager(session)
     is_user_exist = await user_manager.get_user(user_twitter_id)
     if is_user_exist:
@@ -18,10 +13,7 @@ async def add_user(user_twitter_id: int,
     user = await user_manager.create_user(user_twitter_id)
     return user
 
-
-@user_router.delete("/delete")
-async def delete_user(user_twitter_id: int,
-                      session: AsyncSession = Depends(get_db), ):
+async def delete_user_service(session:AsyncSession,user_twitter_id: int):
     user_manager = AlchemyUsersManager(session)
     is_user_exist = await user_manager.get_user(user_twitter_id)
     if not is_user_exist:
