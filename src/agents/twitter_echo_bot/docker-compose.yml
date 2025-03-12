@@ -1,0 +1,70 @@
+
+services:
+  db:
+    image: postgres:17
+    container_name: postgres-db
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - type: bind
+        source: DB/sql_stuff/DB.sql
+        target: /docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d twitter_echo_bot" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  main-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: sh -c "sleep 5 && python main.py"
+    env_file:
+      - .env
+    environment:
+      - PYTHONPATH=/project/PantheonAI
+    depends_on:
+      - db
+    ports:
+      - "127.0.0.1:1111:8000"
+    volumes:
+      - .:/project/simple-ai-tools/twitter_echo_bot
+      - ../../../PantheonAI:/project/PantheonAI
+    working_dir: /project
+    restart: always
+
+  fastapi-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    command: sh -c "sleep 5 && uvicorn app.app:app --host 0.0.0.0 --port 8001 --reload"
+
+    env_file:
+      - .env
+    environment:
+      - PYTHONPATH=/project/app  # или удали, если не нужен
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    ports:
+      - "127.0.0.1:1112:8001"
+
+    volumes:
+      - .:/project
+    working_dir: /project
+    restart: always
+
+volumes:
+  postgres_data:
