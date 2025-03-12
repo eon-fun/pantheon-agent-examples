@@ -7,7 +7,7 @@ from starlette.middleware.cors import CORSMiddleware
 from app.routers.tracked_accounts import tracked_accounts_router
 from app.routers.user import user_router
 from config.config import config
-from custom_logs.custom_logs import log
+from agents_tools_logger.main import log
 
 
 @asynccontextmanager

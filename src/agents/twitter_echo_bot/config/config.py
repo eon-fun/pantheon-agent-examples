@@ -1,4 +1,4 @@
-from custom_logs.custom_logs import log
+from agents_tools_logger.main import log
 import os
 from dotenv import load_dotenv
 

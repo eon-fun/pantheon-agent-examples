@@ -9,7 +9,7 @@ from sqlalchemy.orm import DeclarativeBase
 from typing_extensions import AsyncGenerator
 
 from config.config import config
-from custom_logs.custom_logs import log
+from agents_tools_logger.main import log
 
 DATABASE_URL = (
     f"postgresql+asyncpg://{config.DB.DB_USER}:{config.DB.DB_PASSWORD}@"
