@@ -24,19 +24,19 @@ ROUTERS: List[APIRouter] = [user_router,
 
 app = FastAPI(
     lifespan=lifespan,
-    title=config.APP_TITLE,
-    description=config.APP_DESCRIPTION,
-    version=config.APP_VERSION,
-    docs_url=f"/{config.APP_DOCS_URL}/docs",
-    redoc_url=f"/{config.APP_DOCS_URL}/redoc",
-    openapi_url=f"/{config.APP_DOCS_URL}/openapi.json",
+    title=config.app_title,
+    description=config.app_description,
+    version=config.app_version,
+    docs_url=f"/{config.app_docs_url}/docs",
+    redoc_url=f"/{config.app_docs_url}/redoc",
+    openapi_url=f"/{config.app_docs_url}/openapi.json",
 )
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=config.FASTAPI.ALLOWED_ORIGINS,
-    allow_credentials=config.FASTAPI.ALLOWED_CREDENTIALS,
-    allow_methods=config.FASTAPI.ALLOWED_METHODS,
-    allow_headers=config.FASTAPI.ALLOWED_HEADERS,
+    allow_origins=config.fastapi.allowed_origins,
+    allow_credentials=config.fastapi.allowed_credentials,
+    allow_methods=config.fastapi.allowed_methods,
+    allow_headers=config.fastapi.allowed_headers,
 )
 for router in ROUTERS:
     app.include_router(router)
