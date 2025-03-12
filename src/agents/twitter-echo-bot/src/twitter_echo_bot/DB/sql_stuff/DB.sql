@@ -1,10 +1,10 @@
 -- Удаление всех таблиц и их зависимостей
-DROP TABLE IF EXISTS user_tweet_matches CASCADE;
-DROP TABLE IF EXISTS posted_tweets CASCADE;
-DROP TABLE IF EXISTS tweets_history CASCADE;
-DROP TABLE IF EXISTS user_tracked_accounts CASCADE;
-DROP TABLE IF EXISTS tracked_accounts CASCADE;
-DROP TABLE IF EXISTS users CASCADE;
+-- DROP TABLE IF EXISTS user_tweet_matches CASCADE;
+-- DROP TABLE IF EXISTS posted_tweets CASCADE;
+-- DROP TABLE IF EXISTS tweets_history CASCADE;
+-- DROP TABLE IF EXISTS user_tracked_accounts CASCADE;
+-- DROP TABLE IF EXISTS tracked_accounts CASCADE;
+-- DROP TABLE IF EXISTS users CASCADE;
 
 -- Таблица пользователей
 CREATE TABLE users (
