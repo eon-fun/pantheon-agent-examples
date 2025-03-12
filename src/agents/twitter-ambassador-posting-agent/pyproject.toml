@@ -13,10 +13,10 @@ dependencies = [
     "requests (>=2.32.3)",
     "jinja2 (==3.1.5)",
     "redis-client (==0.0.1.dev0+pan.82.7cccc2f)",
-    "twitter-ambassador-utils (==0.0.1.*)",
-    "base-agent (>=0.1.1,<0.2.0)",
-    "tweetscout-utils (==0.0.1.*)",
-    "send-openai-request (==0.0.1.*)",
+    "twitter-ambassador-utils (==0.0.1.dev0+pan.82.a0a608c)",
+    "base-agent (==0.1.1)",
+    "tweetscout-utils (==0.0.1.dev0+pan.82.354f99b)",
+    "send-openai-request (==0.0.1.dev0+pan.82.a0a608c)",
 ]
 
 [tool.poetry]
