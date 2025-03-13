@@ -3,9 +3,9 @@ from typing import List
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime
-from DB.managers.base import BaseAlchemyManager
-from DB.models import AlchemyTweetHistory, AlchemyUserTweetMatch, AlchemyUserTrackedAccount, AlchemyTrackedAccount
-from DB.models.tweets_history_models import PGTweetHistory
+from twitter_echo_bot.DB.managers.base import BaseAlchemyManager
+from twitter_echo_bot.DB.models import AlchemyTweetHistory, AlchemyUserTweetMatch, AlchemyUserTrackedAccount, AlchemyTrackedAccount
+from twitter_echo_bot.DB.models.tweets_history_models import PGTweetHistory
 from services.twitter.tweetscout_requests import Tweet
 
 

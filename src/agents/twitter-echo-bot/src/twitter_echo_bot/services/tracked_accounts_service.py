@@ -2,7 +2,7 @@ from typing import List
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from DB.managers.tracked_accounts_manager import AlchemyTrackedAccountsManager
+from twitter_echo_bot.DB.managers.tracked_accounts_manager import AlchemyTrackedAccountsManager
 
 
 async def update_user_tracked_accounts_service(user_id: int, twitter_handle: List[str], db_session: AsyncSession):

@@ -3,8 +3,8 @@ from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from DB.sqlalchemy_database_manager import get_db
-from app.services.tracked_accounts_service import update_user_tracked_accounts_service
+from twitter_echo_bot.DB.sqlalchemy_database_manager import get_db
+from twitter_echo_bot.services.tracked_accounts_service import update_user_tracked_accounts_service
 
 tracked_accounts_router = APIRouter(prefix="/tracked_accounts", tags=["tracked_accounts"])
 

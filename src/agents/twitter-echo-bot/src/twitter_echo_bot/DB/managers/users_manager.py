@@ -1,8 +1,8 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from DB.managers.base import BaseAlchemyManager
-from DB.models.users_models import AlchemyUser, PGUser
+from twitter_echo_bot.DB.managers.base import BaseAlchemyManager
+from twitter_echo_bot.DB.models.users_models import AlchemyUser, PGUser
 
 
 class AlchemyUsersManager(BaseAlchemyManager):

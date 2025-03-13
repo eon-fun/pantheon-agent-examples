@@ -1,8 +1,8 @@
 from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from DB.managers.base import BaseAlchemyManager
-from DB.models import AlchemyPostedTweet
+from twitter_echo_bot.DB.managers.base import BaseAlchemyManager
+from twitter_echo_bot.DB.models import AlchemyPostedTweet
 from datetime import datetime
 
 class AlchemyPostedTweetsManager(BaseAlchemyManager):

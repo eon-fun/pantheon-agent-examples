@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from DB.managers.users_manager import AlchemyUsersManager
-from DB.models.users_models import PGUser
+from twitter_echo_bot.DB.managers.users_manager import AlchemyUsersManager
+from twitter_echo_bot.DB.models.users_models import PGUser
 
 
 async def get_user_service(user_id: int, db_session: AsyncSession)->PGUser:
