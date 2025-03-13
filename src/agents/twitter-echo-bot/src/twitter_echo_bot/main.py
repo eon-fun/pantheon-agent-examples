@@ -60,10 +60,6 @@ async def lifespan(application: FastAPI):
     log.info("Application shutdown")
 
 
-ROUTERS: List[APIRouter] = [user_router,
-                            tracked_accounts_router]
-
-
 app = FastAPI(
     lifespan=lifespan,
     title=config.app_title,
@@ -104,5 +100,11 @@ class FollowUnfollowBot(BaseAgent):
         elif action == "add_handles":
             handles = goal.split(".")[3:]
             return await update_user_tracked_accounts_service(user_id=user_id, twitter_handle=handles, db_session=session)
+
+
+
+def get_agent(agent_args: dict):
+    return FollowUnfollowBot.bind(**agent_args)
+
 if __name__ == "__main__":
     serve.run(app, route_prefix="/")
