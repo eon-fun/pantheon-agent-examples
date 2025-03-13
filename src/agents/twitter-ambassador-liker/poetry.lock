@@ -2500,14 +2500,14 @@ reference = "pantheon"
 
 [[package]]
 name = "redis-client"
-version = "0.1.1"
+version = "0.1.2"
 description = "Package that create Redis client"
 optional = false
 python-versions = ">=3.10,<4"
 groups = ["main"]
 files = [
-    {file = "redis_client-0.1.1-py3-none-any.whl", hash = "sha256:57d0e9adca1a73210b3dda5b32514e9e92b6572a78efcaf130b7a4b4c8c87048"},
-    {file = "redis_client-0.1.1.tar.gz", hash = "sha256:c77bc950368a8f5db1eedbf6035cb0123c23e4e563ebd5504bde7d996f2511c5"},
+    {file = "redis_client-0.1.2-py3-none-any.whl", hash = "sha256:d49370c15beb18bfcade3ce739dbde350cc22ae6b006d494999a41f6890565db"},
+    {file = "redis_client-0.1.2.tar.gz", hash = "sha256:06d1b7df90ab91a1e923c4571ad2b8413a479382643f3f5aa3538c844bcf31c6"},
 ]
 
 [package.dependencies]
@@ -3506,4 +3506,4 @@ reference = "pantheon"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4"
-content-hash = "32910013e7346e5216a27b0ac805bd723d2a91c72c8193a064e3260fbdafbc29"
+content-hash = "9d6e0d06cfb0d148b12259366d8370a0235708a8439129b1f95c37b84b589889"
