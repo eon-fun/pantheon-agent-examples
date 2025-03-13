@@ -23,4 +23,4 @@ build-backend = "poetry.core.masonry.api"
 
 
 [project.entry-points."agent.entrypoint"]
-target = "twitter_echo_bot.main:get_agent"
+target = "twitter_echo_bot.entrypoint:get_agent"
