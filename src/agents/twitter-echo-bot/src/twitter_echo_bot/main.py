@@ -7,8 +7,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.middleware.cors import CORSMiddleware
 from base_agent.ray_entrypoint import BaseAgent
 
-from routers.tracked_accounts import tracked_accounts_router
-from routers.user import user_router
 from config.config import config
 
 
@@ -17,6 +15,9 @@ from ray import serve
 from agents_tools_logger.main import log
 from tools.create_tweets_service import CreateTweetsService
 from tools.get_tweets_service import TwitterCollectorClient
+from twitter_echo_bot.DB.models.users_models import PGUser
+from twitter_echo_bot.services.tracked_accounts_service import update_user_tracked_accounts_service
+from twitter_echo_bot.services.user_service import create_user_service, update_user_service, get_user_service
 
 
 async def init_app():
@@ -79,9 +80,6 @@ app.add_middleware(
     allow_methods=config.fastapi.allowed_methods,
     allow_headers=config.fastapi.allowed_headers,
 )
-for router in ROUTERS:
-    app.include_router(router)
-
 
 
 @serve.deployment
@@ -90,7 +88,21 @@ class FollowUnfollowBot(BaseAgent):
     @app.post("/{goal}")
     async def handle(self, goal: str, plan: dict | None = None,
                      session: AsyncSession = Depends(get_db)):
-        pass
-
+        user_id = int(goal.split(".")[0])
+        action = goal.split(".")[1]
+        username = goal.split(".")[2]
+        if action =="add_user":
+            user_data = PGUser(id=user_id, username=username)
+            return await create_user_service(user_data=user_data, db_session=session)
+        elif action == "update_user":
+            persona_descriptor= goal.split(".")[3]
+            prompt= goal.split(".")[4]
+            user_data = PGUser(id=user_id, username=username, persona_descriptor=persona_descriptor, prompt=prompt)
+            return await update_user_service(user_data=user_data, db_session=session)
+        elif action == "get_user":
+            return await get_user_service(user_id=user_id, db_session=session)
+        elif action == "add_handles":
+            handles = goal.split(".")[3:]
+            return await update_user_tracked_accounts_service(user_id=user_id, twitter_handle=handles, db_session=session)
 if __name__ == "__main__":
     serve.run(app, route_prefix="/")
