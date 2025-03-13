@@ -2,7 +2,7 @@ import re
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from ray import serve
-from base_agent import BaseAgent
+from base_agent.ray_entrypoint import BaseAgent
 
 from tweetscout_utils.main import fetch_user_tweets
 from twitter_ambassador_posting_agent.commands import _handle_regular_tweet, _handle_news_tweet, \
