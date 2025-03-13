@@ -5,8 +5,8 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional
 
-from DB.models.base import BaseConfigModel
-from DB.sqlalchemy_database_manager import Base
+from twitter_echo_bot.DB.models.base import BaseConfigModel
+from twitter_echo_bot.DB.sqlalchemy_database_manager import Base
 class AlchemyTweetHistory(Base):
     """
     История твитов отслеживаемых аккаунтов.

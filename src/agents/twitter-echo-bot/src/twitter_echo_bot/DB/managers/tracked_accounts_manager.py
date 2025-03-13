@@ -3,8 +3,8 @@ from typing import List
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from DB.managers.base import BaseAlchemyManager
-from DB.models.tracked_accounts_models import PGTrackedAccount, AlchemyTrackedAccount
+from twitter_echo_bot.DB.managers.base import BaseAlchemyManager
+from twitter_echo_bot.DB.models.tracked_accounts_models import PGTrackedAccount, AlchemyTrackedAccount
 
 
 class AlchemyTrackedAccountsManager(BaseAlchemyManager):

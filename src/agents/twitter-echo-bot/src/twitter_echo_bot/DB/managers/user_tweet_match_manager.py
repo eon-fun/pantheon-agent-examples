@@ -1,9 +1,9 @@
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from DB.managers.base import BaseAlchemyManager
-from DB.models import AlchemyUserTweetMatch
-from DB.models.user_tweet_matches_models import PGUserTweetMatch
+from twitter_echo_bot.DB.managers.base import BaseAlchemyManager
+from twitter_echo_bot.DB.models import AlchemyUserTweetMatch
+from twitter_echo_bot.DB.models.user_tweet_matches_models import PGUserTweetMatch
 
 
 class AlchemyUserTweetMatchManager(BaseAlchemyManager):

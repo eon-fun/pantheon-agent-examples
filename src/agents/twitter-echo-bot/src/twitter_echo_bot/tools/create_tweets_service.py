@@ -2,14 +2,14 @@ import asyncio
 from collections import defaultdict
 from typing import List
 
-from DB.managers.posted_tweets_manager import AlchemyPostedTweetsManager
-from DB.managers.tweets_history_manager import AlchemyTweetsHistoryManager
-from DB.managers.user_tweet_match_manager import AlchemyUserTweetMatchManager
-from DB.managers.users_manager import AlchemyUsersManager
-from DB.models.user_tweet_matches_models import PGUserTweetMatch
-from DB.models.users_models import PGUser
-from DB.sqlalchemy_database_manager import get_db
-from config.promts import get_prompt_by_user_for_creating_tweet
+from twitter_echo_bot.DB.managers.posted_tweets_manager import AlchemyPostedTweetsManager
+from twitter_echo_bot.DB.managers.tweets_history_manager import AlchemyTweetsHistoryManager
+from twitter_echo_bot.DB.managers.user_tweet_match_manager import AlchemyUserTweetMatchManager
+from twitter_echo_bot.DB.managers.users_manager import AlchemyUsersManager
+from twitter_echo_bot.DB.models.user_tweet_matches_models import PGUserTweetMatch
+from twitter_echo_bot.DB.models.users_models import PGUser
+from twitter_echo_bot.DB.sqlalchemy_database_manager import get_db
+from twitter_echo_bot.config.promts import get_prompt_by_user_for_creating_tweet
 from agents_tools_logger.main import log
 from services.ai_connectors.openai_client import send_openai_request
 from services.twitter.actions.create_post import post_tweet

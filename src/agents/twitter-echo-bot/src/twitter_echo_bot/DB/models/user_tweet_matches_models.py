@@ -1,8 +1,8 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, TIMESTAMP, String, func
 from sqlalchemy.orm import relationship
 
-from DB.models.base import BaseConfigModel
-from DB.sqlalchemy_database_manager import Base
+from twitter_echo_bot.DB.models.base import BaseConfigModel
+from twitter_echo_bot.DB.sqlalchemy_database_manager import Base
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
