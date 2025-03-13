@@ -9,7 +9,6 @@ from base_agent.ray_entrypoint import BaseAgent
 
 from config.config import config
 
-
 from DB.sqlalchemy_database_manager import init_models, get_db
 from ray import serve
 from agents_tools_logger.main import log
@@ -52,6 +51,7 @@ async def run_background_task():
 
     await asyncio.gather(*tasks)
 
+
 @asynccontextmanager
 async def lifespan(application: FastAPI):
     log.info("Application startup")
@@ -87,24 +87,25 @@ class FollowUnfollowBot(BaseAgent):
         user_id = int(goal.split(".")[0])
         action = goal.split(".")[1]
         username = goal.split(".")[2]
-        if action =="add_user":
+        if action == "add_user":
             user_data = PGUser(id=user_id, username=username)
             return await create_user_service(user_data=user_data, db_session=session)
         elif action == "update_user":
-            persona_descriptor= goal.split(".")[3]
-            prompt= goal.split(".")[4]
+            persona_descriptor = goal.split(".")[3]
+            prompt = goal.split(".")[4]
             user_data = PGUser(id=user_id, username=username, persona_descriptor=persona_descriptor, prompt=prompt)
             return await update_user_service(user_data=user_data, db_session=session)
         elif action == "get_user":
             return await get_user_service(user_id=user_id, db_session=session)
         elif action == "add_handles":
             handles = goal.split(".")[3:]
-            return await update_user_tracked_accounts_service(user_id=user_id, twitter_handle=handles, db_session=session)
-
+            return await update_user_tracked_accounts_service(user_id=user_id, twitter_handle=handles,
+                                                              db_session=session)
 
 
 def get_agent(agent_args: dict):
     return FollowUnfollowBot.bind(**agent_args)
+
 
 if __name__ == "__main__":
     serve.run(app, route_prefix="/")
