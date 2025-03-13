@@ -2500,14 +2500,14 @@ reference = "pantheon"
 
 [[package]]
 name = "redis-client"
-version = "0.1.0"
+version = "0.1.1"
 description = "Package that create Redis client"
 optional = false
 python-versions = ">=3.10,<4"
 groups = ["main"]
 files = [
-    {file = "redis_client-0.1.0-py3-none-any.whl", hash = "sha256:015d5dfa4978145a26e841fbf1b9c814f85bd455b30538eefae9ba58ccafa32e"},
-    {file = "redis_client-0.1.0.tar.gz", hash = "sha256:fcf69fc48ba4ccf325a0103322e77306b7a61c3968a60a7acda8cf8f7bc06464"},
+    {file = "redis_client-0.1.1-py3-none-any.whl", hash = "sha256:57d0e9adca1a73210b3dda5b32514e9e92b6572a78efcaf130b7a4b4c8c87048"},
+    {file = "redis_client-0.1.1.tar.gz", hash = "sha256:c77bc950368a8f5db1eedbf6035cb0123c23e4e563ebd5504bde7d996f2511c5"},
 ]
 
 [package.dependencies]
@@ -2957,14 +2957,14 @@ reference = "pantheon"
 
 [[package]]
 name = "twitter-ambassador-utils"
-version = "0.1.0"
+version = "0.1.1"
 description = "Package that consists utils for Twitter Ambassador"
 optional = false
 python-versions = ">=3.10,<4"
 groups = ["main"]
 files = [
-    {file = "twitter_ambassador_utils-0.1.0-py3-none-any.whl", hash = "sha256:232485dbb0511c8fac205d0ea6d900c408f8170e034851ba047786812c8e72a5"},
-    {file = "twitter_ambassador_utils-0.1.0.tar.gz", hash = "sha256:c1133308086c126d498ff1eda1b140db042b5a0b3517c6e5dc3af7a556181cc8"},
+    {file = "twitter_ambassador_utils-0.1.1-py3-none-any.whl", hash = "sha256:37c578f8764331adea4e5da55e4427930860fbbd44441cddaf89074b74512c2f"},
+    {file = "twitter_ambassador_utils-0.1.1.tar.gz", hash = "sha256:9da0ba069b2a7c4b1e5018ba9f4a5272c027156b0525cc44f39f978603969dfb"},
 ]
 
 [package.dependencies]
@@ -3506,4 +3506,4 @@ reference = "pantheon"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4"
-content-hash = "bb8ba7442e84f805fa1a09139ad9b683a2c4033a95334daca33e99c874947e64"
+content-hash = "ad49bb6d355c2d57cf7024e704037107713c83d8c04dfbf1138d7a4da490a9ff"
