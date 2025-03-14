@@ -5,10 +5,14 @@ from follow_unfollow_bot.DB.sqlalchemy_database_manager import get_db
 from agents_tools_logger.main import log
 
 from follow_unfollow_bot.config.config import config
-from services.twitter.actions.follow import follow
-from services.twitter.actions.get_likes_on_post import get_likes_on_post
-from services.twitter.auth_client import TwitterAuthClient
-from services.twitter.tweetscout_requests import fetch_user_tweets
+
+from tweetscout_utils.main import fetch_user_tweets, Tweet
+from follow_unfollow_bot_get_likes_on_post.main import get_likes_on_post
+from twitter_ambassador_utils.main import TwitterAuthClient
+from twitter_follow.main import follow
+
+
+
 
 
 async def process_follow_for_like():
