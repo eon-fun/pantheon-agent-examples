@@ -15,7 +15,7 @@ This agent scans for comments directed at a target Twitter account that match de
 - **Rate Limiting**: Ensures posts maintain natural timing with configurable delays
 - **Conversation Awareness**: Analyzes full conversation threads for more meaningful responses
 
-## Usage
+## Usages
 
 The agent accepts POST requests with a goal parameter in the format:
 `your_username.project_username.keyword1,keyword2.theme1,theme2`
