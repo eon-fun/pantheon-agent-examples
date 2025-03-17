@@ -2500,14 +2500,14 @@ reference = "pantheon"
 
 [[package]]
 name = "redis-client"
-version = "0.0.1.dev0+pan.82.7cccc2f"
+version = "0.1.2"
 description = "Package that create Redis client"
 optional = false
 python-versions = ">=3.10,<4"
 groups = ["main"]
 files = [
-    {file = "redis_client-0.0.1.dev0+pan.82.7cccc2f-py3-none-any.whl", hash = "sha256:ff571be16dec922d42cf1b377ee9a16961a0d2b0c0b0504deadb257fb0a82730"},
-    {file = "redis_client-0.0.1.dev0+pan.82.7cccc2f.tar.gz", hash = "sha256:d59b4b8e836e61f8d0f3204e5febaf5679da74f3f4817475547b5641a2d4b5e0"},
+    {file = "redis_client-0.1.2-py3-none-any.whl", hash = "sha256:d49370c15beb18bfcade3ce739dbde350cc22ae6b006d494999a41f6890565db"},
+    {file = "redis_client-0.1.2.tar.gz", hash = "sha256:06d1b7df90ab91a1e923c4571ad2b8413a479382643f3f5aa3538c844bcf31c6"},
 ]
 
 [package.dependencies]
@@ -2731,14 +2731,14 @@ reference = "pantheon"
 
 [[package]]
 name = "send-openai-request"
-version = "0.0.1.dev0+pan.82.a0a608c"
+version = "0.1.0"
 description = "Package that send openai request"
 optional = false
 python-versions = ">=3.10,<4"
 groups = ["main"]
 files = [
-    {file = "send_openai_request-0.0.1.dev0+pan.82.a0a608c-py3-none-any.whl", hash = "sha256:1fd305b00f96e2cb69f3eff4d2ae5d952dbaa7e398108719b67251ac262ed7d4"},
-    {file = "send_openai_request-0.0.1.dev0+pan.82.a0a608c.tar.gz", hash = "sha256:c7f08c33984ae90d0445e9d845aa8416c7a34781858b6dec4baf73ab1fa50c88"},
+    {file = "send_openai_request-0.1.0-py3-none-any.whl", hash = "sha256:bd7d54b25baa331b13e80b0bc7eb1eadebaea3824c409b9d33914765fd8dbc81"},
+    {file = "send_openai_request-0.1.0.tar.gz", hash = "sha256:534d9815191f4379d5b1b031c1c7ea1d7acd151f537d5f9669898362572ffe7b"},
 ]
 
 [package.dependencies]
@@ -2935,14 +2935,14 @@ reference = "pantheon"
 
 [[package]]
 name = "tweetscout-utils"
-version = "0.0.1.dev0+pan.82.354f99b"
+version = "0.1.0"
 description = "Package that consists utils for Tweetscout"
 optional = false
 python-versions = ">=3.10,<4"
 groups = ["main"]
 files = [
-    {file = "tweetscout_utils-0.0.1.dev0+pan.82.354f99b-py3-none-any.whl", hash = "sha256:b182a2ef9c10706d5afaddc9365c1a3821c7a76c2c51ed87416712103e2cf333"},
-    {file = "tweetscout_utils-0.0.1.dev0+pan.82.354f99b.tar.gz", hash = "sha256:2706a7938baae0c76ee5089ed26c4ad7b29ee3e16298fef08a8a4c20380bdd52"},
+    {file = "tweetscout_utils-0.1.0-py3-none-any.whl", hash = "sha256:db4f0c1665b7e337683ae0852086f8992d2783652e3e961e9cd89f30fca0d714"},
+    {file = "tweetscout_utils-0.1.0.tar.gz", hash = "sha256:3379bea940692f38008ab89cd71bab8224fca6dbda33a5c5a0802a3387257284"},
 ]
 
 [package.dependencies]
@@ -2957,14 +2957,14 @@ reference = "pantheon"
 
 [[package]]
 name = "twitter-ambassador-utils"
-version = "0.0.1.dev0+pan.82.a0a608c"
+version = "0.1.1"
 description = "Package that consists utils for Twitter Ambassador"
 optional = false
 python-versions = ">=3.10,<4"
 groups = ["main"]
 files = [
-    {file = "twitter_ambassador_utils-0.0.1.dev0+pan.82.a0a608c-py3-none-any.whl", hash = "sha256:75c4978fb4b1f9b52cf4c5c50971efd2cd1cf7d06128eb47140533cb2af529af"},
-    {file = "twitter_ambassador_utils-0.0.1.dev0+pan.82.a0a608c.tar.gz", hash = "sha256:d9927c90a6bde54754e849c86b0d3369bc28b159ac0a5107bf8bbe53f35c6749"},
+    {file = "twitter_ambassador_utils-0.1.1-py3-none-any.whl", hash = "sha256:37c578f8764331adea4e5da55e4427930860fbbd44441cddaf89074b74512c2f"},
+    {file = "twitter_ambassador_utils-0.1.1.tar.gz", hash = "sha256:9da0ba069b2a7c4b1e5018ba9f4a5272c027156b0525cc44f39f978603969dfb"},
 ]
 
 [package.dependencies]
@@ -3506,4 +3506,4 @@ reference = "pantheon"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4"
-content-hash = "cc38fdd633a07fe8ae948af0213a30dfee3dc7687cab42f2be334f2d09bf7b0a"
+content-hash = "8751ee6bb0b4401c9682f0f3fbe865993ac15930d7f5f7a4253a01a493c4315d"

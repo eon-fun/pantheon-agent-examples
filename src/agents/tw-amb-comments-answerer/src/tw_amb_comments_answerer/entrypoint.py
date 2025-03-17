@@ -4,7 +4,7 @@ import re
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from ray import serve
-from base_agent import BaseAgent
+from base_agent.ray_entrypoint import BaseAgent
 
 from twitter_ambassador_utils.main import TwitterAuthClient, create_post
 from tweetscout_utils.main import get_conversation_from_tweet, create_conversation_string, search_tweets
