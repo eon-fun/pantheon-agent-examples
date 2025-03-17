@@ -10,7 +10,7 @@ A scalable Twitter engagement agent built on Ray Serve that automatically likes 
 - **Engagement Tracking**: Redis-backed system prevents duplicate interactions
 - **Natural Behavior Patterns**: Random delays and selection amounts mimic human activity
 
-## Usage
+## Usages
 
 ### Start the Ray Serve Service
 
