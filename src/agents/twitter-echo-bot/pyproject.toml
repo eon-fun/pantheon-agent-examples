@@ -11,9 +11,9 @@ dependencies = [
     "fastapi (>=0.115.11,<0.116.0)",
     "sqlalchemy (>=2.0.39,<3.0.0)",
     "ray[serve] (>=2.43.0,<3.0.0)",
-    "agents-tools-logger (==0.0.1.*)", #Это пакет который создан в пр 73 (PAN 85)
-    "send-openai-request (==0.0.1.dev0+pan.82.a0a608c)",  #Это пакет который создан в пр 70 (PAN 82)
-    "tweetscout-utils (==0.0.1.dev0+pan.82.354f99b)",  #Это пакет который создан в пр 70 (PAN 82)
+    "agents-tools-logger (>=0.1.0)",
+    "send-openai-request (>=0.1.0)",
+    "tweetscout-utils (>=0.1.0)",
 ]
 
 
