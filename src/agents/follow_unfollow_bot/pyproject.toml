@@ -1,0 +1,27 @@
+[project]
+name = "follow_unfollow_bot"
+version = "0.0.1"
+description = "Twitter bot that follows and unfollows users"
+authors = [
+    {name = "Valentino",email = "bychynski.valiantsin@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.11,<4.0"
+dependencies = [
+    "pydantic (>=2.10.6,<3.0.0)",
+    "sqlalchemy (>=2.0.38,<3.0.0)",
+    "fastapi (>=0.115.11,<0.116.0)",
+    "agents-tools-logger (>=0.1.0)",
+    "tweetscout_utils (>=0.1.0)",
+    "follow_unfollow_bot_get_likes_on_post (>=0.1.0)",
+    "twitter_ambassador_utils (>=0.1.0)",
+    "twitter_follow (>=0.1.0)",
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[project.entry-points."agent.entrypoint"]
+target = "follow_unfollow_bot.main:app"
