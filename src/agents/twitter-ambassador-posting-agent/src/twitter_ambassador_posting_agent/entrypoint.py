@@ -8,7 +8,7 @@ from tweetscout_utils.main import fetch_user_tweets
 from twitter_ambassador_posting_agent.commands import _handle_regular_tweet, _handle_news_tweet, \
     _fetch_quoted_tweet_ids, \
     _find_tweet_for_quote, _handle_quote_tweet
-from redis_client.main import db, Post, ensure_delay_between_posts
+from redis_client.main import get_redis_db, Post, ensure_delay_between_posts
 
 
 @asynccontextmanager
@@ -33,6 +33,7 @@ class TwitterPostingAgent(BaseAgent):
         username = goal.split(".")[0]
         keywords = re.findall(r'[a-zA-Z0-9]+', goal.split(".")[1])
         themes = re.findall(r'[a-zA-Z0-9]+', goal.split(".")[2])
+        db = get_redis_db()
         try:
             print(f'create_ambassador_tweet {username=} {keywords=} {themes=}')
             # Get user's previous posts

@@ -327,23 +327,6 @@ url = "https://pantheon-688567299207.d.codeartifact.eu-west-1.amazonaws.com/pypi
 reference = "pantheon"
 
 [[package]]
-name = "base-agent"
-version = "0.1.1"
-description = "An abstract base class for building various agent-based systems."
-optional = false
-python-versions = ">=3.6"
-groups = ["main"]
-files = [
-    {file = "base-agent-0.1.1.tar.gz", hash = "sha256:4a00216156838c3eec173ae3cb075b0d3d268f17c404e9c6f43f25ae38ab66e0"},
-    {file = "base_agent-0.1.1-py3-none-any.whl", hash = "sha256:69fe287a8b8bb93831ef2c1c28d0fe6b108c18246c68c1458d6aa75367edfbf9"},
-]
-
-[package.source]
-type = "legacy"
-url = "https://pantheon-688567299207.d.codeartifact.eu-west-1.amazonaws.com/pypi/pantheon/simple"
-reference = "pantheon"
-
-[[package]]
 name = "cachetools"
 version = "5.5.2"
 description = "Extensible memoizing collections and decorators"
@@ -2500,14 +2483,14 @@ reference = "pantheon"
 
 [[package]]
 name = "redis-client"
-version = "0.1.3"
+version = "0.1.4"
 description = "Package that create Redis client"
 optional = false
 python-versions = ">=3.10,<4"
 groups = ["main"]
 files = [
-    {file = "redis_client-0.1.3-py3-none-any.whl", hash = "sha256:506ef5f919437c1d85fee6bd0660b1c2546b782528158f1e666ea081d20ff4ae"},
-    {file = "redis_client-0.1.3.tar.gz", hash = "sha256:212d2abb694325879f56c77424b942aa408bc6e3eee869fca0b81100f5ebf8a9"},
+    {file = "redis_client-0.1.4-py3-none-any.whl", hash = "sha256:be8cd2f0081b822af8b7b20c03da7613a85688188f88e993569d1fdb3fb7f8b2"},
+    {file = "redis_client-0.1.4.tar.gz", hash = "sha256:0ef0498296895ff28c5793347637bbd409b230a088dbdad3e04c6d41933f1eaa"},
 ]
 
 [package.dependencies]
@@ -2957,14 +2940,14 @@ reference = "pantheon"
 
 [[package]]
 name = "twitter-ambassador-utils"
-version = "0.1.1"
+version = "0.1.2"
 description = "Package that consists utils for Twitter Ambassador"
 optional = false
 python-versions = ">=3.10,<4"
 groups = ["main"]
 files = [
-    {file = "twitter_ambassador_utils-0.1.1-py3-none-any.whl", hash = "sha256:37c578f8764331adea4e5da55e4427930860fbbd44441cddaf89074b74512c2f"},
-    {file = "twitter_ambassador_utils-0.1.1.tar.gz", hash = "sha256:9da0ba069b2a7c4b1e5018ba9f4a5272c027156b0525cc44f39f978603969dfb"},
+    {file = "twitter_ambassador_utils-0.1.2-py3-none-any.whl", hash = "sha256:356f8f117a8d832306f89d7b99774e6bdd1af15c56b8095e73180307b3f530d2"},
+    {file = "twitter_ambassador_utils-0.1.2.tar.gz", hash = "sha256:5284f1c7fcf08e2e33917c8e1f83e1e7a4eba7700fb0ac0f246bfaa0ced856ed"},
 ]
 
 [package.dependencies]
@@ -3506,4 +3489,4 @@ reference = "pantheon"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4"
-content-hash = "5b6ed387799fea04b573bf9560c6a0f43c85dbf8a426780a0057fde40052604a"
+content-hash = "a6b7d5ba68b3d9c8dd71c75912c09a2d4a8333df66dd0ed25472584c51202b1d"

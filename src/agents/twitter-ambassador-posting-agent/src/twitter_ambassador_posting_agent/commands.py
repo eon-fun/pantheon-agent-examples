@@ -2,10 +2,12 @@ import time
 from datetime import datetime, timedelta
 
 from tweetscout_utils.main import Tweet
-from redis_client.main import db, Post
+from redis_client.main import get_redis_db, Post
 from twitter_ambassador_utils.main import create_post, TwitterAuthClient
 from tweetscout_utils.main import search_tweets
 from send_openai_request.main import send_openai_request
+
+db = get_redis_db()
 
 
 async def add_blank_lines(text) -> str:

@@ -10,7 +10,7 @@ from twitter_ambassador_utils.main import TwitterAuthClient, create_post
 from tweetscout_utils.main import search_tweets
 from tw_amb_gorilla_marketing.commands import check_tweets_for_gorilla_marketing, \
     create_text_for_gorilla_marketing
-from redis_client.main import db, Post, ensure_delay_between_posts
+from redis_client.main import get_redis_db, Post, ensure_delay_between_posts
 
 
 @asynccontextmanager
@@ -35,6 +35,7 @@ class TwitterGorillaMarketingAgent(BaseAgent):
         my_username = goal.split(".")[0]
         keywords = re.findall(r'[a-zA-Z0-9]+', goal.split(".")[1])
         themes = re.findall(r'[a-zA-Z0-9]+', goal.split(".")[2])
+        db = get_redis_db()
         try:
             print(f'start_gorilla_marketing {my_username=} {keywords=} {themes=}')
 

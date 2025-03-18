@@ -7,7 +7,7 @@ from base_agent.ray_entrypoint import BaseAgent
 from twitter_ambassador_utils.main import create_post, TwitterAuthClient
 from tweetscout_utils.main import fetch_user_tweets
 from twitter_ambassador_commentator.commands import create_comment_to_post
-from redis_client.main import db, ensure_delay_between_posts, Post
+from redis_client.main import get_redis_db, ensure_delay_between_posts, Post
 
 
 @asynccontextmanager
@@ -31,6 +31,7 @@ class TwitterCommentatorAgent(BaseAgent):
     ):
         my_username = goal.split(".")[0]
         project_username = goal.split(".")[1]
+        db = get_redis_db()
         try:
             print(f'comment_users_tweet_posts_processor {my_username=} {project_username=}')
             project_tweets = await fetch_user_tweets(project_username)

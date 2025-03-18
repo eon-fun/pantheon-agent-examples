@@ -8,7 +8,7 @@ from base_agent.ray_entrypoint import BaseAgent
 
 from twitter_ambassador_utils.main import TwitterAuthClient, create_post
 from tweetscout_utils.main import get_conversation_from_tweet, create_conversation_string, search_tweets
-from redis_client.main import db, Post, ensure_delay_between_posts
+from redis_client.main import Post, ensure_delay_between_posts, get_redis_db
 from tw_amb_comments_answerer.commands import check_answer_is_needed, create_comment_to_comment
 
 
@@ -35,6 +35,7 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
         project_username = goal.split(".")[1]
         keywords = re.findall(r'[a-zA-Z0-9]+', goal.split(".")[2])
         themes = re.findall(r'[a-zA-Z0-9]+', goal.split(".")[3])
+        db = get_redis_db()
         try:
             print(f'answer_on_project_tweets_comments {my_username=} {project_username=} {keywords=} {themes=}')
 
