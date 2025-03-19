@@ -1,7 +1,7 @@
 from typing import Sequence
 
-from twitter_ambassador_utils.main import set_like, TwitterAuthClient, search_tweets
-from tweetscout_utils.main import Tweet
+from twitter_ambassador_utils.main import set_like, TwitterAuthClient
+from tweetscout_utils.main import Tweet, search_tweets
 from send_openai_request.main import send_openai_request
 
 

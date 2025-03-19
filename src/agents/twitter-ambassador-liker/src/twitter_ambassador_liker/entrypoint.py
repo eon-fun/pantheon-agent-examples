@@ -9,7 +9,7 @@ from base_agent.ray_entrypoint import BaseAgent
 
 from twitter_ambassador_utils.main import set_like, TwitterAuthClient
 from tweetscout_utils.main import search_tweets
-from redis_client.main import db
+from redis_client.main import get_redis_db
 
 
 @asynccontextmanager
@@ -34,6 +34,7 @@ class TwitterLikerAgent(BaseAgent):
         my_username = goal.split(".")[0]
         keywords = re.findall(r'[a-zA-Z0-9]+', goal.split(".")[1])
         themes = re.findall(r'[a-zA-Z0-9]+', goal.split(".")[2])
+        db = get_redis_db()
         try:
             print(f'set_likes {my_username=} {keywords=} {themes=}')
 

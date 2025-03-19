@@ -2,10 +2,12 @@ import time
 from datetime import datetime, timedelta
 
 from tweetscout_utils.main import Tweet
-from redis_client.main import db, Post
+from redis_client.main import get_redis_db, Post
 from twitter_ambassador_utils.main import create_post, TwitterAuthClient
 from tweetscout_utils.main import search_tweets
 from send_openai_request.main import send_openai_request
+
+db = get_redis_db()
 
 
 async def add_blank_lines(text) -> str:
@@ -234,3 +236,20 @@ async def _create_news_tweet(
     result = await send_openai_request(messages=messages, temperature=1.0)
     print(f'Created prompt: {prompt=}')
     return await format_text(result)
+
+
+async def _fetch_quoted_tweet_ids(my_tweets: list[Post]) -> set:
+    quoted_tweet_ids = set()
+    for my_tweet in my_tweets:
+        if my_tweet.quoted_tweet_id:
+            quoted_tweet_ids.add(my_tweet.quoted_tweet_id)
+    return quoted_tweet_ids
+
+
+async def _find_tweet_for_quote(project_tweets: list, quoted_tweet_ids: set) -> Tweet | None:
+    for project_tweet in project_tweets:
+        if (not project_tweet.retweeted_status and project_tweet.id_str not in quoted_tweet_ids) or (
+            project_tweet.retweeted_status and project_tweet.retweeted_status.id_str not in quoted_tweet_ids
+        ):
+            return project_tweet
+    return None
