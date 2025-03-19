@@ -236,3 +236,20 @@ async def _create_news_tweet(
     result = await send_openai_request(messages=messages, temperature=1.0)
     print(f'Created prompt: {prompt=}')
     return await format_text(result)
+
+
+async def _fetch_quoted_tweet_ids(my_tweets: list[Post]) -> set:
+    quoted_tweet_ids = set()
+    for my_tweet in my_tweets:
+        if my_tweet.quoted_tweet_id:
+            quoted_tweet_ids.add(my_tweet.quoted_tweet_id)
+    return quoted_tweet_ids
+
+
+async def _find_tweet_for_quote(project_tweets: list, quoted_tweet_ids: set) -> Tweet | None:
+    for project_tweet in project_tweets:
+        if (not project_tweet.retweeted_status and project_tweet.id_str not in quoted_tweet_ids) or (
+            project_tweet.retweeted_status and project_tweet.retweeted_status.id_str not in quoted_tweet_ids
+        ):
+            return project_tweet
+    return None
