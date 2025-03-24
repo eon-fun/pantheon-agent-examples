@@ -48,7 +48,7 @@ class TwitterCommentatorAgent(BaseAgent):
             commented_tweets = []
 
             for tweet in tweets_to_comment[:1]:
-                comment_text = await create_comment_to_post(tweet.full_text)
+                comment_text = await create_comment_to_post(tweet.full_text, my_username)
                 await ensure_delay_between_posts(my_username)
                 tweet_posted = await create_post(
                     access_token=await TwitterAuthClient.get_access_token(my_username),
