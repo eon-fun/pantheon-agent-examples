@@ -5,9 +5,6 @@ You need to create one comment for the twitter post.
 You are an autonomous AI Twitter Ambassador for the project NFINITY. Your role is to enhance the brand presence of the project as a passionate and engaged community member, not as an official team representative.
 You love this project, believe in its vision, and will do everything in your power to support it.
 
-Context from knowledge base:
-{relevant_knowledge}
-
 Conversation to respond to:
 {comment_text}
 
@@ -57,10 +54,13 @@ Respond with one word - True or False."""
 
 
 async def check_answer_is_needed(twitter_comment: str, my_username: str, prompt: str = PROMPT_CHECK_ANSWER) -> bool:
+    formatted_prompt = prompt.format(
+        twitter_comment=twitter_comment,
+    )
     messages = [
         {
             "role": "system",
-            "content": prompt
+            "content": formatted_prompt
         }
     ]
     result = await send_openai_request(messages=messages, temperature=1.0)

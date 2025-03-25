@@ -11,9 +11,6 @@ db = get_redis_db()
 
 PROMPT_FOR_TWEET = """ DONT USE HASHTAG You are an autonomous AI Twitter Ambassador and enthusiast. Your task is to generate engaging content using the provided knowledge base context.
 
-Context from knowledge base:
-{relevant_knowledge}
-
 Guidelines for tweet creation:
 1. Length: Maximum 260 characters
 2. Style: 
@@ -47,9 +44,6 @@ PROMPT_FOR_QUOTED_TWEET = """ DONT USE HASHTAG You are autonomous AI Twitter Amb
 
 YOUR TASK IS TO COMMENT THIS TWEET: {tweet_for_quote}
 
-Use this context from our knowledge base to inform your response:
-{relevant_knowledge}
-
 The tweet should be bullish, positive, with humor.
 You can add sarcasm if it's appropriate, and include memes if relevant. 
 The tweet should be written in simple, human language. 
@@ -70,9 +64,6 @@ PROMPT_FOR_NEWS_TWEET = """ DONT USE HASHTAG You are a Twitter content creator f
 You need to create one twitter post.
 You are an autonomous AI Twitter Ambassador for the project NFINITY. Your role is to enhance the brand presence of the project as a passionate and engaged community member, not as an official team representative.
 You love this project, believe in its vision, and will do everything in your power to support it.
-
-Context from knowledge base:
-{relevant_knowledge}
 
 Analyze these tweets and themes:
 {news_tweets}
@@ -189,7 +180,8 @@ async def _handle_quote_tweet(project_tweet: Tweet, my_tweets: list[Post], usern
         tweet_for_quote=project_tweet.full_text,
         my_tweets=[tweet.text for tweet in my_tweets],
         keywords=keywords,
-        themes=themes
+        themes=themes,
+        username=username,
     )
     result = await create_post(
         access_token=await TwitterAuthClient.get_access_token(username),
@@ -291,8 +283,12 @@ async def _create_tweet(
         prompt: str = PROMPT_FOR_TWEET
 ) -> str:
     print('generate tweet')
+    formatted_prompt = prompt.format(
+        project_tweets=str(project_tweets),
+        my_tweets=str(my_tweets)
+    )
     messages = [
-        {"role": "system", "content": prompt},
+        {"role": "system", "content": formatted_prompt},
     ]
     result = await send_openai_request(messages=messages, temperature=1.0)
     print(f'Created prompt: {prompt=}')
@@ -308,8 +304,12 @@ async def _create_quoted_tweet(
         prompt: str = PROMPT_FOR_QUOTED_TWEET
 ) -> str:
     print(f'generate quote tweet: {tweet_for_quote=}')
+    formatted_prompt = prompt.format(
+        tweet_for_quote=tweet_for_quote,
+        my_tweets=str(my_tweets)
+    )
     messages = [
-        {"role": "system", "content": prompt},
+        {"role": "system", "content": formatted_prompt},
     ]
     result = await send_openai_request(messages=messages, temperature=1.0)
     print(f'Created prompt: {prompt=}')
@@ -325,8 +325,12 @@ async def _create_news_tweet(
         prompt: str = PROMPT_FOR_NEWS_TWEET
 ) -> str:
     print(f'_create_news_tweet: {news_tweets=}')
+    formatted_prompt = prompt.format(
+        news_tweets=str(news_tweets),
+        my_tweets=str(my_tweets)
+    )
     messages = [
-        {"role": "system", "content": prompt},
+        {"role": "system", "content": formatted_prompt},
     ]
     result = await send_openai_request(messages=messages, temperature=1.0)
     print(f'Created prompt: {prompt=}')
