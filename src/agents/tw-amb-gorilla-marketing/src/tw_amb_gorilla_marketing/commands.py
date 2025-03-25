@@ -36,7 +36,7 @@ The comment should:
 - Express relevant thoughts based on the knowledge context
 - Use natural, human-like language
 - Fit organically into the conversation
-- Stay focused on technology and innovation{question_prompt}
+- Stay focused on technology and innovation
 
 Guidelines:
 - Keep it brief and meaningful
