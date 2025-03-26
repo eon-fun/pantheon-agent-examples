@@ -188,11 +188,12 @@ yjWvEPVjHwTvKeNokfycQ1o3YSbBAUJ4rjBD",
     symbol = token_meta.get("symbol", "Unknown")
     contract = rug_check_data.get("mint", "Unknown")
     creator = rug_check_data.get("creator", "Unknown")
+    if creator is None:
+        creator = "Unknown"
     price = rug_check_data.get("price", 0)
     market_cap = rug_check_data.get("totalMarketLiquidity", 0)
 
     top_holders = rug_check_data.get("topHolders", [])
-
 
     risks = rug_check_data.get("risks", [])
     risk_info = "\n".join(
@@ -202,7 +203,17 @@ yjWvEPVjHwTvKeNokfycQ1o3YSbBAUJ4rjBD",
     transfer_fee = rug_check_data.get("transferFee", {}).get("pct", 0)
     img = rug_check_data.get("fileMeta", {}).get("image", "")
     rugged = "🟢 No" if not rug_check_data.get("rugged", False) else "🔴 Yes"
+    score_normalised = rug_check_data.get("score_normalised", 0)
+    score_levels = {
+        20: "🟢",  # Зеленый
+        40: "🟡",  # Желтый
+        60: "🟠",  # Оранжевый
+        80: "🔴"  # Красный
+    }
 
+    emoji = next((emoji for threshold, emoji in score_levels.items() if score_normalised < threshold), "🔴")
+
+    score_normalised = f"{emoji} {score_normalised}"
     message = f"""
 📊 **{name} ({symbol})**
 💰 **Price:** {price:.10f} USD
@@ -216,7 +227,11 @@ yjWvEPVjHwTvKeNokfycQ1o3YSbBAUJ4rjBD",
 🔎 **Security Check:**
     ├ ⚠️ **Rug Check:** {rugged}
     ├ 💸 **Transfer Fee:** {transfer_fee}%
-    ├ 🏛️ **Risks:**{risk_info}"""
+    ├ 📊 **Score:** {score_normalised}
+    ├ 🏛️ **Risks:**{risk_info}
+    
+[Dextools](https://www.dextools.io/app/solana/pair-explorer/{contract}) | [RugCheck](https://rugcheck.xyz/tokens/{contract}) | [DexScreener](https://dexscreener.com/solana/{contract})
+"""
 
     return message, img
 
@@ -230,12 +245,13 @@ async def cut_string(string: str, start: int = 5, end: int = 5):
 async def build_sol_scan_links(address):
     return f"[{await cut_string(address)}](https://solscan.io/account/{address})"
 
+
 async def sort_holders(holders):
     # holders_info = "\n".join(
     #     [f"- `{holder['address']}` ({holder['pct']:.2f}%)" for holder in top_holders]
     # )
     if holders:
-        holder_msg= ""
+        holder_msg = ""
         for holder in holders:
             if float(holder["pct"]) > 1:
                 holder_msg += f"\n- {await build_sol_scan_links(holder['address'])} ({holder['pct']:.2f}%)"

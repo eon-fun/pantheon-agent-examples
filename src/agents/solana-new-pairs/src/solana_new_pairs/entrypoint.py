@@ -1,7 +1,7 @@
 import asyncio
 
 from solana_new_pairs.DB.sqlalchemy_database_manager import init_models
-from solana_new_pairs.bot.auto_poster import post_new_coins_in_bot
+from solana_new_pairs.bot.auto_poster import post_new_coins_in_bot, message_worker
 from solana_new_pairs.bot.bot import start_bot
 from solana_new_pairs.service.dextools_service import DextoolsAPIWrapper, collect_and_store_data
 
@@ -23,7 +23,11 @@ async def main():
 
     async def post_new_coins():
         while True:
-            await post_new_coins_in_bot()
+            try:
+                await post_new_coins_in_bot()
+
+            except Exception as e:
+                print(e)
 
             await asyncio.sleep(1)
 
@@ -34,7 +38,8 @@ async def main():
     tasks = [
         asyncio.create_task(bot_task()),
         asyncio.create_task(start_collecting_data_from_dextools(dex_tools_api)),
-        asyncio.create_task(post_new_coins())
+        asyncio.create_task(post_new_coins()),
+        asyncio.create_task(message_worker())
     ]
 
     await asyncio.gather(*tasks)

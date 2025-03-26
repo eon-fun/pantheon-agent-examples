@@ -1,28 +1,37 @@
 import asyncio
-import json
-
-from aiogram.enums import ParseMode
-
 from solana_new_pairs.DB.manager.coin_manager import AlchemyBaseCoinManager
 from solana_new_pairs.DB.sqlalchemy_database_manager import get_db
 from solana_new_pairs.bot.bot import bot
 from solana_new_pairs.bot.message import build_message
 from solana_new_pairs.service.collector_service import collect_full_data_about_coin
 
-
-def escape_markdown_v2(text):
-    """Экранирует специальные символы для MarkdownV2"""
-    escape_chars = r"_*[]()~`>#+-=|{}.!"
-    return "".join(f"\\{char}" if char in escape_chars else char for char in text)
+message_queue = asyncio.Queue()
+SEND_DELAY = 1
 
 
-def split_text(text, max_length=4000):
-    """Функция для разбиения длинного текста на части"""
-    parts = []
-    while text:
-        parts.append(text[:max_length])
-        text = text[max_length:]
-    return parts
+async def message_worker():
+    """ Воркер, который отправляет сообщения из очереди с задержкой """
+    while True:
+        chat_id, message, img = await message_queue.get()  # Ждем сообщение из очереди
+
+        try:
+            if img and len(message) < 1024:
+                await bot.send_photo(chat_id=chat_id, photo=img, caption=message, parse_mode="MARKDOWN")
+            else:
+                await bot.send_message(chat_id=chat_id, text=message, parse_mode="MARKDOWN",
+                                       disable_web_page_preview=True)
+
+            # print(f"Отправлено: {message}")
+        except Exception as e:
+            print(f"Ошибка при отправке: {e}")
+        finally:
+            message_queue.task_done()  # Сообщаем, что обработали элемент
+            await asyncio.sleep(SEND_DELAY)  # Задержка перед отправкой следующего
+
+
+async def add_message_to_queue(message: str, img: str = None):
+    """ Добавляет сообщение в очередь """
+    await message_queue.put((-4777229652, message, img))
 
 
 async def post_new_coins_in_bot():
@@ -33,12 +42,6 @@ async def post_new_coins_in_bot():
         for coin in new_coins:
             print(f"Постим новую монету с адресом {coin.token_address}")
             data = await collect_full_data_about_coin(coin.token_address)
+            await asyncio.sleep(1)
             message, img = await build_message(data)
-            if img and len(message) < 1024:
-                print("sending animation")
-                print(len(message))
-                await bot.send_animation(chat_id=-4777229652, animation=img, caption=message, parse_mode="MARKDOWN")
-            else:
-                await bot.send_message(chat_id=-4777229652, text=message, parse_mode="MARKDOWN",
-                               disable_web_page_preview=True)
-
+            await add_message_to_queue(message, img)
