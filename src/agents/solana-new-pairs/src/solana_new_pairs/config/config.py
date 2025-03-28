@@ -4,7 +4,7 @@ from agents_tools_logger.main import log
 
 class DBSettings(BaseSettings):
     user: str = "postgres"
-    password: str = "Plaalen18"
+    password: str = "password"
     host: str = "localhost"
     port: str = "5432"
     name: str = "new_solana_pairs"
