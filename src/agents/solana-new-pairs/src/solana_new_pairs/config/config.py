@@ -36,8 +36,8 @@ class DexToolsSettings(BaseSettings):
     rate_limit_by_second: int = 1
 
 class BotSettings(BaseSettings):
-    bot_token: str ="5343231561:AAGHqNDPaW0AWFu1G86_d4SzklK6aZVzxPM"
-    chat_id: int = -4777229652
+    bot_token: str
+    chat_id: int
     send_delay: int = 1
     max_length_message_for_photo: int = 1024
 
