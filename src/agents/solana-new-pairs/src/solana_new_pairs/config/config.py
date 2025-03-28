@@ -35,6 +35,11 @@ class DexToolsSettings(BaseSettings):
     base_api_url: str = ""
     rate_limit_by_second: int = 1
 
+class BotSettings(BaseSettings):
+    bot_token: str ="5343231561:AAGHqNDPaW0AWFu1G86_d4SzklK6aZVzxPM"
+    chat_id: int = -4777229652
+    send_delay: int = 1
+    max_length_message_for_photo: int = 1024
 
 class Config(BaseSettings):
     app_title: str = "follow_unfollow_bot"
@@ -42,6 +47,7 @@ class Config(BaseSettings):
     app_version: str = "0.0.1"
     app_docs_url: str = "hidden"
 
+    bot: BotSettings = BotSettings()
     db: DBSettings = DBSettings()
     fastapi: FastAPISettings = FastAPISettings()
     dex_tools: DexToolsSettings = DexToolsSettings()

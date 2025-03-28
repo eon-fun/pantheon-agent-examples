@@ -1,9 +1,16 @@
 import asyncio
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+from starlette.middleware.cors import CORSMiddleware
+from ray import serve
 
 from solana_new_pairs.DB.sqlalchemy_database_manager import init_models
 from solana_new_pairs.bot.auto_poster import post_new_coins_in_bot, message_worker
 from solana_new_pairs.bot.bot import start_bot
+from solana_new_pairs.config.config import config
 from solana_new_pairs.service.dextools_service import DextoolsAPIWrapper, collect_and_store_data
+from base_agent.ray_entrypoint import BaseAgent
 
 
 async def main():
@@ -45,8 +52,38 @@ async def main():
     await asyncio.gather(*tasks)
 
 
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    await main()
+    yield
+
+
+app = FastAPI(
+    lifespan=lifespan,
+    title=config.app_title,
+    description=config.app_description,
+    version=config.app_version,
+    docs_url=f"/{config.app_docs_url}/docs",
+    redoc_url=f"/{config.app_docs_url}/redoc",
+    openapi_url=f"/{config.app_docs_url}/openapi.json",
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=config.fastapi.allowed_origins,
+    allow_credentials=config.fastapi.allowed_credentials,
+    allow_methods=config.fastapi.allowed_methods,
+    allow_headers=config.fastapi.allowed_headers,
+)
+
+
+@serve.deployment
+@serve.ingress(app)
+class SolanaNewPairsBot(BaseAgent):
+    @app.post("/{goal}")
+    async def handle(self, goal: str, plan: dict | None = None):
+        return {"status": "main запущен"}
+
+
+app = SolanaNewPairsBot.bind()
 if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        print("Программа остановлена вручную.")
+    serve.run(app, route_prefix="/")

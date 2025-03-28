@@ -1,21 +1,15 @@
-import asyncio
-import json
-
 from aiogram import Bot, Dispatcher, types
-from aiogram.enums import ParseMode
 from aiogram.types import Message
 from aiogram.filters import Command
 
 from solana_new_pairs.bot.message import build_message
+from solana_new_pairs.config.config import config
 from solana_new_pairs.service.collector_service import collect_full_data_about_coin
 
-TOKEN = "5343231561:AAGHqNDPaW0AWFu1G86_d4SzklK6aZVzxPM"
+TOKEN = config.bot.bot_token
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
-
-
-
 
 
 @dp.message()
@@ -23,7 +17,7 @@ async def echo(message: types.Message):
     chat_id = message.chat.id
     coin_address = message.text
     data = await collect_full_data_about_coin(coin_address)
-    message , img = await build_message(data)
+    message, img = await build_message(data)
 
     if img and len(message) < 1024:
         print("sending animation")
@@ -35,12 +29,10 @@ async def echo(message: types.Message):
                                disable_web_page_preview=True)
 
 
-
 @dp.message(Command("help"))
 async def cmd_help(message: Message):
     await message.answer("🛠 Available commands:\n/cex - get data from exchanges\n/dex get data from swap")
 
 
 async def start_bot():
-
     await dp.start_polling(bot)
