@@ -22,15 +22,20 @@ app = FastAPI(lifespan=lifespan)
 @serve.deployment
 @serve.ingress(app)
 class TwitterPostingAgent(BaseAgent):
+    def __init__(self):
+        self.running_tasks = {}
+
     @app.post("/{goal}")
     async def handle(self, goal: str, plan: dict | None = None):
         await self.create_ambassador_tweet(goal)
-        asyncio.create_task(self.schedule_next_run(goal))
+        if goal not in self.running_tasks or self.running_tasks[goal].done():
+            self.running_tasks[goal] = asyncio.create_task(self.schedule_next_run(goal))
 
     async def schedule_next_run(self, goal: str):
-        await asyncio.sleep(30)
-        print(f"Scheduled rerun for goal: {goal}")
-        await self.create_ambassador_tweet(goal)
+        while True:
+            await asyncio.sleep(30)
+            print(f"Scheduled rerun for goal: {goal}")
+            await self.create_ambassador_tweet(goal)
 
     async def create_ambassador_tweet(self, goal: str) -> Post | None:
         username = goal.split(".")[0]
