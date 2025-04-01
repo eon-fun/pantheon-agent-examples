@@ -33,7 +33,7 @@ class TwitterPostingAgent(BaseAgent):
 
     async def schedule_next_run(self, goal: str):
         while True:
-            await asyncio.sleep(30)
+            await asyncio.sleep(1800)
             print(f"Scheduled rerun for goal: {goal}")
             await self.create_ambassador_tweet(goal)
 
