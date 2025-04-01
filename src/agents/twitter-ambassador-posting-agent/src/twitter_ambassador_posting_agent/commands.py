@@ -93,7 +93,7 @@ Content Guidelines:
   Previous tweets to differentiate from:
   {my_tweets}
 
-Create a unique tweet that builds on the news while staying aligned with our project's focus and knowledge base.""",
+Create a unique tweet that builds on the news while staying aligned with our project's focus and knowledge base."""
 
 
 async def add_blank_lines(text) -> str:
