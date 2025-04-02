@@ -1,4 +1,5 @@
 import time
+import re
 from datetime import datetime, timedelta
 
 from tweetscout_utils.main import Tweet
@@ -143,6 +144,11 @@ Who needs thumbs? Unleash the hyper-advanced AI bot and watch it fetch not just 
 
 async def format_text(text: str) -> str:
     text = await add_blank_lines(text)
+
+    text = re.sub(r'#\w+', '', text)
+    text = re.sub(r'\s+', ' ', text)
+    text = text.strip()
+
     for _ in range(20):
         if len(text) <= 280:
             return text
@@ -169,6 +175,10 @@ async def format_text(text: str) -> str:
 
         print(f'Tweet validating 1 {text}')
         text = await add_blank_lines(text)
+
+        text = re.sub(r'#\w+', '', text)
+        text = re.sub(r'\s+', ' ', text)
+        text = text.strip()
 
     raise ValueError('Generated text is too long')
 
