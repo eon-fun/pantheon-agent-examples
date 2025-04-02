@@ -1,6 +1,6 @@
 [project]
 name = "tw-amb-gorilla-marketing"
-version = "0.0.9"
+version = "0.0.10"
 description = "TwitterAmbassadorGorillaMarketing"
 authors = [{name = "k1llzzy",email = "gekachan04@gmail.com"}]
 readme = "README.md"
