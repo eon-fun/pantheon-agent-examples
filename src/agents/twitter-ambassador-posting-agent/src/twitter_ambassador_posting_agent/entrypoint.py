@@ -1,3 +1,4 @@
+import asyncio
 import re
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
@@ -6,9 +7,8 @@ from base_agent.ray_entrypoint import BaseAgent
 
 from tweetscout_utils.main import fetch_user_tweets
 from twitter_ambassador_posting_agent.commands import _handle_regular_tweet, _handle_news_tweet, \
-    _fetch_quoted_tweet_ids, \
-    _find_tweet_for_quote, _handle_quote_tweet
-from redis_client.main import get_redis_db, Post, ensure_delay_between_posts
+    _fetch_quoted_tweet_ids, _find_tweet_for_quote, _handle_quote_tweet
+from redis_client.main import get_redis_db, Post
 
 
 @asynccontextmanager
@@ -22,14 +22,22 @@ app = FastAPI(lifespan=lifespan)
 @serve.deployment
 @serve.ingress(app)
 class TwitterPostingAgent(BaseAgent):
+    def __init__(self):
+        self.running_tasks = {}
+
     @app.post("/{goal}")
     async def handle(self, goal: str, plan: dict | None = None):
         await self.create_ambassador_tweet(goal)
+        if goal not in self.running_tasks or self.running_tasks[goal].done():
+            self.running_tasks[goal] = asyncio.create_task(self.schedule_next_run(goal))
 
-    async def create_ambassador_tweet(
-            self,
-            goal: str,
-    ) -> Post | None:
+    async def schedule_next_run(self, goal: str):
+        while True:
+            await asyncio.sleep(1800)
+            print(f"Scheduled rerun for goal: {goal}")
+            await self.create_ambassador_tweet(goal)
+
+    async def create_ambassador_tweet(self, goal: str) -> Post | None:
         username = goal.split(".")[0]
         keywords = re.findall(r'[a-zA-Z0-9]+', goal.split(".")[1])
         themes = re.findall(r'[a-zA-Z0-9]+', goal.split(".")[2])

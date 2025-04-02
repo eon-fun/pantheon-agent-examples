@@ -2940,14 +2940,14 @@ reference = "pantheon"
 
 [[package]]
 name = "twitter-ambassador-utils"
-version = "0.1.2"
+version = "0.1.4"
 description = "Package that consists utils for Twitter Ambassador"
 optional = false
 python-versions = ">=3.10,<4"
 groups = ["main"]
 files = [
-    {file = "twitter_ambassador_utils-0.1.2-py3-none-any.whl", hash = "sha256:356f8f117a8d832306f89d7b99774e6bdd1af15c56b8095e73180307b3f530d2"},
-    {file = "twitter_ambassador_utils-0.1.2.tar.gz", hash = "sha256:5284f1c7fcf08e2e33917c8e1f83e1e7a4eba7700fb0ac0f246bfaa0ced856ed"},
+    {file = "twitter_ambassador_utils-0.1.4-py3-none-any.whl", hash = "sha256:99d36bd8d43b4e387cd0a6438634da1eeb91f4c90f35504b70a0b52eb085581b"},
+    {file = "twitter_ambassador_utils-0.1.4.tar.gz", hash = "sha256:19eecc35f88acf67d3936fae7de2b05a2c8426176fd37d2adba7af108b51b3c2"},
 ]
 
 [package.dependencies]
@@ -3489,4 +3489,4 @@ reference = "pantheon"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4"
-content-hash = "166394290d4a64494edf96d0779c10e0bd5e20a694dd637acecc32f7dcd70fed"
+content-hash = "596b2221afc601a9ed753a425539fd55ebce4f5d57a8d6a471aff04409029d30"
