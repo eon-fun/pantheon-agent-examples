@@ -1,3 +1,4 @@
+import random
 import time
 import re
 import asyncio
@@ -35,7 +36,8 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
 
     async def schedule_next_run(self, goal: str):
         while True:
-            await asyncio.sleep(1800)
+            timeout = random.randint(1800, 3600)
+            await asyncio.sleep(timeout)
             print(f"Scheduled rerun for goal: {goal}")
             await self.answer_on_project_tweets_comments(goal)
 
