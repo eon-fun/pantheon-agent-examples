@@ -1,14 +1,24 @@
 from contextlib import asynccontextmanager
 
 from base_agent.ray_entrypoint import BaseAgent
+from base_agent.prompt.utils import get_environment
 from fastapi import FastAPI
 from ray import serve
-from jinja2 import Environment, PackageLoader, select_autoescape
+from pydantic import BaseModel
 
 from qdrant_client_custom.main import get_qdrant_client
 from redis_client.main import get_redis_db
 from send_openai_request.main import get_embedding, send_openai_request
 
+
+class InputModel(BaseModel):
+    prompt: str
+
+
+class OutputModel(BaseModel):
+    success: bool
+    result: str
+    
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -35,14 +45,11 @@ class SubAgent:
 class ExampleAgent(BaseAgent):
     def __init__(self):
         super().__init__()
-        self.jinja_env = Environment(
-            loader=PackageLoader("persona_agent", "templates"),
-            autoescape=select_autoescape()
-        )
+        self.jinja_env = get_environment("persona_agent")
 
     @app.post("/{goal}")
-    async def handle(self, goal: str, plan: dict | None = None, prompt: str = ""):
-        return await self.get_persona_template(goal, prompt)
+    async def handle(self, goal: str, plan: dict | None = None, input_prompt: str | None = None):
+        return await self.get_persona_template(goal, input_prompt)
 
     async def get_persona_template(self, goal: str, prompt: str):
         redis_db = get_redis_db()
@@ -86,7 +93,7 @@ class ExampleAgent(BaseAgent):
         ]
         result = await send_openai_request(messages=messages, temperature=0.7)
 
-        return result
+        return OutputModel(success=True, result=result).model_dump()
 
 
 # serve run entrypoint:app
