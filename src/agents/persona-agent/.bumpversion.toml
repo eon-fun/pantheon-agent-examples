@@ -1,9 +1,9 @@
 [tool.bumpversion]
 current_version = "0.0.1" 
-message = "Bump version of agents/persona_agent: {current_version} → {new_version}"
+message = "Bump version of agents/persona-agent: {current_version} → {new_version}"
 commit = false
 tag = false
-tag_name = "agents/persona_agent-v{new_version}"
+tag_name = "agents/persona-agent-v{new_version}"
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"
