@@ -1,4 +1,5 @@
 import time
+import asyncio
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from ray import serve
@@ -21,9 +22,20 @@ app = FastAPI(lifespan=lifespan)
 @serve.deployment
 @serve.ingress(app)
 class TwitterCommentatorAgent(BaseAgent):
+    def __init__(self):
+        self.running_tasks = {}
+
     @app.post("/{goal}")
     async def handle(self, goal: str, plan: dict | None = None):
         await self.comment_users_tweet_posts(goal)
+        if goal not in self.running_tasks or self.running_tasks[goal].done():
+            self.running_tasks[goal] = asyncio.create_task(self.schedule_next_run(goal))
+
+    async def schedule_next_run(self, goal: str):
+        while True:
+            await asyncio.sleep(1800)
+            print(f"Scheduled rerun for goal: {goal}")
+            await self.start_gorilla_marketing(goal)
 
     async def comment_users_tweet_posts(
             self,
