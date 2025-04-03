@@ -1,8 +1,8 @@
 from base_agent.const import EntrypointGroup
 from base_agent.utils import get_entrypoint
+from ray import serve
 
 app = get_entrypoint(EntrypointGroup.AGENT_ENTRYPOINT).load()
-
 
 if __name__ == "__main__":
     import uvicorn
