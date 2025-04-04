@@ -1992,15 +1992,15 @@ fastembed-gpu = ["fastembed-gpu (==0.5.1)"]
 
 [[package]]
 name = "qdrant-client-custom"
-version = "0.0.2"
+version = "0.0.3"
 description = ""
 optional = false
 python-versions = "*"
 groups = ["main"]
 markers = "python_version <= \"3.12\" or python_version >= \"3.13\""
 files = [
-    {file = "qdrant_client_custom-0.0.2-py2.py3-none-any.whl", hash = "sha256:7b749d0220575bf952a61b251d3afdd75d57ce94563167865b2b126a4be6a5d6"},
-    {file = "qdrant_client_custom-0.0.2.tar.gz", hash = "sha256:84cbe47a93804fa943df5d2e251332d3e8db9b6a134420556cb7d16244a98466"},
+    {file = "qdrant_client_custom-0.0.3-py2.py3-none-any.whl", hash = "sha256:55c890c66a050cfc358bacac0c01c914e8e48a07d48f46eb3fade26d13d7a70e"},
+    {file = "qdrant_client_custom-0.0.3.tar.gz", hash = "sha256:db6a9930cb8be6944c62b30f51df72fdb3ec301b642efc5173e5257941ffdd70"},
 ]
 
 [package.dependencies]
@@ -2314,15 +2314,15 @@ pyasn1 = ">=0.1.3"
 
 [[package]]
 name = "send-openai-request"
-version = "0.1.0"
+version = "0.0.2"
 description = "Package that send openai request"
 optional = false
 python-versions = ">=3.10,<4"
 groups = ["main"]
 markers = "python_version <= \"3.12\" or python_version >= \"3.13\""
 files = [
-    {file = "send_openai_request-0.1.0-py3-none-any.whl", hash = "sha256:bd7d54b25baa331b13e80b0bc7eb1eadebaea3824c409b9d33914765fd8dbc81"},
-    {file = "send_openai_request-0.1.0.tar.gz", hash = "sha256:534d9815191f4379d5b1b031c1c7ea1d7acd151f537d5f9669898362572ffe7b"},
+    {file = "send_openai_request-0.0.2-py3-none-any.whl", hash = "sha256:f94a37bac7296cd0254c31f7757adf1fbc8e5b8fbbd98187b810e683f35b6aad"},
+    {file = "send_openai_request-0.0.2.tar.gz", hash = "sha256:bc32c09f21c34bf6413cb74da9e31f9334a4dab4e8bcc5f16673faf9458a7e64"},
 ]
 
 [package.dependencies]
@@ -3000,4 +3000,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4"
-content-hash = "87419c86f9ff6b2f7f4ae06095d0b37e67c7ace28f07e4b0c4d6e884a6d9a807"
+content-hash = "b82c6edb9e2050e93ba64c540af144b8793dc3194a88ca505bc2177da5b3e5ed"
