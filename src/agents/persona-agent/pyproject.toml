@@ -10,7 +10,7 @@ requires-python = ">=3.10,<4"
 dependencies = [
     "fastapi (>=0.115.8,<0.116.0)",
     "send-openai-request (>=0.0.2)",
-    "qdrant-client-custom (>=0.0.1)",
+    "qdrant-client-custom (>=0.0.3)",
     "redis-client (>=0.0.1)",
 ]
 
