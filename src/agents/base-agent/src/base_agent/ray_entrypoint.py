@@ -16,6 +16,12 @@ from base_agent.prompt import prompt_builder
 from base_agent.workflows import workflow_builder
 
 
+class BaseAgentInputModel(abc.AbstractAgentInputModel): ...
+
+
+class BaseAgentOutputModel(abc.AbstractAgentOutputModel): ...
+
+
 class BaseAgent(abc.AbstractAgent):
     """Base default implementation for all agents."""
 
@@ -38,34 +44,58 @@ class BaseAgent(abc.AbstractAgent):
         # ---------- Redis Memory ----------#
         self.memory_client = memory_builder()
 
-    async def handle(self, goal: str, plan: dict | None = None):
-        """This is one of the most important endpoint of MAS.
-        It handles all requests made by handoff from other agents or by user."""
+    async def handle(
+        self,
+        goal: str,
+        plan: dict | None = None,
+        context: BaseAgentInputModel | None = None,
+    ) -> BaseAgentOutputModel:
+        """This is one of the most important endpoints of MAS.
+        It handles all requests made by handoff from other agents or by user.
+
+        If a predefined plan is provided, it skips plan generation and executes the plan directly.
+        Otherwise, it follows the standard logic to generate a plan and execute it.
+        """
+
+        if plan is not None:
+            result = self.run_workflow(plan, context)
+            self.store_interaction(goal, plan, result, context)
+            return result
 
         insights = self.get_relevant_insights(goal)
-
         past_interactions = self.get_past_interactions(goal)
-
         agents = self.get_most_relevant_agents(goal)
         tools = self.get_most_relevant_tools(goal)
 
-        plan = self.generate_plan(goal, agents, tools, insights, past_interactions, plan)
+        plan = self.generate_plan(
+            goal=goal,
+            agents=agents,
+            tools=tools,
+            insights=insights,
+            past_interactions=past_interactions,
+            plan=None,
+        )
 
-        result = self.run_workflow(plan)
-
-        self.store_interaction(goal, plan, result)
-
+        result = self.run_workflow(plan, context)
+        self.store_interaction(goal, plan, result, context)
         return result
 
     def get_past_interactions(self, goal: str) -> list[dict]:
         return self.memory_client.read(key=goal)
 
-    def store_interaction(self, goal: str, plan: dict, result: Any) -> None:
+    def store_interaction(
+        self,
+        goal: str,
+        plan: dict,
+        result: BaseAgentOutputModel,
+        context: BaseAgentInputModel | None = None,
+    ) -> None:
         interaction = MemoryModel(
             **{
                 "goal": goal,
                 "plan": plan,
-                "result": result,
+                "result": result.model_dump(),
+                "context": context.model_dump(),
             }
         )
         self.memory_client.store(key=goal, interaction=interaction.model_dump())
@@ -182,8 +212,12 @@ class BaseAgent(abc.AbstractAgent):
             plan=plan,
         )
 
-    def run_workflow(self, plan: dict[int, Task]):
-        return self.workflow_runner.run(plan)
+    def run_workflow(
+        self,
+        plan: dict[int, Task],
+        context: BaseAgentInputModel | None = None,
+    ) -> BaseAgentOutputModel:
+        return self.workflow_runner.run(plan, context)
 
     def reconfigure(self, config: dict[str, Any]):
         pass
