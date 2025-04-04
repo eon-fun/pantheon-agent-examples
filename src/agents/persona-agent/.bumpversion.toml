@@ -4,6 +4,9 @@ message = "Bump version of agents/persona-agent: {current_version} → {new_vers
 commit = false
 tag = false
 tag_name = "agents/persona-agent-v{new_version}"
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)(\\.(?P<dev>dev\\d+)\\+(?P<branch>.*))?"
+serialize = ["{major}.{minor}.{patch}.{dev}+{branch}", "{major}.{minor}.{patch}"]
+
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"
