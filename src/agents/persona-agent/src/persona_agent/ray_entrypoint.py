@@ -5,7 +5,7 @@ from base_agent.prompt.utils import get_environment
 from fastapi import FastAPI
 from ray import serve
 from pydantic import BaseModel
-from tenacity import retry, stop_after_attempt, wait_fixed
+# from tenacity import retry, stop_after_attempt, wait_fixed
 
 from qdrant_client_custom.main import get_qdrant_client
 from redis_client.main import get_redis_db
@@ -40,7 +40,7 @@ app = FastAPI(lifespan=lifespan)
 #     def __call__(self, *args, **kwds):
 #         pass
 
-@retry(stop=stop_after_attempt(3), wait=wait_fixed(1))
+# @retry(stop=stop_after_attempt(3), wait=wait_fixed(1))
 async def get_openai_embedding(prompt: str):
     return await get_embedding(prompt)
 
