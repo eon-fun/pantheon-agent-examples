@@ -5,6 +5,7 @@ from base_agent.prompt.utils import get_environment
 from fastapi import FastAPI
 from ray import serve
 from pydantic import BaseModel
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 from qdrant_client_custom.main import get_qdrant_client
 from redis_client.main import get_redis_db
@@ -29,20 +30,20 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-@serve.deployment
-class SubAgent:
-    """This agent is a part of ray serve application, but it is not exposed for communication with the outside agents.
-    We can use it to execute some tools or a custom logic to enable ray scaling capabilities.
-    The `__call__` method in this class suggests that it could also just be a function instead.
-    """
+# @serve.deployment
+# class SubAgent:
+#     """This agent is a part of ray serve application, but it is not exposed for communication with the outside agents.
+#     We can use it to execute some tools or a custom logic to enable ray scaling capabilities.
+#     The `__call__` method in this class suggests that it could also just be a function instead.
+#     """
 
-    def __call__(self, *args, **kwds):
-        pass
+#     def __call__(self, *args, **kwds):
+#         pass
 
 
 @serve.deployment
 @serve.ingress(app)
-class ExampleAgent(BaseAgent):
+class PersonaAgent(BaseAgent):
     def __init__(self):
         super().__init__()
         self.jinja_env = get_environment("persona_agent")
@@ -50,6 +51,10 @@ class ExampleAgent(BaseAgent):
     @app.post("/{goal}")
     async def handle(self, goal: str, plan: dict | None = None, input_prompt: str | None = None):
         return await self.get_persona_template(goal, input_prompt)
+    
+    @retry(stop=stop_after_attempt(3), wait=wait_fixed(1))
+    async def get_openai_embedding(self, prompt: str):
+        return await get_embedding(prompt)
 
     async def get_persona_template(self, goal: str, prompt: str):
         redis_db = get_redis_db()
@@ -63,7 +68,7 @@ class ExampleAgent(BaseAgent):
         desc_key = f"{goal}:description"
         persona_description = redis_db.get(desc_key) or ""
 
-        embedding_input = await get_embedding.remote(prompt)
+        embedding_input = await self.get_openai_embedding(prompt)
 
         search_similar_tweets = qdrant_client.search(
             collection_name=persona_collection,
@@ -97,7 +102,7 @@ class ExampleAgent(BaseAgent):
 
 
 # serve run entrypoint:app
-app = ExampleAgent.bind()
+app = PersonaAgent.bind()
 
 
 if __name__ == "__main__":
