@@ -38,7 +38,7 @@ class PersonaAgent(BaseAgent):
         self.jinja_env = get_environment("persona_agent")
 
     @app.post("/{goal}")
-    async def handle(self, goal: str, plan: dict | None = None, input_prompt: str | None = None):
+    async def handle(self, goal: str, input_prompt: str, plan: dict | None = None):
         return await self.get_persona_template(goal, input_prompt)
 
     async def get_persona_template(self, goal: str, prompt: str):
