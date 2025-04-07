@@ -75,7 +75,7 @@ class PersonaAgent(BaseAgent):
             query_vector=embedding_input,
             limit=5
         )
-        similar_tweets = [tweet["text"] for tweet in search_similar_tweets]
+        similar_tweets = [tweet.payload["text"] for tweet in search_similar_tweets]
         context = "\n".join(similar_tweets)
 
         # Используем Jinja2 для рендеринга шаблонов
