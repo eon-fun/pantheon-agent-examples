@@ -40,6 +40,10 @@ app = FastAPI(lifespan=lifespan)
 #     def __call__(self, *args, **kwds):
 #         pass
 
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(1))
+async def get_openai_embedding(prompt: str):
+    return await get_embedding(prompt)
+
 
 @serve.deployment
 @serve.ingress(app)
@@ -51,10 +55,6 @@ class PersonaAgent(BaseAgent):
     @app.post("/{goal}")
     async def handle(self, goal: str, plan: dict | None = None, input_prompt: str | None = None):
         return await self.get_persona_template(goal, input_prompt)
-    
-    @retry(stop=stop_after_attempt(3), wait=wait_fixed(1))
-    async def get_openai_embedding(self, prompt: str):
-        return await get_embedding(prompt)
 
     async def get_persona_template(self, goal: str, prompt: str):
         redis_db = get_redis_db()
@@ -68,7 +68,7 @@ class PersonaAgent(BaseAgent):
         desc_key = f"{goal}:description"
         persona_description = redis_db.get(desc_key) or ""
 
-        embedding_input = await self.get_openai_embedding(prompt)
+        embedding_input = await get_openai_embedding(prompt)
 
         search_similar_tweets = qdrant_client.search(
             collection_name=persona_collection,
