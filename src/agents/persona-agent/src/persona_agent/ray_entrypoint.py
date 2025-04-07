@@ -30,21 +30,6 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-# @serve.deployment
-# class SubAgent:
-#     """This agent is a part of ray serve application, but it is not exposed for communication with the outside agents.
-#     We can use it to execute some tools or a custom logic to enable ray scaling capabilities.
-#     The `__call__` method in this class suggests that it could also just be a function instead.
-#     """
-
-#     def __call__(self, *args, **kwds):
-#         pass
-
-@retry(stop=stop_after_attempt(3), wait=wait_fixed(1))
-async def get_openai_embedding(prompt: str):
-    return await get_embedding(prompt)
-
-
 @serve.deployment
 @serve.ingress(app)
 class PersonaAgent(BaseAgent):
@@ -68,7 +53,7 @@ class PersonaAgent(BaseAgent):
         desc_key = f"{goal}:description"
         persona_description = redis_db.get(desc_key) or ""
 
-        embedding_input = await get_openai_embedding(prompt)
+        embedding_input = await get_embedding(prompt)
 
         search_similar_tweets = qdrant_client.search(
             collection_name=persona_collection,
