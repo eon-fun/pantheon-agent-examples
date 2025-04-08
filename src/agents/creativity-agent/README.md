@@ -1,6 +1,6 @@
 # Creativity Agent
 
-This agent acts as a Ray Serve service providing an HTTP interface to the Creatify API (https://creativity.ai/). It allows other services or agents within the PantheonAI ecosystem to generate AI shorts and perform lipsync tasks without needing direct access to the Creatify API keys or implementation details.
+This agent acts as a Ray Serve service providing an HTTP interface to the Creatify API. It allows other services or agents within the PantheonAI ecosystem to generate AI shorts and perform lipsync tasks without needing direct access to the Creatify API keys or implementation details.
 
 ## Features
 
@@ -15,16 +15,11 @@ This agent acts as a Ray Serve service providing an HTTP interface to the Creati
 
 1. **Environment Variables:** Create a `.env` file in the `agents/creativity-agent/` directory with the following content:
 
-   ```dotenv
    # .env file for Creativity Agent
+
    CREATIVITY_BASE_URL=https://api.creativity.ai/v1 # Optional: Override default
    CREATIVITY_API_ID="YOUR_CREATIVITY_API_ID_HERE"
    CREATIVITY_API_KEY="YOUR_CREATIVITY_API_KEY_HERE"
-
-   # Optional Ray Serve settings
-   # DEPLOYMENT_NAME=CreativityService
-   # NUM_REPLICAS=1
-   ```
 
    Replace placeholders with your actual Creatify API credentials.
 
@@ -33,34 +28,6 @@ This agent acts as a Ray Serve service providing an HTTP interface to the Creati
    ```bash
    cd agents/creativity-agent
    poetry install
-   ```
-
-## Running
-
-### Locally with Ray Serve
-
-1. Start Ray (if not already running): `ray start --head`
-2. Run the agent using Ray Serve CLI:
-
-   ```bash
-   serve run src.creativity_agent.ray_entrypoint:agent_builder
-   ```
-
-   The service will typically be available at `http://localhost:8000`.
-
-### With Docker
-
-1. Build the Docker image:
-   ```bash
-   docker build -t creativity-agent agents/creativity-agent/
-   ```
-2. Run the Docker container:
-   ```bash
-   # Make sure to pass your API keys as environment variables
-   docker run -p 8000:8000 \\
-     -e CREATIVITY_API_ID="YOUR_CREATIVITY_API_ID_HERE" \\
-     -e CREATIVITY_API_KEY="YOUR_CREATIVITY_API_KEY_HERE" \\
-     creativity-agent
    ```
 
 ## API Endpoints
