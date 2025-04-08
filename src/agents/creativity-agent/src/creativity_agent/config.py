@@ -14,16 +14,10 @@ class Settings(BaseSettings):
     creativity_api_id: str = Field(...)
     creativity_api_key: str = Field(...)
 
-    deployment_name: str = Field(default="CreativityService")
-    num_replicas: int = Field(default=1, ge=1)
-
     log_level: str = Field(default="INFO")
 
 
 @lru_cache()
 def get_settings() -> Settings:
-    try:
-        settings = Settings()
-        return settings
-    except Exception as e:
-        raise
+    settings = Settings()
+    return settings

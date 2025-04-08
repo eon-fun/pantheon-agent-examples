@@ -92,13 +92,10 @@ logger.info(f"Logger configured with level: {settings_for_logging.log_level.uppe
 app = FastAPI(
     title="Creativity Agent",
     description="HTTP interface for the Creatify API, running as a Ray Serve deployment.",
-    version=settings_for_logging.deployment_name
+
 )
 
-@serve.deployment(
-    name=settings_for_logging.deployment_name,
-    num_replicas=settings_for_logging.num_replicas,
-)
+@serve.deployment()
 @serve.ingress(app)
 class CreativityService:
     def __init__(self):
@@ -258,10 +255,7 @@ def agent_builder(args: Optional[Dict[str, Any]] = None) -> serve.handle.Deploym
     runtime_args = args or {}
     logger.info(f"Building CreativityService deployment with runtime args: {runtime_args}")
 
-    settings = get_settings()
-    name = runtime_args.get("deployment_name", settings.deployment_name)
-    num_replicas = runtime_args.get("num_replicas", settings.num_replicas)
-
-    logger.info(f"Binding deployment '{name}' with {num_replicas} replicas.")
+   
+    logger.info("Binding deployment 'CreativityService'...")
 
     return CreativityService.bind()
