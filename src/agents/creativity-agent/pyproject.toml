@@ -1,0 +1,28 @@
+[project]
+name = "creativity-agent"
+version = "0.1.0"
+description = "Ray Serve agent for interacting with the Creatify API"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+readme = "README.md"
+requires-python = ">=3.9,<4.0"
+dependencies = [
+    "fastapi>=0.110.0,<1.0.0",
+    "pydantic-settings>=2.0.0,<3.0.0",
+    "httpx>=0.25.0,<1.0.0",
+    "ray[serve]>=2.9.0,<3.0.0",
+    "uvicorn[standard]>=0.24.0,<1.0.0",
+    "python-dotenv>=1.0.0,<2.0.0",
+    "pydantic>=2.0.0,<3.0.0",
+]
+
+[tool.poetry]
+packages = [{ include = "creativity_agent", from = "src" }]
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pyarrow = "^15.0.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
