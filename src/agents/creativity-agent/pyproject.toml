@@ -29,7 +29,9 @@ target = "creativity_agent.ray_entrypoint:agent_builder"
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"
 pyarrow = "^15.0.0"
-ray = { version = ">=2.9.0,<3.0.0", extras = ["serve"] }
+ray = {extras = ["serve"], version = "^2.42.1"}
+
+
 
 [build-system]
 requires = ["poetry-core"]
