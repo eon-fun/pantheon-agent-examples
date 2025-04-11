@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 from solana_new_pairs.DB.manager.coin_manager import AlchemyBaseCoinManager
 from solana_new_pairs.DB.manager.dex_tools_manager import AlchemyDexToolsManager
 from solana_new_pairs.DB.sqlalchemy_database_manager import get_db
-
+from agents_tools_logger.main import log
 logger = logging.getLogger(__name__)
 
 
@@ -117,7 +117,7 @@ async def main():
         # print(await api.get_blockchains(order="asc", sort="name", page=1, pageSize=50))
         data = await api.get_pools(chain="solana", from_="2023-11-14T19:00:00", to="2023-11-14T23:00:00", order="asc",
                                    sort="creationTime", page=None, pageSize=None)
-        print(data)
+
     finally:
         await api.close()
 
@@ -133,7 +133,7 @@ async def collect_and_store_data(dex_tools_api: DextoolsAPIWrapper):
     chain = "solana"
     data = await dex_tools_api.get_pools(chain, from_=from_, to=to)
     if data:
-        print(f"Received {len(data.get('data', []))} pools in timeframe {from_} - {to}")
+        log.info(f"Received {len(data.get('data', []))} pools in timeframe {from_} - {to}")
         data = data.get('data').get('results')
         async for session in get_db():
             coin_manager = AlchemyBaseCoinManager(session)
@@ -144,7 +144,7 @@ async def collect_and_store_data(dex_tools_api: DextoolsAPIWrapper):
                     new_coin = await coin_manager.create_base_coin(token_address)
                     await dex_tools_manager.create_dex_tools_data(new_coin.id, pool_data)
                 except Exception as e:
-                    print(f"We already have dextools data for {new_coin.id}")
+                    log.warning(f"We already have dextools data for {new_coin.id}")
 
     else:
-        print("No data received")
+        log.info("No data received")

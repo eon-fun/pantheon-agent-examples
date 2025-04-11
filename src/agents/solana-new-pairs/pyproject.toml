@@ -9,7 +9,8 @@ dependencies = [
     "aiogram (>=3.19.0,<4.0.0)",
     "sqlmodel (>=0.0.24,<0.0.25)",
     "sqlalchemy (>=2.0.39,<3.0.0)",
-    "fastapi (>=0.115.12,<0.116.0)"
+    "fastapi (>=0.115.12,<0.116.0)",
+    "agents-tools-logger (>=0.1.0)",
 ]
 
 

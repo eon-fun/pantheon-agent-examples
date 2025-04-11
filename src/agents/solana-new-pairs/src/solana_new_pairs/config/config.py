@@ -31,9 +31,13 @@ class FastAPISettings(BaseSettings):
 
 
 class DexToolsSettings(BaseSettings):
-    api_key: str = ""
-    base_api_url: str = ""
+    api_key: str
+    plan : str = "trial"
     rate_limit_by_second: int = 1
+
+    class Config:
+        env_prefix = "DEX_"  # Все переменные должны начинаться с DEX_
+        env_file = ".env"  # Путь до .env файла (если нужен)
 
 class BotSettings(BaseSettings):
     bot_token: str

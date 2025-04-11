@@ -15,7 +15,7 @@ from base_agent.ray_entrypoint import BaseAgent
 
 async def main():
     await init_models()
-    dex_tools_api = DextoolsAPIWrapper(api_key="Kv7BZ8mwvU4vFoaaS8eEJ3UvmXG4x7Qk71uLesRF", plan="trial")
+    dex_tools_api = DextoolsAPIWrapper(api_key=config.dex_tools.api_key, plan=config.dex_tools.plan)
 
     async def start_collecting_data_from_dextools(dex_tools_api: DextoolsAPIWrapper):
 
