@@ -37,7 +37,7 @@ class TwitterCommentatorAgent(BaseAgent):
             timeout = random.randint(1800, 3600)
             await asyncio.sleep(timeout)
             print(f"Scheduled rerun for goal: {goal}")
-            await self.start_gorilla_marketing(goal)
+            await self.comment_users_tweet_posts(goal)
 
     async def comment_users_tweet_posts(
             self,
