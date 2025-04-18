@@ -1,6 +1,6 @@
 [project]
 name = "tw-amb-mention-answerer"
-version = "0.0.3"
+version = "0.0.4"
 description = "tw-amb-mention-answerer"
 authors = [{name = "k1llzzy",email = "gekachan04@gmail.com"}]
 readme = "README.md"
