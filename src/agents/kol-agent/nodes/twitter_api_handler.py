@@ -1,64 +1,57 @@
 import logging
-from models.raid_state import RaidState
+from models.raid_state import TwitterState
 from api.twitter import post_comment, post_reply, like_tweet, retweet
 from typing import Dict, Any
+import time
+from nodes.content_generator import generate_content_by_role
 
-
-def execute_pending_action(action: Dict[str, Any], bot_id: str) -> Dict[str, Any]:
+def twitter_retweet(state: TwitterState) -> TwitterState:
     """
-    Executes a pending action via the Twitter API
-
-    Args:
-        action (Dict[str, Any]): Action description
-        bot_id (str): Bot ID
-
-    Returns:
-        Dict[str, Any]: Action execution result
+    Performs a retweet
     """
-    action_type = action["type"]
-    tweet_id = action.get("tweet_id", action.get("target_id"))
-
-    if action_type == "comment":
-        content = action["content"]
-        print(f"Bot {bot_id} posts a comment to tweet {tweet_id}")
-        result = post_comment(tweet_id, content, bot_id)
-
-    elif action_type == "reply":
-        content = action["content"]
-        print(
-            f"Bot {bot_id} posts a reply to comment {tweet_id}")
-        result = post_reply(tweet_id, content, bot_id)
-
-    elif action_type == "like":
-        print(f"Bot {bot_id} likes tweet {tweet_id}")
-        result = like_tweet(tweet_id, bot_id)
-
-    elif action_type == "retweet":
-        print(f"Bot {bot_id} retweets {tweet_id}")
-        result = retweet(tweet_id, bot_id)
-
-    else:
-        print(f"Unknown action type: {action_type}")
-        result = {"status": "error",
-                  "message": f"Unknown action type: {action_type}"}
-
-    return result
+    time.sleep(state["action"]["delay"])
+    return {
+        "executed_actions": [
+            retweet(state["action"])
+        ]
+    }
 
 
-def twitter_api_handler(state: RaidState) -> RaidState:
+def twitter_like(state: TwitterState) -> TwitterState:
     """
-    LangGraph node for interacting with the Twitter API
-
-    Args:
-        state (OrionState): Current state
-
-    Returns:
-        OrionState: Updated state
+    Performs a like
     """
+    time.sleep(state["action"]["delay"])
+    return {
+        "executed_actions": [
+            like_tweet(state["action"])
+        ]
+    }
 
-    executed_actions = []
-    for bot in state["assigned_bots"]:
-        for action in bot["actions"]:                # Execute action
-            result = execute_pending_action(action, bot["id"])
-            executed_actions.append(result)
-    return {"executed_actions": executed_actions}
+
+def twitter_comment(state: TwitterState) -> TwitterState:
+    """
+    Performs a comment
+    """
+    content_comment = generate_content_by_role(
+            state["action"]["role"], "comment", state["tweet_content"])
+    time.sleep(state["action"]["delay"])
+    return {
+        "executed_actions": [
+            post_comment(state["action"], content_comment)
+        ]
+    }
+
+
+def twitter_reply(state: TwitterState) -> TwitterState:
+    """
+    Performs a reply to a comment
+    """
+    content_reply = generate_content_by_role(
+            state["action"]["role"], "reply", state["tweet_content"])
+    time.sleep(state["action"]["delay"])
+    return {
+        "executed_actions": [
+            post_reply(state["action"], content_reply)
+        ]
+    }

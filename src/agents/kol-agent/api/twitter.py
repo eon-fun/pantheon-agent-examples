@@ -1,6 +1,6 @@
 """
-Модуль с mock-функциями для работы с Twitter API.
-Этот модуль имитирует взаимодействие с Twitter API для тестирования.
+Module with mock functions for working with the Twitter API.
+This module simulates interaction with the Twitter API for testing.
 """
 import time
 import uuid
@@ -11,36 +11,32 @@ from typing import Dict, Any, List, Optional
 
 class TwitterClient:
     """
-    Mock-клиент для Twitter API
+    Mock client for Twitter API
     """
 
     def __init__(self, use_real_api: bool = False):
         """
-        Инициализация Twitter клиента
+        Initialization of the Twitter client
 
         Args:
-            use_real_api (bool): Флаг использования реального API (не используется в текущей реализации)
+            use_real_api (bool): Flag for using the real API (not used in the current implementation)
         """
         self.logger = logging.getLogger("twitter_api")
         self.use_real_api = use_real_api
-        self.logger.info("Инициализация Twitter клиента (mock)")
+        self.logger.info("Initialization of Twitter client (mock)")
 
     def post_tweet(self, content: str, bot_id: str) -> Dict[str, Any]:
         """
-        Публикация твита
+        Publishes a tweet
 
         Args:
-            content (str): Содержание твита
-            bot_id (str): ID бота, от имени которого публикуется твит
+            content (str): Tweet content
+            bot_id (str): Bot ID on whose behalf the tweet is published
 
         Returns:
-            Dict[str, Any]: Ответ API с информацией о твите
+            Dict[str, Any]: API response with tweet information
         """
-        self.logger.info(f"Бот {bot_id} публикует твит: {content[:50]}...")
-        # Имитация задержки сети
-        time.sleep(0.1)
-
-        # Генерация ID твита
+        # Generate tweet ID
         tweet_id = f"tweet_{uuid.uuid4().hex[:10]}"
 
         return {
@@ -51,143 +47,97 @@ class TwitterClient:
             "status": "success"
         }
 
-    def post_comment(self, tweet_id: str, content: str, bot_id: str) -> Dict[str, Any]:
+    def post_comment(self, action: Dict[str, Any], content: str) -> Dict[str, Any]:
         """
-        Публикация комментария к твиту
+        Publishes a comment to a tweet
 
         Args:
-            tweet_id (str): ID твита, к которому публикуется комментарий
-            content (str): Содержание комментария
-            bot_id (str): ID бота, от имени которого публикуется комментарий
+            tweet_id (str): Tweet ID to which the comment is published
+            content (str): Comment content
+            bot_id (str): Bot ID on whose behalf the comment is published
 
         Returns:
-            Dict[str, Any]: Ответ API с информацией о комментарии
+            Dict[str, Any]: API response with comment information
         """
-        self.logger.info(
-            f"Бот {bot_id} комментирует твит {tweet_id}: {content[:50]}...")
-        # Имитация задержки сети
-        time.sleep(0.1)
-
-        # Генерация ID комментария
+        # Generate comment ID
         comment_id = f"comment_{uuid.uuid4().hex[:10]}"
+        action["content"] = content
 
         return {
-            "id": comment_id,
-            "tweet_id": tweet_id,
-            "content": content,
-            "bot_id": bot_id,
+            "action": action,
             "created_at": time.time(),
             "status": "success"
         }
 
-    def post_reply(self, comment_id: str, content: str, bot_id: str) -> Dict[str, Any]:
+    def post_reply(self, action: Dict[str, Any], content: str) -> Dict[str, Any]:
         """
-        Публикация ответа на комментарий
+        Publishes a reply to a comment
 
         Args:
-            comment_id (str): ID комментария, на который публикуется ответ
-            content (str): Содержание ответа
-            bot_id (str): ID бота, от имени которого публикуется ответ
+            comment_id (str): Comment ID to which the reply is published
+            content (str): Reply content
+            bot_id (str): Bot ID on whose behalf the reply is published
 
         Returns:
-            Dict[str, Any]: Ответ API с информацией об ответе
+            Dict[str, Any]: API response with reply information
         """
-        self.logger.info(
-            f"Бот {bot_id} отвечает на комментарий {comment_id}: {content[:50]}...")
-        # Имитация задержки сети
-        time.sleep(0.1)
-
-        # Генерация ID ответа
+        # Generate reply ID
         reply_id = f"reply_{uuid.uuid4().hex[:10]}"
 
         return {
-            "id": reply_id,
-            "comment_id": comment_id,
-            "content": content,
-            "bot_id": bot_id,
+            "action": action,
             "created_at": time.time(),
             "status": "success"
         }
 
-    def like_tweet(self, tweet_id: str, bot_id: str) -> Dict[str, Any]:
+    def like_tweet(self, action: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Лайк твита
+        Likes a tweet
 
         Args:
-            tweet_id (str): ID твита для лайка
-            bot_id (str): ID бота, который ставит лайк
+            tweet_id (str): Tweet ID for like
+            bot_id (str): Bot ID that likes the tweet
 
         Returns:
-            Dict[str, Any]: Ответ API с информацией о действии
+            Dict[str, Any]: API response with action information
         """
-        self.logger.info(f"Бот {bot_id} лайкает твит {tweet_id}")
-        # Имитация задержки сети
-        time.sleep(0.05)
-
-        # Шанс ошибки 5%
-        # if random.random() < 0.05:
-        #     return {
-        #         "status": "error",
-        #         "message": "Rate limit exceeded"
-        #     }
-
         return {
             "status": "success",
-            "tweet_id": tweet_id,
-            "bot_id": bot_id,
-            "action": "like",
+            "action": action,
             "created_at": time.time()
         }
 
-    def retweet(self, tweet_id: str, bot_id: str) -> Dict[str, Any]:
+    def retweet(self, action: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Ретвит
+        Retweets
 
         Args:
-            tweet_id (str): ID твита для ретвита
-            bot_id (str): ID бота, который делает ретвит
+            tweet_id (str): Tweet ID to retweet
+            bot_id (str): Bot ID who retweets
 
         Returns:
-            Dict[str, Any]: Ответ API с информацией о действии
+            Dict[str, Any]: API response with action information
         """
-        self.logger.info(f"Бот {bot_id} ретвитит твит {tweet_id}")
-        # Имитация задержки сети
-        time.sleep(0.05)
-
-        # Шанс ошибки 5%
-        # if random.random() < 0.05:
-        #     return {
-        #         "status": "error",
-        #         "message": "Rate limit exceeded"
-        #     }
-
-        # Генерация ID ретвита
+        # Generate retweet ID
         retweet_id = f"rt_{uuid.uuid4().hex[:10]}"
 
         return {
             "status": "success",
-            "tweet_id": tweet_id,
-            "retweet_id": retweet_id,
-            "bot_id": bot_id,
-            "action": "retweet",
+            "action": action,
             "created_at": time.time()
         }
 
     def view_tweet(self, tweet_id: str, bot_id: str) -> Dict[str, Any]:
         """
-        Просмотр твита (для аналитики)
+        Views a tweet (for analytics)
 
         Args:
-            tweet_id (str): ID твита для просмотра
-            bot_id (str): ID бота, который просматривает твит
+            tweet_id (str): Tweet ID to view
+            bot_id (str): Bot ID who views the tweet
 
         Returns:
-            Dict[str, Any]: Ответ API с информацией о действии
+            Dict[str, Any]: API response with action information
         """
-        self.logger.debug(f"Бот {bot_id} просматривает твит {tweet_id}")
-        # Имитация задержки сети
-        time.sleep(0.02)
-
         return {
             "status": "success",
             "tweet_id": tweet_id,
@@ -198,23 +148,20 @@ class TwitterClient:
 
     def get_tweet(self, tweet_id: str) -> Dict[str, Any]:
         """
-        Получение информации о твите
+        Gets tweet information
 
         Args:
-            tweet_id (str): ID твита
+            tweet_id (str): Tweet ID
 
         Returns:
-            Dict[str, Any]: Информация о твите
+            Dict[str, Any]: Tweet information
         """
-        self.logger.debug(f"Получение информации о твите {tweet_id}")
-        # Имитация задержки сети
-        time.sleep(0.1)
 
         return {
             "id": tweet_id,
-            "content": f"Это мок-содержимое твита {tweet_id}",
+            "content": f"This is mock content of tweet {tweet_id}",
             "author_id": f"author_{tweet_id[-5:]}",
-            "created_at": time.time() - 3600,  # Час назад
+            "created_at": time.time() - 3600,  # One hour ago
             "like_count": random.randint(0, 100),
             "retweet_count": random.randint(0, 50),
             "reply_count": random.randint(0, 20)
@@ -222,21 +169,16 @@ class TwitterClient:
 
     def get_tweet_comments(self, tweet_id: str, limit: int = 20) -> List[Dict[str, Any]]:
         """
-        Получение комментариев к твиту
+        Gets comments to a tweet
 
         Args:
-            tweet_id (str): ID твита
-            limit (int): Максимальное количество комментариев
+            tweet_id (str): Tweet ID
+            limit (int): Maximum number of comments
 
         Returns:
-            List[Dict[str, Any]]: Список комментариев
+            List[Dict[str, Any]]: List of comments
         """
-        self.logger.debug(
-            f"Получение комментариев к твиту {tweet_id}, лимит {limit}")
-        # Имитация задержки сети
-        time.sleep(0.2)
-
-        # Генерация случайного количества комментариев
+        # Generate a random number of comments
         num_comments = min(random.randint(0, 30), limit)
 
         comments = []
@@ -247,7 +189,7 @@ class TwitterClient:
             comments.append({
                 "id": comment_id,
                 "tweet_id": tweet_id,
-                "content": f"Это мок-комментарий {i+1} к твиту {tweet_id}",
+                "content": f"This is mock comment {i+1} to tweet {tweet_id}",
                 "bot_id": bot_id,
                 "created_at": time.time() - random.randint(0, 3600)
             })
@@ -255,50 +197,50 @@ class TwitterClient:
         return comments
 
 
-# Удобные функции для использования вне класса
-def post_tweet(content: str, bot_id: str) -> Dict[str, Any]:
-    """Обертка для TwitterClient.post_tweet"""
+# Convenient functions for use outside the class
+def post_tweet(action: Dict[str, Any]) -> Dict[str, Any]:
+    """Wrapper for TwitterClient.post_tweet"""
     client = TwitterClient()
-    return client.post_tweet(content, bot_id)
+    return client.post_tweet(action["content"], action["bot_id"])
 
 
-def post_comment(tweet_id: str, content: str, bot_id: str) -> Dict[str, Any]:
-    """Обертка для TwitterClient.post_comment"""
+def post_comment(action: Dict[str, Any], content: str) -> Dict[str, Any]:
+    """Wrapper for TwitterClient.post_comment"""
     client = TwitterClient()
-    return client.post_comment(tweet_id, content, bot_id)
+    return client.post_comment(action, content)
 
 
-def post_reply(comment_id: str, content: str, bot_id: str) -> Dict[str, Any]:
-    """Обертка для TwitterClient.post_reply"""
+def post_reply(action: Dict[str, Any], content: str) -> Dict[str, Any]:
+    """Wrapper for TwitterClient.post_reply"""
     client = TwitterClient()
-    return client.post_reply(comment_id, content, bot_id)
+    return client.post_reply(action, content)
 
 
-def like_tweet(tweet_id: str, bot_id: str) -> Dict[str, Any]:
-    """Обертка для TwitterClient.like_tweet"""
+def like_tweet(action: Dict[str, Any]) -> Dict[str, Any]:
+    """Wrapper for TwitterClient.like_tweet"""
     client = TwitterClient()
-    return client.like_tweet(tweet_id, bot_id)
+    return client.like_tweet(action)
 
 
-def retweet(tweet_id: str, bot_id: str) -> Dict[str, Any]:
-    """Обертка для TwitterClient.retweet"""
+def retweet(action: Dict[str, Any]) -> Dict[str, Any]:
+    """Wrapper for TwitterClient.retweet"""
     client = TwitterClient()
-    return client.retweet(tweet_id, bot_id)
+    return client.retweet(action)
 
 
 def view_tweet(tweet_id: str, bot_id: str) -> Dict[str, Any]:
-    """Обертка для TwitterClient.view_tweet"""
+    """Wrapper for TwitterClient.view_tweet"""
     client = TwitterClient()
     return client.view_tweet(tweet_id, bot_id)
 
 
 def get_tweet(tweet_id: str) -> Dict[str, Any]:
-    """Обертка для TwitterClient.get_tweet"""
+    """Wrapper for TwitterClient.get_tweet"""
     client = TwitterClient()
     return client.get_tweet(tweet_id)
 
 
 def get_tweet_comments(tweet_id: str, limit: int = 20) -> List[Dict[str, Any]]:
-    """Обертка для TwitterClient.get_tweet_comments"""
+    """Wrapper for TwitterClient.get_tweet_comments"""
     client = TwitterClient()
     return client.get_tweet_comments(tweet_id, limit)

@@ -1,17 +1,34 @@
-from typing import TypedDict, List, Dict, Any, Optional
+from typing import TypedDict, List, Dict, Any, Optional, Annotated
+import operator
+from pydantic import BaseModel
 
 
+class Action(BaseModel):
+    type: str
+    bot_id: str
+    role: str
+    delay: float
+    content: str
+
+class ExecutedAction(BaseModel):
+    action: Action
+    status: str
+    created_at: float
 class RaidState(TypedDict):
-    status: Optional[str]  # "pending", "active", "completed", "failed", "generating_content", "action_pending", "waiting"
-
-    # Параметры задачи
+    # Task parameters
     target_tweet_id: str
-    topic: Optional[str] = "topic"
     bot_count: int
+    delay_minutes: float
 
-    # Состояние рейда
-    assigned_bots: Optional[List[Dict[str, Any]]] = list()  # список ботов с заданиями
-    executed_actions: Optional[List[Dict[str, Any]]] = list()  # выполненные действия
+    # Raid state
+    bots_actions: Optional[List[Action]]  # list of bots with tasks
+    executed_actions: Annotated[List[ExecutedAction], operator.add]  # executed actions
+    tweet_content: Optional[str]
 
-    # Метаданные
-    messages: Optional[List[Dict[str, Any]]] = list()  # история сообщений/действий
+    # Metadata
+    messages: Optional[List[Dict[str, Any]]]  # message/action history
+
+
+class TwitterState(TypedDict):
+    action: Action
+    target_tweet_id: str

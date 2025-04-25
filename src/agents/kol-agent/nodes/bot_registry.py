@@ -1,38 +1,17 @@
 from models.raid_state import RaidState
 from typing import List, Dict, Any
 import random
-
-
+from constants import LIKE_PERCENTAGE, COMMENT_PERCENTAGE, REPLY_PERCENTAGE, RETWEET_PERCENTAGE
+from api.twitter import get_tweet
+from nodes.content_generator import generate_content_by_role
 # Bot roles
 BOT_ROLES = [
-    "seed",        # Инициатор обсуждения
-    "advocate",    # Сторонник
-    "skeptic",     # Скептик
-    "expert",      # Эксперт
-    "moderator",   # Модератор
-    "enthusiast",  # Энтузиаст
-    "newbie"       # Новичок
+    "advocate",    # Advocate
+    "skeptic",     # Skeptic
+    "expert",      # Expert
+    "enthusiast",  # Enthusiast
+    "newbie"       # Newbie
 ]
-
-# Стили взаимодействия
-ENGAGEMENT_STYLES = [
-    "casual",      # Обычный пользователь
-    "careful",     # Осторожный пользователь
-    "enthusiast",  # Энтузиаст
-    "lurker",      # Наблюдатель
-    "strategic"    # Стратегический
-]
-
-# Матрица совместимости ролей (кто чаще всего взаимодействует с кем)
-ROLE_COMPATIBILITY = {
-    "seed": ["advocate", "skeptic", "newbie"],
-    "advocate": ["skeptic", "expert", "enthusiast"],
-    "skeptic": ["advocate", "expert", "moderator"],
-    "expert": ["advocate", "skeptic", "newbie", "moderator"],
-    "moderator": ["advocate", "skeptic", "expert"],
-    "enthusiast": ["advocate", "newbie", "seed"],
-    "newbie": ["expert", "advocate", "moderator"]
-}
 
 
 def get_available_bots(count: int) -> List[Dict[str, Any]]:
@@ -42,29 +21,76 @@ def get_available_bots(count: int) -> List[Dict[str, Any]]:
     Returns:
         List[Dict[str, Any]]: List of bots
     """
-    # В реальном приложении здесь был бы запрос к БД или API
+    # In a real application, there would be a request to the DB or API here
     # Here we create mock bots for testing
 
-    # Создаем "count" ботов с разными ролями и стилями
     # Create "count" bots with different roles and styles
     bots = []
     for i in range(count):
         bot_id = f"bot_{i+1}"
         role = random.choice(BOT_ROLES)
-        engagement_style = random.choice(ENGAGEMENT_STYLES)
 
-        # Создаем персону бота
+        # Create a bot persona
         bot = {
             "id": bot_id,
-            "name": f"Bot {i+1}",
-            "role": role,
-            "engagement_style": engagement_style,
-            "available": True,
+            "role": role
         }
 
         bots.append(bot)
 
     return bots
+
+
+def plan_raid_actions(bots: List[Dict[str, Any]], delay_minutes: float):
+    """
+    Plans actions for the raid
+
+    Args:
+        state (RaidState): Current state
+    """
+    import math
+    like_count = math.ceil(len(bots) * LIKE_PERCENTAGE)
+    comment_count = math.ceil(len(bots) * COMMENT_PERCENTAGE)
+    reply_count = math.ceil(len(bots) * REPLY_PERCENTAGE)
+    retweet_count = math.ceil(len(bots) * RETWEET_PERCENTAGE)
+
+    actions = []
+    for bot in bots[:like_count]:
+        delay = random.uniform(1, delay_minutes*60)
+        actions.append({
+            "type": "twitter_like",
+            "bot_id": bot["id"],
+            "role": bot["role"],
+            "delay": delay,
+            "content": None
+        })
+
+    for bot in bots[:comment_count]:
+        delay = random.uniform(1, delay_minutes*60)
+        actions.append({
+            "type": "twitter_comment",
+            "bot_id": bot["id"],
+            "role": bot["role"],
+            "delay": delay,
+            "content": None
+        })
+
+    # Shuffle bots for random distribution
+    random.shuffle(bots)
+
+    for bot in bots[:retweet_count]:
+        delay = random.uniform(1, delay_minutes*60)
+        actions.append({
+            "type": "twitter_retweet",
+            "bot_id": bot["id"],
+            "role": bot["role"],
+            "delay": delay,
+            "content": None
+        })
+
+    message = f"Planned actions for the raid: {like_count} likes, {comment_count} comments, {reply_count} replies"
+
+    return actions, message
 
 
 def bot_registry(state: RaidState):
@@ -86,22 +112,21 @@ def bot_registry(state: RaidState):
     # Update state depending on the task type
     # updated_state = state.copy()
     updated_state = {}
+    updated_state["tweet_content"] = get_tweet(state["target_tweet_id"])["content"]
+    updated_state["messages"] = state.get("messages", [])
 
-    # Add bots to the state
-    updated_state["assigned_bots"] = []
-    for bot in selected_bots:
-        # Add bot with an empty action list
-        updated_state["assigned_bots"].append({
-            **bot,
-            "actions": []
-        })
-    updated_state["messages"] = []
+    bots_actions, message = plan_raid_actions(
+        selected_bots, state["delay_minutes"])
+    updated_state["bots_actions"] = bots_actions
+
     # Add message to log
     updated_state["messages"].append({
         "type": "bot_assignment",
-        "content": f"Selected {len(selected_bots)} bots for raid task"
+        "content": f"Selected {len(selected_bots)} bots for the raid"
     })
-
-    updated_state["status"] = "pending"
+    updated_state["messages"].append({
+        "type": "bot_assignment",
+        "content": message
+    })
 
     return updated_state
