@@ -1,9 +1,12 @@
-from models.raid_state import RaidState
 from typing import List, Dict, Any
 import random
-from constants import LIKE_PERCENTAGE, COMMENT_PERCENTAGE, REPLY_PERCENTAGE, RETWEET_PERCENTAGE
-from api.twitter import get_tweet
-from nodes.content_generator import generate_content_by_role
+import math
+
+from kol_agent.models.raid_state import RaidState
+from kol_agent.config import get_config
+from kol_agent.api.twitter import get_tweet
+
+
 # Bot roles
 BOT_ROLES = [
     "advocate",    # Advocate
@@ -48,11 +51,12 @@ def plan_raid_actions(bots: List[Dict[str, Any]], delay_minutes: float):
     Args:
         state (RaidState): Current state
     """
-    import math
-    like_count = math.ceil(len(bots) * LIKE_PERCENTAGE)
-    comment_count = math.ceil(len(bots) * COMMENT_PERCENTAGE)
-    reply_count = math.ceil(len(bots) * REPLY_PERCENTAGE)
-    retweet_count = math.ceil(len(bots) * RETWEET_PERCENTAGE)
+
+    config = get_config()
+    like_count = math.ceil(len(bots) * config.LIKE_PERCENTAGE)
+    comment_count = math.ceil(len(bots) * config.COMMENT_PERCENTAGE)
+    reply_count = math.ceil(len(bots) * config.REPLY_PERCENTAGE)
+    retweet_count = math.ceil(len(bots) * config.RETWEET_PERCENTAGE)
 
     actions = []
     for bot in bots[:like_count]:

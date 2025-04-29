@@ -1,8 +1,5 @@
-import logging
-# from models.raid_state import ContentGeneratorState
 import random
-from api.twitter import get_tweet
-from typing import TypedDict, Dict, Any
+
 
 # Templates for different bot roles
 ROLE_TEMPLATES = {
