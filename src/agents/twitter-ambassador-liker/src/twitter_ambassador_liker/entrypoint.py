@@ -55,10 +55,11 @@ class TwitterLikerAgent(BaseAgent):
             search_queries = keywords + [f"#{theme}" for theme in themes]
 
             tweets_dict = {}
+            account_access_token = await TwitterAuthClient.get_access_token(my_username)
             for query in search_queries:
                 # Добавляем дополнительные параметры поиска
-                result = await search_tweets(
-                    f"{query} -filter:replies min_faves:20 lang:en"
+                result = await search_tweets(access_token=account_access_token,
+                    query=f"{query} -filter:replies min_faves:20 lang:en"
                 )
                 for tweet in result[:2]:  # Берем только первые 2 твита для каждого запроса
                     if tweet.id_str not in tweets_dict:
@@ -80,7 +81,7 @@ class TwitterLikerAgent(BaseAgent):
             for tweet in tweets_to_like[:randint(1, 3)]:  # Лайкаем случайное количество твитов
                 await asyncio.sleep(randint(10, 40))  # Случайная задержка
                 result = await set_like(
-                    token=await TwitterAuthClient.get_access_token(my_username),
+                    token=account_access_token,
                     tweet_id=tweet.id_str,
                     user_id=TwitterAuthClient.get_static_data(my_username)['id'],
                 )
