@@ -48,7 +48,8 @@ class TwitterCommentatorAgent(BaseAgent):
         db = get_redis_db()
         try:
             print(f'comment_users_tweet_posts_processor {my_username=} {project_username=}')
-            project_tweets = await fetch_user_tweets(project_username)
+            account_access_token=await TwitterAuthClient.get_access_token(my_username)
+            project_tweets = await fetch_user_tweets(access_token=account_access_token, username=project_username)
             commented_tweets_key = f'commented_tweets:{my_username}:{project_username}'
             commented_tweets_before = db.get_set(commented_tweets_key)
 
@@ -65,7 +66,7 @@ class TwitterCommentatorAgent(BaseAgent):
                 comment_text = await create_comment_to_post(tweet.full_text, my_username)
                 await ensure_delay_between_posts(my_username)
                 tweet_posted = await create_post(
-                    access_token=await TwitterAuthClient.get_access_token(my_username),
+                    access_token=account_access_token,
                     tweet_text=comment_text,
                     commented_tweet_id=tweet.id_str,
                 )
