@@ -2918,14 +2918,14 @@ reference = "pantheon"
 
 [[package]]
 name = "tweetscout-utils"
-version = "0.1.0"
+version = "0.0.3"
 description = "Package that consists utils for Tweetscout"
 optional = false
 python-versions = ">=3.10,<4"
 groups = ["main"]
 files = [
-    {file = "tweetscout_utils-0.1.0-py3-none-any.whl", hash = "sha256:db4f0c1665b7e337683ae0852086f8992d2783652e3e961e9cd89f30fca0d714"},
-    {file = "tweetscout_utils-0.1.0.tar.gz", hash = "sha256:3379bea940692f38008ab89cd71bab8224fca6dbda33a5c5a0802a3387257284"},
+    {file = "tweetscout_utils-0.0.3-py3-none-any.whl", hash = "sha256:b28001dbb23180ab8f85fb21c36fe83093e8dddd61c924411b07d908dd95f415"},
+    {file = "tweetscout_utils-0.0.3.tar.gz", hash = "sha256:c2ccc48ac9dc005e0ab501920580908ec9c1294e17719c3bb718817a726158c6"},
 ]
 
 [package.dependencies]
@@ -3489,4 +3489,4 @@ reference = "pantheon"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4"
-content-hash = "1b7b20a6ca0bacea7694a09b04111e56797ae9f2bf0a968ce2bd464e117664ab"
+content-hash = "3decf9d00a5d7887e0001f1c405c88e0488f21db2806c7819be934a9c0176776"
