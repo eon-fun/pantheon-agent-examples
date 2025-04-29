@@ -8,7 +8,7 @@ from base_agent.ray_entrypoint import BaseAgent
 
 from tweetscout_utils.main import fetch_user_tweets
 from twitter_ambassador_posting_agent.commands import _handle_regular_tweet, _handle_news_tweet, \
-    _fetch_quoted_tweet_ids, _find_tweet_for_quote, _handle_quote_tweet
+    _fetch_quoted_tweet_ids, _find_tweet_for_quote, _handle_quote_tweet, TwitterAuthClient
 from redis_client.main import get_redis_db, Post
 
 
@@ -48,6 +48,7 @@ class TwitterPostingAgent(BaseAgent):
             print(f'create_ambassador_tweet {username=} {keywords=} {themes=}')
             # Get user's previous posts
             my_tweets = db.get_user_posts(username)
+            account_access_token = await TwitterAuthClient.get_access_token(username)
 
             # If user has no tweets, create their first tweet
             if not my_tweets:
@@ -55,7 +56,7 @@ class TwitterPostingAgent(BaseAgent):
                 return await _handle_regular_tweet([], [], username, keywords, themes)
 
             # Get project tweets
-            project_tweets = await fetch_user_tweets(username)
+            project_tweets = await fetch_user_tweets(access_token=account_access_token,username=username)
 
             # Check if last tweet was a news summary
             if not my_tweets[-1].is_news_summary_tweet:
