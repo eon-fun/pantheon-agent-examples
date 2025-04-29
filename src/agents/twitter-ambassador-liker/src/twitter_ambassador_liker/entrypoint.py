@@ -51,40 +51,41 @@ class TwitterLikerAgent(BaseAgent):
         try:
             print(f'set_likes {my_username=} {keywords=} {themes=}')
 
-            # Формируем поисковые запросы из keywords и themes
-            search_queries = keywords + [f"#{theme}" for theme in themes]
-            search_terms = []
-            if keywords:
-                search_terms.extend(keywords)
-            if themes:
-                search_terms.extend([f"#{theme}" for theme in themes])
-
-            if len(search_terms) > 1:
-                main_query = f"({' OR '.join(search_terms)})"
-            else:
-                main_query = search_terms[0]
-
-            filters = [
-                "-filter:replies",
-                "min_faves:20",
-                "lang:en",
-                "-is:retweet",
-                "has:media"
-            ]
-            full_query = f"{main_query} {' '.join(filters)}"
-
-            tweets_dict = {}
-            account_access_token = await TwitterAuthClient.get_access_token(my_username)
-            for query in search_queries:
-                # Добавляем дополнительные параметры поиска
-                result = await search_tweets(access_token=account_access_token, query=full_query)
-                for tweet in result[:2]:  # Берем только первые 2 твита для каждого запроса
-                    if tweet.id_str not in tweets_dict:
-                        tweets_dict[tweet.id_str] = tweet
+            # Формируем поисковые запросы из keywords и themes, но по одному для каждого запроса
+            search_queries = keywords + themes
 
             # Получаем уже лайкнутые твиты
             user_likes_key = f'user_likes:{my_username}'
             likes_tweet_before = db.get_set(user_likes_key)
+
+            tweets_dict = {}
+            account_access_token = await TwitterAuthClient.get_access_token(my_username)
+
+            # Ограничиваем количество поисковых запросов, чтобы избежать превышения лимитов API
+            for query in search_queries[:3]:  # Берем только первые 3 ключевых слова/темы
+                try:
+                    # Для каждого ключевого слова формируем более простой запрос
+                    # Используем минимальный набор фильтров для снижения сложности запроса
+                    base_query = query
+                    if query in themes:
+                        base_query = f"#{query}"  # Добавляем # для тем
+
+                    simple_query = f"{base_query} -is:retweet lang:en has:media"
+
+                    result = await search_tweets(access_token=account_access_token, query=simple_query)
+
+                    # Фильтруем результаты после получения, вместо усложнения запроса
+                    filtered_tweets = [tweet for tweet in result
+                                       if tweet.favorite_count >= 20
+                                       and tweet.in_reply_to_status_id_str is None]
+
+                    for tweet in filtered_tweets[:2]:  # Берем только первые 2 твита для каждого запроса
+                        if tweet.id_str not in tweets_dict:
+                            tweets_dict[tweet.id_str] = tweet
+
+                except Exception as e:
+                    print(f"Error searching for {query}: {e}")
+                    continue
 
             tweets_to_like = [
                 tweet for tweet in tweets_dict.values()
