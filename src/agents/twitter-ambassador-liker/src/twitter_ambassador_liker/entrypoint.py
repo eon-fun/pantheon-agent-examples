@@ -53,14 +53,31 @@ class TwitterLikerAgent(BaseAgent):
 
             # Формируем поисковые запросы из keywords и themes
             search_queries = keywords + [f"#{theme}" for theme in themes]
+            search_terms = []
+            if keywords:
+                search_terms.extend(keywords)
+            if themes:
+                search_terms.extend([f"#{theme}" for theme in themes])
+
+            if len(search_terms) > 1:
+                main_query = f"({' OR '.join(search_terms)})"
+            else:
+                main_query = search_terms[0]
+
+            filters = [
+                "-filter:replies",
+                "min_faves:20",
+                "lang:en",
+                "-is:retweet",
+                "has:media"
+            ]
+            full_query = f"{main_query} {' '.join(filters)}"
 
             tweets_dict = {}
             account_access_token = await TwitterAuthClient.get_access_token(my_username)
             for query in search_queries:
                 # Добавляем дополнительные параметры поиска
-                result = await search_tweets(access_token=account_access_token,
-                    query=f"{query} -filter:replies min_faves:20 lang:en"
-                )
+                result = await search_tweets(access_token=account_access_token, query=full_query)
                 for tweet in result[:2]:  # Берем только первые 2 твита для каждого запроса
                     if tweet.id_str not in tweets_dict:
                         tweets_dict[tweet.id_str] = tweet
