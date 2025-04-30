@@ -53,26 +53,41 @@ class TwitterGorillaMarketingAgent(BaseAgent):
         try:
             print(f'start_gorilla_marketing {my_username=} {keywords=} {themes=}')
 
+            # Получаем токен доступа один раз для всех запросов
+            access_token = await TwitterAuthClient.get_access_token(my_username)
+
             # Формируем поисковые запросы
             search_queries = keywords + [f"#{theme}" for theme in themes]
 
             tweets_dict = {}
             for query in search_queries:
-                result = await search_tweets(
-                    f"{query} -filter:replies min_faves:5 lang:en"
-                )
-                for tweet in result[:3]:
-                    if tweet.id_str not in tweets_dict:
-                        tweets_dict[tweet.id_str] = tweet
+                try:
+                    # Правильно формируем запрос к Twitter API
+                    search_query = f"{query} -is:reply min_likes:5 lang:en"
+                    result = await search_tweets(
+                        access_token=access_token,
+                        query=search_query
+                    )
+
+                    for tweet in result[:3]:
+                        if tweet.id_str not in tweets_dict:
+                            tweets_dict[tweet.id_str] = tweet
+                except Exception as e:
+                    print(f"Error searching for query '{query}': {e}")
+                    continue  # Продолжаем с другими запросами
 
             # Получаем уже прокомментированные твиты
             commented_tweets_key = f'gorilla_marketing_answered:{my_username}'
-            commented_tweets_before = db.get_set(commented_tweets_key)
+            commented_tweets_before = db.get_set(commented_tweets_key) or set()
 
             tweets_to_comment = [
                 tweet for tweet in tweets_dict.values()
                 if tweet.id_str not in commented_tweets_before
             ]
+
+            if not tweets_to_comment:
+                print("No new tweets to comment on")
+                return False
 
             # Проверяем твиты на релевантность
             good_tweets = await check_tweets_for_gorilla_marketing(
@@ -82,9 +97,14 @@ class TwitterGorillaMarketingAgent(BaseAgent):
                 my_username=my_username
             )
 
+            if not good_tweets:
+                print("No relevant tweets found")
+                return False
+
             # Сортируем по количеству лайков
             good_tweets = sorted(good_tweets, key=lambda t: t.favorite_count, reverse=True)
 
+            comments_posted = False
             for tweet in good_tweets[:2]:  # Комментируем только 2 лучших твита
                 comment_text = await create_text_for_gorilla_marketing(
                     tweet_text=tweet.full_text,
@@ -95,7 +115,7 @@ class TwitterGorillaMarketingAgent(BaseAgent):
                 await ensure_delay_between_posts(my_username)
 
                 result = await create_post(
-                    access_token=await TwitterAuthClient.get_access_token(my_username),
+                    access_token=access_token,
                     tweet_text=comment_text,
                     commented_tweet_id=tweet.id_str,
                 )
@@ -110,9 +130,10 @@ class TwitterGorillaMarketingAgent(BaseAgent):
                     )
                     db.add_user_post(my_username, post)
                     db.add_to_set(commented_tweets_key, tweet.id_str)
-                    print(f'Posted comment for {tweet.full_text=} {comment_text=}')
+                    print(f'Posted comment for tweet {tweet.id_str}: {comment_text}')
+                    comments_posted = True
 
-            return True
+            return comments_posted
 
         except Exception as error:
             print(f'start_gorilla_marketing error: {my_username=} {error=}')

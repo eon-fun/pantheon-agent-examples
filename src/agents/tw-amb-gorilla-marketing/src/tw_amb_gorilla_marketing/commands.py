@@ -48,7 +48,19 @@ Guidelines:
 Tweet to respond to:
 {tweet_text}"""
 
-async def find_tweets_for_gorilla_marketing() -> Sequence[Tweet]:
+
+async def find_tweets_for_gorilla_marketing(access_token: str) -> Sequence[Tweet]:
+    """
+    Find relevant tweets for gorilla marketing campaign.
+    Searches for tweets related to specific terms that have at least 5 likes,
+    are in English, and aren't replies or from the nfinityAI account.
+
+    Args:
+        access_token: Twitter API token
+
+    Returns:
+        A list of unique tweets matching the search criteria
+    """
     tweets_dict = {}
     search_terms = [
         "decentralized AI",
@@ -58,13 +70,25 @@ async def find_tweets_for_gorilla_marketing() -> Sequence[Tweet]:
         "nfinityAI",
         "$NFNT",
     ]
+
     for search_term in search_terms:
-        result = await search_tweets(
-            f"{search_term} -filter:replies min_faves:5 lang:en -from:nfinityAI"
-        )
-        for tweet in result[:3]:
-            if tweet.id_str not in tweets_dict:
-                tweets_dict[tweet.id_str] = tweet
+        query = f"{search_term} min_retweets:5 lang:en -is:reply -from:nfinityAI"
+
+        try:
+            # Передаем access_token как обязательный параметр
+            result = await search_tweets(
+                access_token=access_token,
+                query=query
+            )
+
+            # Берем до трех твитов из результатов
+            for tweet in result[:3]:
+                if tweet.id_str not in tweets_dict:
+                    tweets_dict[tweet.id_str] = tweet
+
+        except Exception as e:
+            print(f"Error searching for '{search_term}': {e}")
+            continue  # Продолжаем с другими поисковыми запросами, если один не удался
 
     return list(tweets_dict.values())
 
