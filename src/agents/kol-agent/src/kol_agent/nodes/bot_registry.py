@@ -44,7 +44,7 @@ def get_available_bots(count: int) -> List[Dict[str, Any]]:
     return bots
 
 
-def plan_raid_actions(bots: List[Dict[str, Any]], delay_minutes: float):
+def plan_raid_actions(bots: List[Dict[str, Any]], raid_minutes: float):
     """
     Plans actions for the raid
 
@@ -60,7 +60,7 @@ def plan_raid_actions(bots: List[Dict[str, Any]], delay_minutes: float):
 
     actions = []
     for bot in bots[:like_count]:
-        delay = random.uniform(1, delay_minutes*60)
+        delay = random.uniform(1, raid_minutes*60)
         actions.append({
             "type": "twitter_like",
             "bot_id": bot["id"],
@@ -70,7 +70,7 @@ def plan_raid_actions(bots: List[Dict[str, Any]], delay_minutes: float):
         })
 
     for bot in bots[:comment_count]:
-        delay = random.uniform(1, delay_minutes*60)
+        delay = random.uniform(1, raid_minutes*60)
         actions.append({
             "type": "twitter_comment",
             "bot_id": bot["id"],
@@ -83,7 +83,7 @@ def plan_raid_actions(bots: List[Dict[str, Any]], delay_minutes: float):
     random.shuffle(bots)
 
     for bot in bots[:retweet_count]:
-        delay = random.uniform(1, delay_minutes*60)
+        delay = random.uniform(1, raid_minutes*60)
         actions.append({
             "type": "twitter_retweet",
             "bot_id": bot["id"],
@@ -120,7 +120,7 @@ def bot_registry(state: RaidState):
     updated_state["messages"] = state.get("messages", [])
 
     bots_actions, message = plan_raid_actions(
-        selected_bots, state["delay_minutes"])
+        selected_bots, state["raid_minutes"])
     updated_state["bots_actions"] = bots_actions
 
     # Add message to log

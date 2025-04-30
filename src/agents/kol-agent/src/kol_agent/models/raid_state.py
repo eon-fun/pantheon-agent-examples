@@ -18,7 +18,7 @@ class RaidState(TypedDict):
     # Task parameters
     target_tweet_id: str
     bot_count: int
-    delay_minutes: float
+    raid_minutes: float
 
     # Raid state
     bots_actions: Optional[List[Action]]  # list of bots with tasks

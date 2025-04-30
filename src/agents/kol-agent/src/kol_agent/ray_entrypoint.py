@@ -4,15 +4,15 @@ from base_agent.ray_entrypoint import BaseAgent
 from fastapi import FastAPI
 from ray import serve
 from langfuse.callback import CallbackHandler
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from kol_agent.raid import get_raid_workflow
 
 
 class InputModel(BaseModel):
-    target_tweet_id: str
-    bot_count: int
-    raid_minutes: float
+    target_tweet_id: str = Field(..., description="The ID of the tweet to raid", example="1719810222222222222")
+    bot_count: int = Field(..., description="The number of bots to use", example=10)
+    raid_minutes: float = Field(..., description="The number of minutes to raid", example=0.1)
 
 
 class OutputModel(BaseModel):
