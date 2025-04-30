@@ -41,10 +41,9 @@ class TwitterMentionsMonitor(BaseAgent):
             print(f'respond_to_mentions {my_username=} {keywords=} {hashtags=}')
             account_access_token = await TwitterAuthClient.get_access_token(my_username)
 
-            # mentions = await search_tweets(access_token=account_access_token, query=f"@{my_username}")
             mentions = await search_tweets(
                 access_token=account_access_token,
-                query=f"to:{my_username} -is:retweet"  # Находит твиты, адресованные пользователю, исключая ретвиты
+                query=f"@{my_username} -is:retweet"  # Находит упоминания пользователя, исключая ретвиты
             )
 
             responded_mentions_key = f'responded_mentions:{my_username}'
