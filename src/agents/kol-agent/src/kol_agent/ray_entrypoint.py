@@ -7,7 +7,10 @@ from langfuse.callback import CallbackHandler
 from pydantic import BaseModel, Field
 
 from kol_agent.raid import get_raid_workflow
+from kol_agent.config import get_config
 
+
+config = get_config()
 
 class InputModel(BaseModel):
     target_tweet_id: str = Field(..., description="The ID of the tweet to raid", example="1719810222222222222")
@@ -32,7 +35,11 @@ app = FastAPI(lifespan=lifespan)
 @serve.ingress(app)
 class KolAgent(BaseAgent):
     def __init__(self):
-        langfuse_handler = CallbackHandler()
+        langfuse_handler = CallbackHandler(
+            public_key = config.LANGFUSE_PUBLIC_KEY,
+            secret_key = config.LANGFUSE_SECRET_KEY,
+            host = config.LANGFUSE_HOST,
+        )
         workflow = get_raid_workflow()
         self.graph = workflow.compile().with_config({"callbacks": [langfuse_handler]})
 
