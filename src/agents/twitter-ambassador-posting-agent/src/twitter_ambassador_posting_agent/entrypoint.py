@@ -1,5 +1,3 @@
-import asyncio
-import random
 import re
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
@@ -29,15 +27,6 @@ class TwitterPostingAgent(BaseAgent):
     @app.post("/{goal}")
     async def handle(self, goal: str, plan: dict | None = None):
         await self.create_ambassador_tweet(goal)
-        if goal not in self.running_tasks or self.running_tasks[goal].done():
-            self.running_tasks[goal] = asyncio.create_task(self.schedule_next_run(goal))
-
-    async def schedule_next_run(self, goal: str):
-        while True:
-            timeout = random.randint(1800, 3600)
-            await asyncio.sleep(timeout)
-            print(f"Scheduled rerun for goal: {goal}")
-            await self.create_ambassador_tweet(goal)
 
     async def create_ambassador_tweet(self, goal: str) -> Post | None:
         username = goal.split(".")[0]
