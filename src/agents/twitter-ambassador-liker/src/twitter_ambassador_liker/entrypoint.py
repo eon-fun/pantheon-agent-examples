@@ -10,7 +10,7 @@ from base_agent.ray_entrypoint import BaseAgent
 from twitter_ambassador_utils.main import set_like, TwitterAuthClient
 from tweetscout_utils.main import search_tweets
 from redis_client.main import get_redis_db
-
+from loguru import logger
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -39,7 +39,7 @@ class TwitterLikerAgent(BaseAgent):
         themes = re.findall(r'[a-zA-Z0-9]+', goal.split(".")[2])
         db = get_redis_db()
         try:
-            print(f'set_likes {my_username=} {keywords=} {themes=}')
+            logger.info(f'set_likes {my_username=} {keywords=} {themes=}')
 
             # Формируем поисковые запросы из keywords и themes, но по одному для каждого запроса
             search_queries = keywords + themes
@@ -74,7 +74,7 @@ class TwitterLikerAgent(BaseAgent):
                             tweets_dict[tweet.id_str] = tweet
 
                 except Exception as e:
-                    print(f"Error searching for {query}: {e}")
+                    logger.error(f"Error searching for {query}: {e}")
                     continue
 
             tweets_to_like = [
@@ -83,7 +83,7 @@ class TwitterLikerAgent(BaseAgent):
             ]
 
             if not tweets_to_like:
-                print(f"Nothing to like {my_username=}. You have already liked every tweet")
+                logger.info(f"Nothing to like {my_username=}. You have already liked every tweet")
                 return False
 
             for tweet in tweets_to_like[:randint(1, 3)]:  # Лайкаем случайное количество твитов
@@ -94,13 +94,13 @@ class TwitterLikerAgent(BaseAgent):
                     user_id=TwitterAuthClient.get_static_data(my_username)['id'],
                 )
                 if result.get('data', {}).get('liked'):
-                    print(f'Liked tweet: {my_username=} {tweet.id_str=}')
+                    logger.info(f'Liked tweet: {my_username=} {tweet.id_str=}')
                     db.add_to_set(user_likes_key, tweet.id_str)
 
             return True
 
         except Exception as error:
-            print(f'set_likes error: {my_username=} {error=}')
+            logger.error(f'set_likes error: {my_username=} {error=}')
             return False
 
 

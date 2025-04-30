@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from ray import serve
 from base_agent.ray_entrypoint import BaseAgent
-
+from loguru import logger
 from twitter_ambassador_utils.main import TwitterAuthClient, create_post
 from tweetscout_utils.main import search_tweets
 from tw_amb_gorilla_marketing.commands import check_tweets_for_gorilla_marketing, \
@@ -40,7 +40,7 @@ class TwitterGorillaMarketingAgent(BaseAgent):
         themes = re.findall(r'[a-zA-Z0-9]+', goal.split(".")[2])
         db = get_redis_db()
         try:
-            print(f'start_gorilla_marketing {my_username=} {keywords=} {themes=}')
+            logger.info(f'start_gorilla_marketing {my_username=} {keywords=} {themes=}')
 
             # Получаем токен доступа один раз для всех запросов
             access_token = await TwitterAuthClient.get_access_token(my_username)
@@ -60,7 +60,7 @@ class TwitterGorillaMarketingAgent(BaseAgent):
                         if tweet.id_str not in tweets_dict:
                             tweets_dict[tweet.id_str] = tweet
                 except Exception as e:
-                    print(f"Error searching for query '{query}': {e}")
+                    logger.error(f"Error searching for query '{query}': {e}")
                     continue  # Продолжаем с другими запросами
 
             # Получаем уже прокомментированные твиты
@@ -73,7 +73,7 @@ class TwitterGorillaMarketingAgent(BaseAgent):
             ]
 
             if not tweets_to_comment:
-                print("No new tweets to comment on")
+                logger.info("No new tweets to comment on")
                 return False
 
             # Проверяем твиты на релевантность
@@ -85,7 +85,7 @@ class TwitterGorillaMarketingAgent(BaseAgent):
             )
 
             if not good_tweets:
-                print("No relevant tweets found")
+                logger.info("No relevant tweets found")
                 return False
 
             # Сортируем по количеству лайков
@@ -117,13 +117,13 @@ class TwitterGorillaMarketingAgent(BaseAgent):
                     )
                     db.add_user_post(my_username, post)
                     db.add_to_set(commented_tweets_key, tweet.id_str)
-                    print(f'Posted comment for tweet {tweet.id_str}: {comment_text}')
+                    logger.info(f'Posted comment for tweet {tweet.id_str}: {comment_text}')
                     comments_posted = True
 
             return comments_posted
 
         except Exception as error:
-            print(f'start_gorilla_marketing error: {my_username=} {error=}')
+            logger.error(f'start_gorilla_marketing error: {my_username=} {error=}')
             return False
 
 

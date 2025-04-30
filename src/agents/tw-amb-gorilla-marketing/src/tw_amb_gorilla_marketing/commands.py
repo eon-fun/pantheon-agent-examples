@@ -3,7 +3,7 @@ from typing import Sequence
 from twitter_ambassador_utils.main import set_like, TwitterAuthClient
 from tweetscout_utils.main import Tweet, search_tweets
 from send_openai_request.main import send_openai_request
-
+from loguru import logger
 
 PROMPT_FOR_CHECK = """You are a technology and Web3 enthusiast focused on AI and blockchain innovations.
 
@@ -87,7 +87,7 @@ async def find_tweets_for_gorilla_marketing(access_token: str) -> Sequence[Tweet
                     tweets_dict[tweet.id_str] = tweet
 
         except Exception as e:
-            print(f"Error searching for '{search_term}': {e}")
+            logger.error(f"Error searching for '{search_term}': {e}")
             continue  # Продолжаем с другими поисковыми запросами, если один не удался
 
     return list(tweets_dict.values())
@@ -121,7 +121,7 @@ async def check_tweets_for_gorilla_marketing(
         if 'true' in result.lower():
             good_tweets.append(tweet)
 
-    print(f'Count good tweets {len(good_tweets)=} {good_tweets}')
+    logger.info(f'Count good tweets {len(good_tweets)=} {good_tweets}')
     return good_tweets
 
 

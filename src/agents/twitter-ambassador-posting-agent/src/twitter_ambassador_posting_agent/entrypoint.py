@@ -8,7 +8,7 @@ from tweetscout_utils.main import fetch_user_tweets
 from twitter_ambassador_posting_agent.commands import _handle_regular_tweet, _handle_news_tweet, \
     _fetch_quoted_tweet_ids, _find_tweet_for_quote, _handle_quote_tweet, TwitterAuthClient
 from redis_client.main import get_redis_db, Post
-
+from loguru import logger
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -26,6 +26,7 @@ class TwitterPostingAgent(BaseAgent):
 
     @app.post("/{goal}")
     async def handle(self, goal: str, plan: dict | None = None):
+        logger.info(f'Creating posting agent with goal: {goal}')
         await self.create_ambassador_tweet(goal)
 
     async def create_ambassador_tweet(self, goal: str) -> Post | None:
@@ -34,17 +35,18 @@ class TwitterPostingAgent(BaseAgent):
         themes = re.findall(r'[a-zA-Z0-9]+', goal.split(".")[2])
         db = get_redis_db()
         try:
-            print(f'create_ambassador_tweet {username=} {keywords=} {themes=}')
-            # Get user's previous posts
+            logger.info(f'Username: {username=}, keywords: {keywords=}, themes: {themes=}')
+
+            logger.info(f'Fetching user\'s previous tweets for user: {username}')
             my_tweets = db.get_user_posts(username)
             account_access_token = await TwitterAuthClient.get_access_token(username)
 
             # If user has no tweets, create their first tweet
             if not my_tweets:
-                print(f"No previous tweets found for {username}, creating first tweet")
+                logger.info(f"No previous tweets found for {username}, creating first tweet")
                 return await _handle_regular_tweet([], [], username, keywords, themes)
 
-            # Get project tweets
+            logger.info(f'Fetching project tweets for user: {username}')
             project_tweets = await fetch_user_tweets(access_token=account_access_token,username=username)
 
             # Check if last tweet was a news summary
@@ -63,8 +65,8 @@ class TwitterPostingAgent(BaseAgent):
             return await _handle_regular_tweet(project_tweets, my_tweets, username, keywords, themes)
 
         except Exception as error:
-            print(f'create_ambassador_tweet error: {username=} {type(error)=} {error=}')
-            raise error
+            logger.error(f'create_ambassador_tweet error: {username=} {type(error)=} {error=}')
+            raise 
 
 
 def get_agent(agent_args: dict):

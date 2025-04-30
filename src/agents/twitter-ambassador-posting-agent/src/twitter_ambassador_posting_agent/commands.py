@@ -7,6 +7,7 @@ from redis_client.main import get_redis_db, Post
 from twitter_ambassador_utils.main import create_post, TwitterAuthClient
 from tweetscout_utils.main import search_tweets
 from send_openai_request.main import send_openai_request
+from loguru import logger
 
 db = get_redis_db()
 
@@ -138,7 +139,7 @@ Who needs thumbs? Unleash the hyper-advanced AI bot and watch it fetch not just 
         f"{text}"
     )
     text = await send_openai_request(messages=messages, temperature=1.0)
-    print(f'Tweet validating 2 {text}')
+    logger.info(f'Tweet validating 2 {text}')
     return text
 
 
@@ -173,7 +174,7 @@ async def format_text(text: str) -> str:
         )
         text = await send_openai_request(messages=messages, temperature=1.0)
 
-        print(f'Tweet validating 1 {text}')
+        logger.info(f'Tweet validating 1 {text}')
         text = await add_blank_lines(text)
 
         text = re.sub(r'#\w+', '', text)
@@ -199,7 +200,7 @@ async def _handle_quote_tweet(project_tweet: Tweet, my_tweets: list[Post], usern
         quote_tweet_id=project_tweet.id_str,
     )
     if result is None or 'data' not in result or 'id' not in result['data']:
-        print(f"create_post did not return the expected data: {result}")
+        logger.info(f"create_post did not return the expected data: {result}")
         return
 
     post = Post(
@@ -214,9 +215,15 @@ async def _handle_quote_tweet(project_tweet: Tweet, my_tweets: list[Post], usern
     return post
 
 
-async def _handle_regular_tweet(project_tweets: list[Tweet], my_tweets: list[Post], username: str, keywords: list[str],
-                                themes: list[str]) -> Post:
+async def _handle_regular_tweet(
+        project_tweets: list[Tweet], 
+        my_tweets: list[Post], 
+        username: str, 
+        keywords: list[str],
+        themes: list[str],
+    ) -> Post | None:
     """Regular tweet about project"""
+    logger.info(f'Fetching tweet text for keyword: {keywords}, themes: {themes}')
     tweet_text = await _create_tweet(
         project_tweets=[tweet.full_text for tweet in project_tweets],
         my_tweets=[tweet.text for tweet in my_tweets],
@@ -225,12 +232,17 @@ async def _handle_regular_tweet(project_tweets: list[Tweet], my_tweets: list[Pos
         themes=themes
     )
 
+    logger.info(f'Fetching access token for twitter')
+    access_token = await TwitterAuthClient.get_access_token(username)
+    logger.info(f'Fetched access token successfully')
+
+    logger.info(f'Trying to create a post with tweet text: {tweet_text}')
     result = await create_post(
-        access_token=await TwitterAuthClient.get_access_token(username),
+        access_token=access_token,
         tweet_text=tweet_text,
     )
     if result is None or 'data' not in result or 'id' not in result['data']:
-        print(f"create_post did not return the expected data: {result}")
+        logger.error(f"create_post did not return the expected data: {result}")
         return
 
     post = Post(
@@ -239,6 +251,7 @@ async def _handle_regular_tweet(project_tweets: list[Tweet], my_tweets: list[Pos
         sender_username=username,
         timestamp=int(time.time())
     )
+    logger.info(f'Storing user post to DB')
     db.add_user_post(username, post)
     db.save_tweet_link('create_ambassador_tweet', result['data']['id'])
     return post
@@ -266,7 +279,7 @@ async def _handle_news_tweet(my_tweets: list[Post], username: str, keywords: lis
             all_news_tweets.extend(
                 tweet.full_text for tweet in filtered_news[:2])  # Берем только 2 твита для каждого запроса
         except Exception as e:
-            print(f"Error searching for news with keyword {keyword}: {e}")
+            logger.error(f"Error searching for news with keyword {keyword}: {e}")
             continue
 
     # Обрабатываем темы (хэштеги)
@@ -286,12 +299,12 @@ async def _handle_news_tweet(my_tweets: list[Post], username: str, keywords: lis
             all_news_tweets.extend(
                 tweet.full_text for tweet in filtered_news[:2])  # Берем только 2 твита для каждого запроса
         except Exception as e:
-            print(f"Error searching for news with theme #{theme}: {e}")
+            logger.error(f"Error searching for news with theme #{theme}: {e}")
             continue
 
     # Если не нашли новостей, вернем None
     if not all_news_tweets:
-        print("No news tweets found")
+        logger.info("No news tweets found")
         return None
 
     tweet_text = await _create_news_tweet(
@@ -307,7 +320,7 @@ async def _handle_news_tweet(my_tweets: list[Post], username: str, keywords: lis
         tweet_text=tweet_text,
     )
     if result is None or 'data' not in result or 'id' not in result['data']:
-        print(f"create_post did not return the expected data: {result}")
+        logger.info(f"create_post did not return the expected data: {result}")
         return None
 
     post = Post(
@@ -330,7 +343,7 @@ async def _create_tweet(
         username: str,
         prompt: str = PROMPT_FOR_TWEET
 ) -> str:
-    print('generate tweet')
+    logger.info('generate tweet')
     formatted_prompt = prompt.format(
         project_tweets=str(project_tweets),
         my_tweets=str(my_tweets)
@@ -339,7 +352,7 @@ async def _create_tweet(
         {"role": "system", "content": formatted_prompt},
     ]
     result = await send_openai_request(messages=messages, temperature=1.0)
-    print(f'Created prompt: {prompt=}')
+    logger.info(f'Created prompt: {prompt=}')
     return await format_text(result)
 
 
@@ -351,7 +364,7 @@ async def _create_quoted_tweet(
         username: str,
         prompt: str = PROMPT_FOR_QUOTED_TWEET
 ) -> str:
-    print(f'generate quote tweet: {tweet_for_quote=}')
+    logger.info(f'generate quote tweet: {tweet_for_quote=}')
     formatted_prompt = prompt.format(
         tweet_for_quote=tweet_for_quote,
         my_tweets=str(my_tweets)
@@ -360,7 +373,7 @@ async def _create_quoted_tweet(
         {"role": "system", "content": formatted_prompt},
     ]
     result = await send_openai_request(messages=messages, temperature=1.0)
-    print(f'Created prompt: {prompt=}')
+    logger.info(f'Created prompt: {prompt=}')
     return await format_text(result)
 
 
@@ -372,7 +385,7 @@ async def _create_news_tweet(
         username: str,
         prompt: str = PROMPT_FOR_NEWS_TWEET
 ) -> str:
-    print(f'_create_news_tweet: {news_tweets=}')
+    logger.info(f'_create_news_tweet: {news_tweets=}')
     formatted_prompt = prompt.format(
         news_tweets=str(news_tweets),
         my_tweets=str(my_tweets)
@@ -381,7 +394,7 @@ async def _create_news_tweet(
         {"role": "system", "content": formatted_prompt},
     ]
     result = await send_openai_request(messages=messages, temperature=1.0)
-    print(f'Created prompt: {prompt=}')
+    logger.info(f'Created prompt: {prompt=}')
     return await format_text(result)
 
 

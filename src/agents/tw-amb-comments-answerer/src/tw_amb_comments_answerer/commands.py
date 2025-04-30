@@ -1,5 +1,5 @@
 import re
-
+from loguru import logger
 from send_openai_request.main import send_openai_request
 
 PROMPT_FOR_COMMENT = """DONT USE HASHTAG You are a technology community manager. Your task is to create a reply to the conversation using provided knowledge base context.
@@ -96,7 +96,7 @@ Who needs thumbs? Unleash the hyper-advanced AI bot and watch it fetch not just 
         f"{text}"
     )
     text = await send_openai_request(messages=messages, temperature=1.0)
-    print(f'Tweet validating 2 {text}')
+    logger.info(f'Tweet validating 2 {text}')
     return text
 
 
@@ -131,7 +131,7 @@ async def format_text(text: str) -> str:
         )
         text = await send_openai_request(messages=messages, temperature=1.0)
 
-        print(f'Tweet validating 1 {text}')
+        logger.info(f'Tweet validating 1 {text}')
         text = await add_blank_lines(text)
 
         text = re.sub(r'#\w+', '', text)
@@ -175,5 +175,5 @@ async def create_comment_to_comment(
         }
     ]
     result = await send_openai_request(messages=messages, temperature=1.0)
-    print(f'Created comment with prompt: {formatted_prompt}')
+    logger.info(f'Created comment with prompt: {formatted_prompt}')
     return await format_text(result)

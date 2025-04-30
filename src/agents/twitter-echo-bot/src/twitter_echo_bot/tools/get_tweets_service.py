@@ -10,7 +10,7 @@ from twitter_echo_bot.config.promts import get_prompt_for_create_user_prompt
 from agents_tools_logger.main import log
 from send_openai_request.main import send_openai_request
 from tweetscout_utils.main import fetch_user_tweets, Tweet
-
+from loguru import logger
 
 class TwitterCollectorClient:
     async def get_new_tweets(self, twitter_handle: str) -> List[Tweet]:
@@ -19,7 +19,7 @@ class TwitterCollectorClient:
         В реальной реализации здесь будет вызов API Twitter.
         """
         # TODO: Реализовать получение твитов через API Twitter.
-        print(f"Получаем твиты для {twitter_handle}")
+        logger.info(f"Получаем твиты для {twitter_handle}")
         tweets = await fetch_user_tweets(twitter_handle)
         log.info(f"Получено {len(tweets)} твитов для {twitter_handle}")
         return tweets
