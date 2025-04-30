@@ -38,7 +38,12 @@ class KolAgent(BaseAgent):
 
     @app.post("/{goal}")
     async def handle(self, goal: str, input: InputModel, plan: dict | None = None):
-        await self.graph.ainvoke(input.target_tweet_id, input.bot_count, input.raid_minutes)
+        state = {
+            "target_tweet_id": input.target_tweet_id,
+            "bot_count": input.bot_count,
+            "raid_minutes": input.raid_minutes,
+        }
+        await self.graph.ainvoke(state)
         return OutputModel(success=True, message="Raid started")
 
 
