@@ -17,6 +17,10 @@ class InputModel(BaseModel):
     bot_count: int = Field(..., description="The number of bots to use", example=10)
     raid_minutes: float = Field(..., description="The number of minutes to raid", example=0.1)
 
+    public_key: str = Field(..., description="The public key of the Langfuse project", example="1234567890")
+    secret_key: str = Field(..., description="The secret key of the Langfuse project", example="1234567890")
+    host: str = Field(..., description="The host of the Langfuse project", example="https://langfuse.dev.pntheon.ai")
+
 
 class OutputModel(BaseModel):
     success: bool
@@ -35,23 +39,23 @@ app = FastAPI(lifespan=lifespan)
 @serve.ingress(app)
 class KolAgent(BaseAgent):
     def __init__(self):
-        langfuse_handler = CallbackHandler(
-            public_key = config.LANGFUSE_PUBLIC_KEY,
-            secret_key = config.LANGFUSE_SECRET_KEY,
-            host = config.LANGFUSE_HOST,
-        )
         workflow = get_raid_workflow()
-        self.graph = workflow.compile().with_config({"callbacks": [langfuse_handler]})
+        self.graph = workflow.compile()
 
     @app.post("/{goal}")
     async def handle(self, goal: str, input: InputModel, plan: dict | None = None):
+        langfuse_handler = CallbackHandler(
+            public_key = input.public_key,
+            secret_key = input.secret_key,
+            host = input.host,
+        )
         state = {
             "target_tweet_id": input.target_tweet_id,
             "bot_count": input.bot_count,
             "raid_minutes": input.raid_minutes,
         }
-        await self.graph.ainvoke(state)
-        return OutputModel(success=True, message="Raid started")
+        data = await self.graph.ainvoke(state, callbacks=[langfuse_handler])
+        return OutputModel(success=True, message=str(data))
 
 
 
