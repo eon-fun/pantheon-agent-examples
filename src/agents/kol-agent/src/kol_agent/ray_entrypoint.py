@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from base_agent.ray_entrypoint import BaseAgent
 from fastapi import FastAPI
 from ray import serve
-from langfuse.callbacks import LangfuseHandler
+from langfuse.callback import CallbackHandler
 from pydantic import BaseModel
 
 from kol_agent.raid import get_raid_workflow
@@ -32,7 +32,7 @@ app = FastAPI(lifespan=lifespan)
 @serve.ingress(app)
 class ExampleAgent(BaseAgent):
     def __init__(self):
-        langfuse_handler = LangfuseHandler()
+        langfuse_handler = CallbackHandler()
         workflow = get_raid_workflow()
         self.graph = workflow.compile().with_config({"callbacks": [langfuse_handler]})
 
