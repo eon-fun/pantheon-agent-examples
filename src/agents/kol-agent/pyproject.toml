@@ -37,7 +37,7 @@ base-agent = {source = "pantheon"}
 tweetscout-utils = {source = "pantheon"}
 
 [project.entry-points."agent.entrypoint"]
-target = "kol_agent.ray_entrypoint:app"
+target = "kol_agent.ray_entrypoint:get_agent"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"

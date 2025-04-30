@@ -30,7 +30,7 @@ app = FastAPI(lifespan=lifespan)
 
 @serve.deployment
 @serve.ingress(app)
-class ExampleAgent(BaseAgent):
+class KolAgent(BaseAgent):
     def __init__(self):
         langfuse_handler = CallbackHandler()
         workflow = get_raid_workflow()
@@ -43,9 +43,8 @@ class ExampleAgent(BaseAgent):
 
 
 
-# serve run entrypoint:app
-app = ExampleAgent.bind()
-
+def get_agent(agent_args: dict):
+    return KolAgent.bind(**agent_args)
 
 if __name__ == "__main__":
     serve.run(app, route_prefix="/")
