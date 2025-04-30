@@ -50,8 +50,9 @@ class TwitterMentionsMonitor(BaseAgent):
         db = get_redis_db()
         try:
             print(f'respond_to_mentions {my_username=} {keywords=} {hashtags=}')
+            account_access_token = await TwitterAuthClient.get_access_token(my_username)
 
-            mentions = await search_tweets(query=f"@{my_username}")
+            mentions = await search_tweets(access_token=account_access_token, query=f"@{my_username}")
 
             responded_mentions_key = f'responded_mentions:{my_username}'
             previously_responded = db.get_set(responded_mentions_key) or set()
@@ -67,7 +68,7 @@ class TwitterMentionsMonitor(BaseAgent):
 
             for mention in new_mentions:
                 if await check_mention_needs_reply(mention.full_text, my_username):
-                    conversation = await get_conversation_from_tweet(mention)
+                    conversation = await get_conversation_from_tweet(access_token=account_access_token, tweet=mention)
                     conversation_text = create_conversation_string(conversation)
 
                     reply_text = await create_mention_reply(
@@ -80,7 +81,7 @@ class TwitterMentionsMonitor(BaseAgent):
                     await ensure_delay_between_posts(my_username, delay=120)
 
                     tweet_posted = await create_post(
-                        access_token=await TwitterAuthClient.get_access_token(my_username),
+                        access_token=account_access_token,
                         tweet_text=reply_text,
                         commented_tweet_id=mention.id_str,
                     )
