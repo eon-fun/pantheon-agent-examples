@@ -57,16 +57,14 @@ class TwitterGorillaMarketingAgent(BaseAgent):
             access_token = await TwitterAuthClient.get_access_token(my_username)
 
             # Формируем поисковые запросы
-            search_queries = keywords + [f"#{theme}" for theme in themes]
+            search_queries = keywords + themes  # Не добавляем # к темам
 
             tweets_dict = {}
             for query in search_queries:
                 try:
-                    # Правильно формируем запрос к Twitter API
-                    search_query = f"{query} -is:reply min_likes:5 lang:en"
                     result = await search_tweets(
                         access_token=access_token,
-                        query=search_query
+                        query=query
                     )
 
                     for tweet in result[:3]:
