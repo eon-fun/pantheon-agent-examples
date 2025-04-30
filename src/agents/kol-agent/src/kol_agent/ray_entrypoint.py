@@ -54,7 +54,7 @@ class KolAgent(BaseAgent):
             "bot_count": input.bot_count,
             "raid_minutes": input.raid_minutes,
         }
-        data = await self.graph.ainvoke(state, callbacks=[langfuse_handler])
+        data = await self.graph.ainvoke(state, config={"callbacks": [langfuse_handler]})
         return OutputModel(success=True, message=str(data))
 
 
