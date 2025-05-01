@@ -1,5 +1,5 @@
 [tool.bumpversion]
-current_version = "0.0.21"
+current_version = "0.0.22"
 message = "Bump version of twitter-ambassador-posting-agent: {current_version} → {new_version}"
 commit = false
 tag = false

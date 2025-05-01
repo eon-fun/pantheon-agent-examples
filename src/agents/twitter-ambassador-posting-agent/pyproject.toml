@@ -1,6 +1,6 @@
 [project]
 name = "twitter-ambassador-posting-agent"
-version = "0.0.21"
+version = "0.0.22"
 description = "TwitterAmbassadorPostingAgent"
 authors = [{name = "k1llzzy",email = "gekachan04@gmail.com"}]
 readme = "README.md"
