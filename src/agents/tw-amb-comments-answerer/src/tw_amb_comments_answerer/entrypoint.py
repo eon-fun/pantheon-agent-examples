@@ -69,7 +69,7 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
 
             for tweet in tweets_to_comment:
                 if await check_answer_is_needed(tweet.full_text, my_username=my_username):
-                    conversation = await get_conversation_from_tweet(access_token=account_access_token, tweet=tweet)
+                    conversation = await get_conversation_from_tweet(tweet=tweet)
                     comment_text = await create_comment_to_comment(
                         comment_text=create_conversation_string(conversation),
                         keywords=keywords,

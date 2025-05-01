@@ -59,7 +59,7 @@ class TwitterMentionsMonitor(BaseAgent):
 
             for mention in new_mentions:
                 if await check_mention_needs_reply(mention.full_text, my_username):
-                    conversation = await get_conversation_from_tweet(access_token=account_access_token, tweet=mention)
+                    conversation = await get_conversation_from_tweet(tweet=mention)
                     conversation_text = create_conversation_string(conversation)
 
                     reply_text = await create_mention_reply(

@@ -37,7 +37,7 @@ class TwitterCommentatorAgent(BaseAgent):
         try:
             print(f'Comment user tweets with username: {my_username=} project: {project_username=}')
             account_access_token=await TwitterAuthClient.get_access_token(my_username)
-            project_tweets = await fetch_user_tweets(access_token=account_access_token, username=project_username)
+            project_tweets = await fetch_user_tweets(username=project_username)
             commented_tweets_key = f'commented_tweets:{my_username}:{project_username}'
             commented_tweets_before = db.get_set(commented_tweets_key)
 

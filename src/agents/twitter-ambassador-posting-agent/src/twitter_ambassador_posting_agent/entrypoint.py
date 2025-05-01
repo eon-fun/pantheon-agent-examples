@@ -46,7 +46,7 @@ class TwitterPostingAgent(BaseAgent):
                 return await _handle_regular_tweet([], [], username, keywords, themes)
 
             print(f'Fetching project tweets for user: {username}')
-            project_tweets = await fetch_user_tweets(access_token=account_access_token,username=username)
+            project_tweets = await fetch_user_tweets(username=username)
 
             # Check if last tweet was a news summary
             if not my_tweets[-1].is_news_summary_tweet:
