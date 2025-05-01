@@ -7,7 +7,6 @@ from twitter_echo_bot.DB.managers.users_manager import AlchemyUsersManager
 from twitter_echo_bot.DB.models.tracked_accounts_models import PGTrackedAccount
 from twitter_echo_bot.DB.sqlalchemy_database_manager import get_db
 from twitter_echo_bot.config.promts import get_prompt_for_create_user_prompt
-from agents_tools_logger.main import log
 from send_openai_request.main import send_openai_request
 from tweetscout_utils.main import fetch_user_tweets, Tweet
 from loguru import logger
@@ -19,9 +18,9 @@ class TwitterCollectorClient:
         В реальной реализации здесь будет вызов API Twitter.
         """
         # TODO: Реализовать получение твитов через API Twitter.
-        logger.info(f"Получаем твиты для {twitter_handle}")
+        logger.info(f"Fetching tweets for {twitter_handle}")
         tweets = await fetch_user_tweets(twitter_handle)
-        log.info(f"Получено {len(tweets)} твитов для {twitter_handle}")
+        logger.info(f"Fetched {len(tweets)} tweets for {twitter_handle}")
         return tweets
 
     async def save_tweets(self, tweets: List[Tweet], account_id: int):
@@ -59,12 +58,12 @@ class TwitterCollectorClient:
             user_manager = AlchemyUsersManager(session)
             users = await user_manager.get_filtered_users()
             if users:
-                log.info(f"Найдено {len(users)} пользователей без промптов.")
+                logger.info(f"Found {len(users)} users without prompts.")
                 for user in users:
                     persona_descriptor = user.persona_descriptor
                     user_prompt = await create_user_prompt(persona_descriptor)
                     await user_manager.add_prompt_to_user(user.id, user_prompt)
-                    log.info(f"Добавлен промпт для пользователя {user.username}")
+                    logger.info(f"Adding prompt to user: {user.username}")
 
 
 async def create_user_prompt(words: str) -> str:

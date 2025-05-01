@@ -16,7 +16,7 @@ dependencies = [
     "redis-client (>=0.1.6)",
     "twitter-ambassador-utils (>=0.1.4)",
     "tweetscout-utils (==0.0.3)",
-    "send-openai-request (>=0.1.0)",
+    "send-openai-request (>=0.1.1)",
 ]
 
 [tool.poetry]
