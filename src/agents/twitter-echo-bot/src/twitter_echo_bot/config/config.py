@@ -1,7 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
-from agents_tools_logger.main import log
-
+from loguru import logger
 
 class FastAPISettings(BaseSettings):
     allowed_origins: list[str] = Field(default=[
@@ -50,7 +49,7 @@ class AppConfig(BaseSettings):
         }
         for var_name, var_value in required_vars.items():
             if not var_value:
-                log.warning(f"Environment variable {var_name} is not set!")
+                logger.warning(f"Environment variable {var_name} is not set!")
 
 
 config = AppConfig()

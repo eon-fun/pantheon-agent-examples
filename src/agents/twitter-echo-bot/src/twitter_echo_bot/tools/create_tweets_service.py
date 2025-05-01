@@ -10,11 +10,10 @@ from twitter_echo_bot.DB.models.user_tweet_matches_models import PGUserTweetMatc
 from twitter_echo_bot.DB.models.users_models import PGUser
 from twitter_echo_bot.DB.sqlalchemy_database_manager import get_db
 from twitter_echo_bot.config.promts import get_prompt_by_user_for_creating_tweet
-from agents_tools_logger.main import log
 from services.ai_connectors.openai_client import send_openai_request
 from services.twitter.actions.create_post import post_tweet
 from services.twitter.auth_client import TwitterAuthClient
-
+from loguru import logger
 
 class CreateTweetsService:
     def __init__(self, ):
@@ -62,7 +61,7 @@ class CreateTweetsService:
         return list(grouped_tweets.values())
 
     async def start(self):
-        log.info("Создание твитов для пользователей.")
+        logger.info("Creating tweets for users")
         data = await self.get_unprocessed_tweets()
         sorted_data = await self.process_unprocessed_tweets(data)
         for data in sorted_data:
