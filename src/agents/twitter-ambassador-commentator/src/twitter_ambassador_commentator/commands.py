@@ -1,5 +1,4 @@
 import re
-from loguru import logger
 from send_openai_request.main import send_openai_request
 
 PROMPT = """DONT USE HASHTAG You are an AI and crypto enthusiast with a vision for the future of decentralized tech.    
@@ -59,7 +58,7 @@ Who needs thumbs? Unleash the hyper-advanced AI bot and watch it fetch not just 
         f"{text}"
     )
     text = await send_openai_request(messages=messages, temperature=1.0)
-    logger.info(f'Tweet validating 2 {text}')
+    print(f'Tweet validating 2 {text}')
     return text
 
 
@@ -94,7 +93,7 @@ async def format_text(text: str) -> str:
         )
         text = await send_openai_request(messages=messages, temperature=1.0)
 
-        logger.info(f'Tweet validating 1 {text}')
+        print(f'Tweet validating 1 {text}')
         text = await add_blank_lines(text)
 
         text = re.sub(r'#\w+', '', text)
@@ -112,5 +111,5 @@ async def create_comment_to_post(twitter_post: str, my_username: str, prompt=PRO
         {"role": "system", "content": formatted_prompt},
     ]
     result = await send_openai_request(messages=messages, temperature=1.0)
-    logger.info(f'PROMPT_CREATE_COMMENT: {messages=}')
+    print(f'PROMPT_CREATE_COMMENT: {messages=}')
     return await format_text(result)

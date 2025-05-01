@@ -5,7 +5,6 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from ray import serve
 from base_agent.ray_entrypoint import BaseAgent
-from loguru import logger
 from twitter_ambassador_utils.main import TwitterAuthClient, create_post
 from tweetscout_utils.main import get_conversation_from_tweet, create_conversation_string, search_tweets
 from redis_client.main import Post, ensure_delay_between_posts, get_redis_db
@@ -38,7 +37,7 @@ class TwitterMentionsMonitor(BaseAgent):
 
         db = get_redis_db()
         try:
-            logger.info(f'respond_to_mentions {my_username=} {keywords=} {hashtags=}')
+            print(f'respond_to_mentions {my_username=} {keywords=} {hashtags=}')
             account_access_token = await TwitterAuthClient.get_access_token(my_username)
 
             mentions = await search_tweets(
@@ -55,7 +54,7 @@ class TwitterMentionsMonitor(BaseAgent):
             ]
 
             if not new_mentions:
-                logger.info("No new mentions to respond to")
+                print("No new mentions to respond to")
                 return False
 
             for mention in new_mentions:
@@ -89,12 +88,12 @@ class TwitterMentionsMonitor(BaseAgent):
                         db.add_user_post(my_username, post)
                         db.add_to_set(responded_mentions_key, mention.id_str)
                         db.save_tweet_link('respond_to_mentions', mention.id_str)
-                        logger.info(f'Posted reply to mention {mention.id_str}: {reply_text}')
+                        print(f'Posted reply to mention {mention.id_str}: {reply_text}')
 
             return True
 
         except Exception as error:
-            logger.error(f'respond_to_mentions error: {my_username=} {error=}')
+            print(f'respond_to_mentions error: {my_username=} {error=}')
             raise
 
 

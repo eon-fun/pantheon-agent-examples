@@ -8,7 +8,6 @@ from twitter_ambassador_utils.main import create_post, TwitterAuthClient
 from tweetscout_utils.main import fetch_user_tweets
 from twitter_ambassador_commentator.commands import create_comment_to_post
 from redis_client.main import get_redis_db, ensure_delay_between_posts, Post
-from loguru import logger
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -36,7 +35,7 @@ class TwitterCommentatorAgent(BaseAgent):
         project_username = goal.split(".")[1]
         db = get_redis_db()
         try:
-            logger.info(f'Comment user tweets with username: {my_username=} project: {project_username=}')
+            print(f'Comment user tweets with username: {my_username=} project: {project_username=}')
             account_access_token=await TwitterAuthClient.get_access_token(my_username)
             project_tweets = await fetch_user_tweets(access_token=account_access_token, username=project_username)
             commented_tweets_key = f'commented_tweets:{my_username}:{project_username}'
@@ -74,7 +73,7 @@ class TwitterCommentatorAgent(BaseAgent):
 
             return True
         except BaseException as error:
-            logger.error(f'comment_users_tweet_posts error: {my_username=} {error=}')
+            print(f'comment_users_tweet_posts error: {my_username=} {error=}')
             raise
 
 
