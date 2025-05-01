@@ -61,7 +61,7 @@ class TwitterLikerAgent(BaseAgent):
 
                     simple_query = f"{base_query} -is:retweet lang:en has:media"
 
-                    result = await search_tweets(access_token=account_access_token, query=simple_query)
+                    result = await search_tweets(query=simple_query)
 
                     # Фильтруем результаты после получения, вместо усложнения запроса
                     filtered_tweets = [tweet for tweet in result

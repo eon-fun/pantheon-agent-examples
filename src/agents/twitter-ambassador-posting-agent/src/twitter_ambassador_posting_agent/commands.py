@@ -266,8 +266,7 @@ async def _handle_news_tweet(my_tweets: list[Post], username: str, keywords: lis
         try:
             # Создаем простой запрос для каждого ключевого слова
             simple_query = f"{keyword} lang:en -is:retweet"
-            news = await search_tweets(access_token=await TwitterAuthClient.get_access_token(username),
-                                       query=simple_query)
+            news = await search_tweets(query=simple_query)
 
             # Фильтруем результаты после получения
             filtered_news = [tweet for tweet in news
@@ -286,8 +285,7 @@ async def _handle_news_tweet(my_tweets: list[Post], username: str, keywords: lis
         try:
             # Создаем простой запрос для каждой темы
             simple_query = f"#{theme} lang:en -is:retweet"
-            news = await search_tweets(access_token=await TwitterAuthClient.get_access_token(username),
-                                       query=simple_query)
+            news = await search_tweets(query=simple_query)
 
             # Фильтруем результаты после получения
             filtered_news = [tweet for tweet in news
