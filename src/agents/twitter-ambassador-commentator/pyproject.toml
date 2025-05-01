@@ -1,6 +1,6 @@
 [project]
 name = "twitter-ambassador-commentator"
-version = "0.0.21"
+version = "0.0.22"
 description = "TwitterAmbassadorCommentator"
 authors = [{name = "k1llzzy",email = "gekachan04@gmail.com"}]
 readme = "README.md"
