@@ -7,7 +7,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from follow_unfollow_bot.DB.managers.base import BaseAlchemyManager
 from follow_unfollow_bot.DB.models import AlchemyUser
 from follow_unfollow_bot.DB.models.users_model import PGUserModel
-from loguru import logger
 
 class AlchemyUsersManager(BaseAlchemyManager):
     def __init__(self, session: AsyncSession):
@@ -30,7 +29,7 @@ class AlchemyUsersManager(BaseAlchemyManager):
             user.followers_today = (user.followers_today or 0) + 1
             await self.session.commit()
         except NoResultFound:
-            logger.error(f"Пользователь {user_id} не найден")
+            print(f"Пользователь {user_id} не найден")
 
     async def get_user(self, user_id: int) -> Optional[PGUserModel]:
         """Получает пользователя по ID, если он существует"""
