@@ -41,7 +41,7 @@ class TwitterLikerAgent(BaseAgent):
             print(f'set_likes {my_username=} {keywords=} {themes=}')
 
             # Формируем поисковые запросы из keywords и themes, но по одному для каждого запроса
-            search_queries = keywords + themes
+            search_queries = keywords
 
             # Получаем уже лайкнутые твиты
             user_likes_key = f'user_likes:{my_username}'
@@ -51,7 +51,7 @@ class TwitterLikerAgent(BaseAgent):
             account_access_token = await TwitterAuthClient.get_access_token(my_username)
 
             # Ограничиваем количество поисковых запросов, чтобы избежать превышения лимитов API
-            for query in search_queries[:3]:  # Берем только первые 3 ключевых слова/темы
+            for query in search_queries:  # Берем только первые 3 ключевых слова/темы
                 try:
                     # Для каждого ключевого слова формируем более простой запрос
                     # Используем минимальный набор фильтров для снижения сложности запроса
@@ -64,9 +64,7 @@ class TwitterLikerAgent(BaseAgent):
                     result = await search_tweets(query=simple_query)
 
                     # Фильтруем результаты после получения, вместо усложнения запроса
-                    filtered_tweets = [tweet for tweet in result
-                                       if tweet.favorite_count >= 20
-                                       and tweet.in_reply_to_status_id_str is None]
+                    filtered_tweets = [tweet for tweet in result]
 
                     for tweet in filtered_tweets[:2]:  # Берем только первые 2 твита для каждого запроса
                         if tweet.id_str not in tweets_dict:
