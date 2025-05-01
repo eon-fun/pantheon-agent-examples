@@ -15,7 +15,7 @@ dependencies = [
     "jinja2 (==3.1.5)",
     "redis-client (>=0.1.6)",
     "twitter-ambassador-utils (>=0.1.6)",
-    "tweetscout-utils (==0.0.3)",
+    "tweetscout-utils (==0.0.4)",
     "send-openai-request (==0.1.1)",
 ]
 
