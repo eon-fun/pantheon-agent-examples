@@ -1,0 +1,13 @@
+name: answer-life-universe-everything
+description: Returns the answer to the question of life, universe and everything
+steps:
+ - name: answer-life-universe-everything
+   tool: return_answer_tool
+   inputs:
+    - name: answer
+      value: '{"answer": 42}'
+   outputs:
+      - name: result
+outputs:
+  - name: answer
+    value: "{{steps.answer-life-universe-everything.outputs.result}}"
