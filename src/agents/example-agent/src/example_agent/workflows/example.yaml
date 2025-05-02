@@ -3,7 +3,7 @@ name: answer-life-universe-everything
 description: Returns the answer to the question of life, universe and everything
 steps:
  - name: answer-life-universe-everything
-   tool: return_answer_tool
+   tool: return_answer_tool@0.1.2
    inputs:
     - name: answer
       value: '{"answer": 42}'
