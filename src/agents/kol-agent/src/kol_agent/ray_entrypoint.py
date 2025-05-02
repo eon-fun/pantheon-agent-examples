@@ -10,17 +10,21 @@ from kol_agent.raid import get_raid_workflow
 from kol_agent.config import get_config
 
 
+from twitter_ambassador_utils.main import set_like, TwitterAuthClient
+from tweetscout_utils.main import search_tweets
+from redis_client.main import get_redis_db
+import logging
+import time
+import random
+
+logger = logging.getLogger(__name__)
+
 config = get_config()
 
 class InputModel(BaseModel):
     target_tweet_id: str = Field(..., description="The ID of the tweet to raid", example="1719810222222222222")
     bot_count: int = Field(..., description="The number of bots to use", example=10)
     raid_minutes: float = Field(..., description="The number of minutes to raid", example=0.1)
-
-    public_key: str = Field(..., description="The public key of the Langfuse project", example="1234567890")
-    secret_key: str = Field(..., description="The secret key of the Langfuse project", example="1234567890")
-    host: str = Field(..., description="The host of the Langfuse project", example="https://langfuse.dev.pntheon.ai")
-
 
 class OutputModel(BaseModel):
     success: bool
@@ -39,24 +43,48 @@ app = FastAPI(lifespan=lifespan)
 @serve.ingress(app)
 class KolAgent(BaseAgent):
     def __init__(self):
+        langfuse_handler = CallbackHandler(
+            public_key = config.LANGFUSE_PUBLIC_KEY,
+            secret_key = config.LANGFUSE_SECRET_KEY,
+            host = config.LANGFUSE_HOST,
+            trace_name="kol-agent"
+        )
         workflow = get_raid_workflow()
-        self.graph = workflow.compile()
+        self.graph = workflow.compile().with_config({"callbacks": [langfuse_handler]})
 
     @app.post("/{goal}")
     async def handle(self, goal: str, input: InputModel, plan: dict | None = None):
-        langfuse_handler = CallbackHandler(
-            public_key = input.public_key,
-            secret_key = input.secret_key,
-            host = input.host,
-        )
         state = {
             "target_tweet_id": input.target_tweet_id,
             "bot_count": input.bot_count,
             "raid_minutes": input.raid_minutes,
         }
-        data = await self.graph.ainvoke(state, config={"callbacks": [langfuse_handler]})
-        return OutputModel(success=True, message=str(data))
+        await self.graph.ainvoke(state)
+        return OutputModel(success=True, message="Raid started")
 
+    @app.get("/all_accounts")
+    async def all_accounts(self):
+        db = get_redis_db()
+        return {"accounts": db.get_active_twitter_accounts()}
+    
+    @app.post("/set_likes")
+    async def set_likes(self, input: InputModel):
+        db = get_redis_db()
+        accounts = db.get_active_twitter_accounts()
+        for account in accounts:
+            time.sleep(random.randint(30, 90))
+            account_access_token = await TwitterAuthClient.get_access_token(account)
+            result = await set_like(
+                token=account_access_token,
+                tweet_id=input.target_tweet_id,
+                user_id=TwitterAuthClient.get_static_data(account)['id'],
+            )
+            if result.get('data', {}).get('liked'):
+                logger.warning(f'Liked tweet: {account=} {input.target_tweet_id=}')
+                db.add_to_set(f'user_likes:{account}', input.target_tweet_id)
+            else:
+                logger.error(f'Failed to like tweet: {account=} {input.target_tweet_id=}')
+        return {"success": True}
 
 
 def get_agent(agent_args: dict):
