@@ -5,7 +5,6 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from ray import serve
 from base_agent.ray_entrypoint import BaseAgent
-
 from twitter_ambassador_utils.main import TwitterAuthClient, create_post
 from tweetscout_utils.main import get_conversation_from_tweet, create_conversation_string, search_tweets
 from redis_client.main import Post, ensure_delay_between_posts, get_redis_db
@@ -60,7 +59,7 @@ class TwitterMentionsMonitor(BaseAgent):
 
             for mention in new_mentions:
                 if await check_mention_needs_reply(mention.full_text, my_username):
-                    conversation = await get_conversation_from_tweet(access_token=account_access_token, tweet=mention)
+                    conversation = await get_conversation_from_tweet(tweet=mention)
                     conversation_text = create_conversation_string(conversation)
 
                     reply_text = await create_mention_reply(
@@ -95,7 +94,7 @@ class TwitterMentionsMonitor(BaseAgent):
 
         except Exception as error:
             print(f'respond_to_mentions error: {my_username=} {error=}')
-            raise error
+            raise
 
 
 def get_agent(agent_args: dict):
