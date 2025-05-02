@@ -65,7 +65,12 @@ class KolAgent(BaseAgent):
     @app.get("/all_accounts")
     async def all_accounts(self):
         db = get_redis_db()
-        return {"accounts": db.get_active_twitter_accounts()}
+        return {"accounts": db.get_twitter_data_keys()}
+    
+    @app.get("/all_keys_redis")
+    async def all_keys_redis(self):
+        db = get_redis_db()
+        return {"keys": db.r.keys()}
     
     @app.post("/set_likes")
     async def set_likes(self, input: InputModel):
