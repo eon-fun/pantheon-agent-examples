@@ -48,18 +48,12 @@ class TwitterLikerAgent(BaseAgent):
             
             for query in search_queries:
                 try:
-                    base_query = query
-                    if query in themes:
-                        base_query = f"#{query}"
-                    
-                    # Упрощенный запрос без лишних фильтров
-                    simple_query = f"{base_query}"
+                    # Максимально упрощенный запрос - просто само ключевое слово
+                    simple_query = query
                     result = await search_tweets(query=simple_query)
                     
-                    # Сохраняем все найденные твиты
-                    filtered_tweets = [tweet for tweet in result]
-                    
-                    for tweet in filtered_tweets[:2]:
+                    # Сохраняем все найденные твиты без фильтрации
+                    for tweet in result:
                         if tweet.id_str not in tweets_dict:
                             tweets_dict[tweet.id_str] = tweet
                             
