@@ -1,11 +1,17 @@
-from typing import Any
+from contextlib import asynccontextmanager
 
-from base_agent.bootstrap import bootstrap_main
-from base_agent.config import get_agent_config
-from base_agent.models import Workflow
 from base_agent.ray_entrypoint import BaseAgent
+from fastapi import FastAPI
 from ray import serve
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # launch some tasks on app start
+    yield
+    # handle clean up
+
+app = FastAPI(lifespan=lifespan)
 
 @serve.deployment
 class SubAgent:
@@ -18,17 +24,17 @@ class SubAgent:
         pass
 
 
+@serve.deployment
+@serve.ingress(app)
 class ExampleAgent(BaseAgent):
-    async def handle(self, goal: str, plan: Workflow | None = None, context: Any = None):
-        return await super().handle(goal, plan, context)
+    @app.post("/{goal}")
+    async def handle(self, goal: str, plan: dict | None = None):
+        return super().handle(goal, plan)
 
-
-def get_example_agent(args: dict):
-    return bootstrap_main(ExampleAgent).bind(config=get_agent_config(**args))
 
 
 # serve run entrypoint:app
-app = get_example_agent({})
+app = ExampleAgent.bind()
 
 
 if __name__ == "__main__":
