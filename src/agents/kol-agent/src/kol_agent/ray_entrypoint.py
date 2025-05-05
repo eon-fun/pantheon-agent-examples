@@ -52,15 +52,15 @@ class KolAgent(BaseAgent):
         workflow = get_raid_workflow()
         self.graph = workflow.compile().with_config({"callbacks": [langfuse_handler]})
 
-    @app.post("/{goal}")
-    async def handle(self, goal: str, input: InputModel, plan: dict | None = None):
-        state = {
-            "target_tweet_id": input.target_tweet_id,
-            "bot_count": input.bot_count,
-            "raid_minutes": input.raid_minutes,
-        }
-        await self.graph.ainvoke(state)
-        return OutputModel(success=True, message="Raid started")
+    # @app.post("/{goal}")
+    # async def handle(self, goal: str, input: InputModel, plan: dict | None = None):
+    #     state = {
+    #         "target_tweet_id": input.target_tweet_id,
+    #         "bot_count": input.bot_count,
+    #         "raid_minutes": input.raid_minutes,
+    #     }
+    #     await self.graph.ainvoke(state)
+    #     return OutputModel(success=True, message="Raid started")
 
     @app.get("/all_accounts")
     async def all_accounts(self):
@@ -97,4 +97,3 @@ def get_agent(agent_args: dict):
 
 if __name__ == "__main__":
     serve.run(app, route_prefix="/")
-    
