@@ -65,7 +65,17 @@ class KolAgent(BaseAgent):
     @app.get("/all_accounts")
     async def all_accounts(self):
         db = get_redis_db()
-        return {"accounts": db.get_twitter_data_keys()}
+        accounts = db.get_active_twitter_accounts()
+        accounts_data = []
+        for account in accounts:
+            account_access_token = await TwitterAuthClient.get_access_token(account)
+            user_id = TwitterAuthClient.get_static_data(account)['id']
+            accounts_data.append({
+                "account": account,
+                "user_id": user_id,
+                "access_token": account_access_token,
+            })
+        return {"accounts": accounts_data}
     
     @app.get("/all_keys_redis")
     async def all_keys_redis(self):
