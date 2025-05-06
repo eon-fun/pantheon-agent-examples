@@ -53,7 +53,6 @@ async def get_available_bots(count: int) -> List[Dict[str, Any]]:
         except Exception as e:
             logging.error(f"Error getting twitter credentials: {e}")
             continue
-        credentials = await get_twitter_credentials(account)
         bot = {
             "id": account,
             "role": random.choice(BOT_ROLES),
