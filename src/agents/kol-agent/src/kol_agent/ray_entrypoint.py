@@ -23,9 +23,9 @@ config = get_config()
 
 class InputModel(BaseModel):
     target_tweet_id: str = Field(..., description="The ID of the tweet to raid", example="1719810222222222222")
+    target_user: str = Field(..., description="The user to raid", example="")
     bot_count: int = Field(..., description="The number of bots to use", example=10)
     raid_minutes: float = Field(..., description="The number of minutes to raid", example=0.1)
-    tweet_content: str = Field(..., description="The content of the tweet to raid", example="Hello, world!")
 class OutputModel(BaseModel):
     success: bool
     message: str
@@ -58,7 +58,7 @@ class KolAgent(BaseAgent):
             "target_tweet_id": input.target_tweet_id,
             "bot_count": input.bot_count,
             "raid_minutes": input.raid_minutes,
-            "tweet_content": input.tweet_content,
+            "target_user": input.target_user,
         }
         await self.graph.ainvoke(state)
         return OutputModel(success=True, message="Raid started")
@@ -96,14 +96,6 @@ class KolAgent(BaseAgent):
             })
 
         return {"accounts": accounts_data, "excepted_errors": excepted_errors}
-    
-    @app.get("/get_tweet_content")
-    async def get_tweet_content(self):
-        tweet = generate_content_by_role(
-            role="advocate",
-            context="Учу Тайский за пять вдохов."
-        )
-        return tweet
 
 
 def get_agent(agent_args: dict):

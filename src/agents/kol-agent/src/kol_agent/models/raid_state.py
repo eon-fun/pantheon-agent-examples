@@ -7,6 +7,8 @@ class Action(BaseModel):
     type: str
     bot_id: str
     role: str
+    account_access_token: str
+    user_id: str
     delay: float
     content: str
 
@@ -17,6 +19,7 @@ class ExecutedAction(BaseModel):
 class RaidState(TypedDict):
     # Task parameters
     target_tweet_id: str
+    target_user: str
     bot_count: int
     raid_minutes: float
 

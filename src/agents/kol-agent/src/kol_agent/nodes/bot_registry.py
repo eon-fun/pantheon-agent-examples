@@ -7,7 +7,7 @@ from kol_agent.config import get_config
 from redis_client.main import get_redis_db
 
 from tweetscout_utils.main import get_tweet_by_link
-
+from twitter_ambassador_utils.main import TwitterAuthClient
 
 # Bot roles
 BOT_ROLES = [
@@ -18,8 +18,19 @@ BOT_ROLES = [
     "newbie"       # Newbie
 ]
 
+async def get_twitter_credentials(account: str):
+    """
+    Gets the twitter credentials
+    """
+    account_access_token = await TwitterAuthClient.get_access_token(account)
+    user_id = TwitterAuthClient.get_static_data(account)['id']
+    return {
+        "account_access_token": account_access_token,
+        "user_id": user_id
+    }
 
-def get_available_bots(count: int) -> List[Dict[str, Any]]:
+
+async def get_available_bots(count: int) -> List[Dict[str, Any]]:
     """
     Returns a list of available bots
 
@@ -37,9 +48,12 @@ def get_available_bots(count: int) -> List[Dict[str, Any]]:
         accounts = random.sample(accounts, count)
     for account in accounts:
         # Create a bot persona
+        credentials = await get_twitter_credentials(account)
         bot = {
             "id": account,
-            "role": random.choice(BOT_ROLES)
+            "role": random.choice(BOT_ROLES),
+            "account_access_token": credentials["account_access_token"],
+            "user_id": credentials["user_id"]
         }
 
         bots.append(bot)
@@ -68,6 +82,8 @@ def plan_raid_actions(bots: List[Dict[str, Any]], raid_minutes: float):
             "type": "twitter_like",
             "bot_id": bot["id"],
             "role": bot["role"],
+            "account_access_token": bot["account_access_token"],
+            "user_id": bot["user_id"],
             "delay": delay,
             "content": None
         })
@@ -78,6 +94,8 @@ def plan_raid_actions(bots: List[Dict[str, Any]], raid_minutes: float):
             "type": "twitter_comment",
             "bot_id": bot["id"],
             "role": bot["role"],
+            "account_access_token": bot["account_access_token"],
+            "user_id": bot["user_id"],
             "delay": delay,
             "content": None
         })
@@ -91,6 +109,8 @@ def plan_raid_actions(bots: List[Dict[str, Any]], raid_minutes: float):
             "type": "twitter_retweet",
             "bot_id": bot["id"],
             "role": bot["role"],
+            "account_access_token": bot["account_access_token"],
+            "user_id": bot["user_id"],
             "delay": delay,
             "content": None
         })
@@ -114,16 +134,16 @@ async def bot_registry(state: RaidState):
     bot_count = state["bot_count"]
 
     # Select bots for the task
-    selected_bots = get_available_bots(bot_count)
+    selected_bots = await get_available_bots(bot_count)
 
     # Update state depending on the task type
     # updated_state = state.copy()
     updated_state = {}
     tweet_id = state["target_tweet_id"]
-    # link = f"https://twitter.com/apify/status/{tweet_id}"
-    # tweet = await get_tweet_by_link(link)
-    # updated_state["tweet_content"] = tweet.full_text
-    updated_state["tweet_content"] = state.get("tweet_content", "base_tweet_content")
+    user = state["target_user"]
+    link = f"https://x.com/{user}/status/{tweet_id}"
+    tweet = await get_tweet_by_link(link)
+    updated_state["tweet_content"] = tweet.full_text
 
     updated_state["messages"] = state.get("messages", [])
 

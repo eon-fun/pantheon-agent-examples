@@ -1,21 +1,10 @@
 import time
-from twitter_ambassador_utils.main import set_like, TwitterAuthClient, retweet, create_post
+from twitter_ambassador_utils.main import set_like, retweet, create_post
 import logging
 
 from kol_agent.models.raid_state import TwitterState, Action
 # from kol_agent.api.twitter import post_comment, post_reply, like_tweet, retweet
 from kol_agent.nodes.content_generator import generate_content_by_role
-
-async def get_twitter_credentials(action: Action):
-    """
-    Gets the twitter credentials
-    """
-    account_access_token = await TwitterAuthClient.get_access_token(action["bot_id"])
-    user_id = TwitterAuthClient.get_static_data(action["bot_id"])['id']
-    return {
-        "account_access_token": account_access_token,
-        "user_id": user_id
-    }
 
 async def twitter_retweet(state: TwitterState) -> TwitterState:
     """
@@ -24,11 +13,10 @@ async def twitter_retweet(state: TwitterState) -> TwitterState:
     time.sleep(state["action"]["delay"])
     status = True
     try:
-        credentials = await get_twitter_credentials(state["action"])
         result = await retweet(
-            token=credentials["account_access_token"],
+            token=state["action"]["account_access_token"],
             tweet_id=state["target_tweet_id"],
-            user_id=credentials["user_id"]
+            user_id=state["action"]["user_id"]
         )
     except Exception as e:
         status = False
@@ -52,11 +40,10 @@ async def twitter_like(state: TwitterState) -> TwitterState:
     time.sleep(state["action"]["delay"])
     status = True
     try:
-        credentials = await get_twitter_credentials(state["action"])
         result = await set_like(
-            token=credentials["account_access_token"],
+            token=state["action"]["account_access_token"],
             tweet_id=state["target_tweet_id"],
-            user_id=credentials["user_id"]
+            user_id=state["action"]["user_id"]
         )
     except Exception as e:
         status = False
@@ -83,9 +70,8 @@ async def twitter_comment(state: TwitterState) -> TwitterState:
     time.sleep(state["action"]["delay"])
     status = True
     try:
-        credentials = await get_twitter_credentials(state["action"])
         result = await create_post(
-            access_token=credentials["account_access_token"],
+            access_token=state["action"]["account_access_token"],
             tweet_text=content_comment,
             commented_tweet_id=state["target_tweet_id"]
         )
@@ -114,9 +100,8 @@ async def twitter_reply(state: TwitterState) -> TwitterState:
     time.sleep(state["action"]["delay"])
     status = True
     try:
-        credentials = await get_twitter_credentials(state["action"])
         result = await create_post(
-            access_token=credentials["account_access_token"],
+            access_token=state["action"]["account_access_token"],
             tweet_text=content_reply,
             commented_tweet_id=state["target_tweet_id"]
         )
