@@ -119,7 +119,8 @@ def bot_registry(state: RaidState):
     # Update state depending on the task type
     # updated_state = state.copy()
     updated_state = {}
-    link = f"https://twitter.com/apify/status/{state["target_tweet_id"]}"
+    tweet_id = state["target_tweet_id"]
+    link = f"https://twitter.com/apify/status/{tweet_id}"
     tweet = get_tweet_by_link(link)
     updated_state["tweet_content"] = tweet.full_text
     
