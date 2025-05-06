@@ -1,7 +1,7 @@
 from typing import List, Dict, Any
 import random
 import math
-
+import logging
 from kol_agent.models.raid_state import RaidState
 from kol_agent.config import get_config
 from redis_client.main import get_redis_db
@@ -48,6 +48,11 @@ async def get_available_bots(count: int) -> List[Dict[str, Any]]:
         accounts = random.sample(accounts, count)
     for account in accounts:
         # Create a bot persona
+        try:
+            credentials = await get_twitter_credentials(account)
+        except Exception as e:
+            logging.error(f"Error getting twitter credentials: {e}")
+            continue
         credentials = await get_twitter_credentials(account)
         bot = {
             "id": account,
