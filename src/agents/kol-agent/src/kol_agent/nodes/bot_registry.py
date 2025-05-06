@@ -4,7 +4,9 @@ import math
 
 from kol_agent.models.raid_state import RaidState
 from kol_agent.config import get_config
-from kol_agent.api.twitter import get_tweet
+from redis_client.main import get_redis_db
+
+from tweetscout_utils.main import get_tweet_by_link
 
 
 # Bot roles
@@ -29,14 +31,15 @@ def get_available_bots(count: int) -> List[Dict[str, Any]]:
 
     # Create "count" bots with different roles and styles
     bots = []
-    for i in range(count):
-        bot_id = f"bot_{i+1}"
-        role = random.choice(BOT_ROLES)
-
+    db = get_redis_db()
+    accounts = db.get_active_twitter_accounts()
+    if len(accounts) > count:
+        accounts = random.sample(accounts, count)
+    for account in accounts:
         # Create a bot persona
         bot = {
-            "id": bot_id,
-            "role": role
+            "id": account,
+            "role": random.choice(BOT_ROLES)
         }
 
         bots.append(bot)
@@ -116,7 +119,10 @@ def bot_registry(state: RaidState):
     # Update state depending on the task type
     # updated_state = state.copy()
     updated_state = {}
-    updated_state["tweet_content"] = get_tweet(state["target_tweet_id"])["content"]
+    link = f"https://twitter.com/apify/status/{state["target_tweet_id"]}"
+    tweet = get_tweet_by_link(link)
+    updated_state["tweet_content"] = tweet.full_text
+    
     updated_state["messages"] = state.get("messages", [])
 
     bots_actions, message = plan_raid_actions(

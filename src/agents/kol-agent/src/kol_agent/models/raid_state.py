@@ -32,3 +32,4 @@ class RaidState(TypedDict):
 class TwitterState(TypedDict):
     action: Action
     target_tweet_id: str
+    tweet_content: str

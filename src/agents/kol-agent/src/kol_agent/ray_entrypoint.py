@@ -96,11 +96,6 @@ class KolAgent(BaseAgent):
 
         return {"accounts": accounts_data, "excepted_errors": excepted_errors}
     
-    @app.get("/all_keys_redis")
-    async def all_keys_redis(self):
-        db = get_redis_db()
-        return {"keys": db.r.keys()}
-    
     # @app.post("/set_likes")
     # async def set_likes(self, input: InputModel):
     #     db = get_redis_db()
