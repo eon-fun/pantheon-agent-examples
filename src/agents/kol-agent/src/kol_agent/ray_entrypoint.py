@@ -67,9 +67,21 @@ class KolAgent(BaseAgent):
         db = get_redis_db()
         accounts = db.get_active_twitter_accounts()
         accounts_data = []
+        excepted_errors = []
         for account in accounts:
-            account_access_token = await TwitterAuthClient.get_access_token(account)
-            user_id = TwitterAuthClient.get_static_data(account)['id']
+            account_access_token = None
+            user_id = None
+            try:
+                account_access_token = await TwitterAuthClient.get_access_token(account)
+            except Exception as token_error:
+                logger.error(f'Failed to get access token for account: {account=} {token_error=}')
+                excepted_errors.append(f"Token error for {account}: {str(token_error)}")
+            try:
+                user_id = TwitterAuthClient.get_static_data(account)['id']
+            except Exception as user_id_error:
+                logger.error(f'Failed to get user id for account: {account=} {user_id_error=}')
+                excepted_errors.append(f"User id error for {account}: {str(user_id_error)}")
+                continue
             accounts_data.append({
                 "account": account,
                 "user_id": user_id,
