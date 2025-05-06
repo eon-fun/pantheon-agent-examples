@@ -120,10 +120,11 @@ async def bot_registry(state: RaidState):
     # updated_state = state.copy()
     updated_state = {}
     tweet_id = state["target_tweet_id"]
-    link = f"https://twitter.com/apify/status/{tweet_id}"
-    tweet = await get_tweet_by_link(link)
-    updated_state["tweet_content"] = tweet.full_text
-    
+    # link = f"https://twitter.com/apify/status/{tweet_id}"
+    # tweet = await get_tweet_by_link(link)
+    # updated_state["tweet_content"] = tweet.full_text
+    updated_state["tweet_content"] = state.get("tweet_content", "base_tweet_content")
+
     updated_state["messages"] = state.get("messages", [])
 
     bots_actions, message = plan_raid_actions(
