@@ -52,15 +52,15 @@ class KolAgent(BaseAgent):
         workflow = get_raid_workflow()
         self.graph = workflow.compile().with_config({"callbacks": [langfuse_handler]})
 
-    # @app.post("/{goal}")
-    # async def handle(self, goal: str, input: InputModel, plan: dict | None = None):
-    #     state = {
-    #         "target_tweet_id": input.target_tweet_id,
-    #         "bot_count": input.bot_count,
-    #         "raid_minutes": input.raid_minutes,
-    #     }
-    #     await self.graph.ainvoke(state)
-    #     return OutputModel(success=True, message="Raid started")
+    @app.post("/{goal}")
+    async def handle(self, goal: str, input: InputModel, plan: dict | None = None):
+        state = {
+            "target_tweet_id": input.target_tweet_id,
+            "bot_count": input.bot_count,
+            "raid_minutes": input.raid_minutes,
+        }
+        await self.graph.ainvoke(state)
+        return OutputModel(success=True, message="Raid started")
 
     @app.get("/all_accounts")
     async def all_accounts(self):
@@ -101,28 +101,28 @@ class KolAgent(BaseAgent):
         db = get_redis_db()
         return {"keys": db.r.keys()}
     
-    @app.post("/set_likes")
-    async def set_likes(self, input: InputModel):
-        db = get_redis_db()
-        accounts = db.get_active_twitter_accounts()
-        excepted_errors = []
-        for account in accounts:
-            try:
-                time.sleep(random.randint(10, 30))
-                account_access_token = await TwitterAuthClient.get_access_token(account)
-                result = await set_like(
-                    token=account_access_token,
-                    tweet_id=input.target_tweet_id,
-                    user_id=TwitterAuthClient.get_static_data(account)['id'],
-                )
-                if result.get('data', {}).get('liked'):
-                    logger.warning(f'Liked tweet: {account=} {input.target_tweet_id=}')
-                    db.add_to_set(f'user_likes:{account}', input.target_tweet_id)
-            except Exception as e:
-                logger.error(f'Failed to like tweet: {account=} {input.target_tweet_id=} {e=}')
-                excepted_errors.append(e)
+    # @app.post("/set_likes")
+    # async def set_likes(self, input: InputModel):
+    #     db = get_redis_db()
+    #     accounts = db.get_active_twitter_accounts()
+    #     excepted_errors = []
+    #     for account in accounts:
+    #         try:
+    #             time.sleep(random.randint(10, 30))
+    #             account_access_token = await TwitterAuthClient.get_access_token(account)
+    #             result = await set_like(
+    #                 token=account_access_token,
+    #                 tweet_id=input.target_tweet_id,
+    #                 user_id=TwitterAuthClient.get_static_data(account)['id'],
+    #             )
+    #             if result.get('data', {}).get('liked'):
+    #                 logger.warning(f'Liked tweet: {account=} {input.target_tweet_id=}')
+    #                 db.add_to_set(f'user_likes:{account}', input.target_tweet_id)
+    #         except Exception as e:
+    #             logger.error(f'Failed to like tweet: {account=} {input.target_tweet_id=} {e=}')
+    #             excepted_errors.append(e)
 
-        return {"success": True, "message": f"Liked {len(accounts)} tweets", "excepted_errors": excepted_errors}
+    #     return {"success": True, "message": f"Liked {len(accounts)} tweets", "excepted_errors": excepted_errors}
 
 
 def get_agent(agent_args: dict):
