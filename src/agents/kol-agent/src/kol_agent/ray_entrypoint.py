@@ -71,22 +71,29 @@ class KolAgent(BaseAgent):
         for account in accounts:
             account_access_token = None
             user_id = None
+            print(f'Getting data for account: {account=}')
             try:
                 account_access_token = await TwitterAuthClient.get_access_token(account)
             except Exception as token_error:
-                logger.error(f'Failed to get access token for account: {account=} {token_error=}')
+                print(f'Failed to get access token for account: {account=} {token_error=}')
                 excepted_errors.append(f"Token error for {account}: {str(token_error)}")
+            else:
+                print(f'Successfully got access token for account: {account=}, {account_access_token=}')
+            
             try:
                 user_id = TwitterAuthClient.get_static_data(account)['id']
             except Exception as user_id_error:
-                logger.error(f'Failed to get user id for account: {account=} {user_id_error=}')
+                print(f'Failed to get user id for account: {account=} {user_id_error=}')
                 excepted_errors.append(f"User id error for {account}: {str(user_id_error)}")
-                continue
+            else:
+                print(f'Successfully got user id for account: {account=}, {user_id=}')
+            
             accounts_data.append({
                 "account": account,
                 "user_id": user_id,
                 "access_token": account_access_token,
             })
+
         return {"accounts": accounts_data}
     
     @app.get("/all_keys_redis")
