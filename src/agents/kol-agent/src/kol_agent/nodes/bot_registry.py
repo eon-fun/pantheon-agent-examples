@@ -100,7 +100,7 @@ def plan_raid_actions(bots: List[Dict[str, Any]], raid_minutes: float):
     return actions, message
 
 
-def bot_registry(state: RaidState):
+async def bot_registry(state: RaidState):
     """
     LangGraph node for bot management
 
@@ -121,7 +121,7 @@ def bot_registry(state: RaidState):
     updated_state = {}
     tweet_id = state["target_tweet_id"]
     link = f"https://twitter.com/apify/status/{tweet_id}"
-    tweet = get_tweet_by_link(link)
+    tweet = await get_tweet_by_link(link)
     updated_state["tweet_content"] = tweet.full_text
     
     updated_state["messages"] = state.get("messages", [])
