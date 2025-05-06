@@ -97,7 +97,8 @@ async def twitter_comment(state: TwitterState) -> TwitterState:
             "success": status,
             "action": state["action"],
             "created_at": time.time(),
-            "result": result
+            "result": result,
+            "content_comment": content_comment
         }
     return {
         "executed_actions": [executed_actions]

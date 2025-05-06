@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 
 from kol_agent.raid import get_raid_workflow
 from kol_agent.config import get_config
-
+from kol_agent.nodes.content_generator import generate_content_by_role
 
 from twitter_ambassador_utils.main import set_like, TwitterAuthClient
 from tweetscout_utils.main import search_tweets
@@ -97,28 +97,13 @@ class KolAgent(BaseAgent):
 
         return {"accounts": accounts_data, "excepted_errors": excepted_errors}
     
-    # @app.post("/set_likes")
-    # async def set_likes(self, input: InputModel):
-    #     db = get_redis_db()
-    #     accounts = db.get_active_twitter_accounts()
-    #     excepted_errors = []
-    #     for account in accounts:
-    #         try:
-    #             time.sleep(random.randint(10, 30))
-    #             account_access_token = await TwitterAuthClient.get_access_token(account)
-    #             result = await set_like(
-    #                 token=account_access_token,
-    #                 tweet_id=input.target_tweet_id,
-    #                 user_id=TwitterAuthClient.get_static_data(account)['id'],
-    #             )
-    #             if result.get('data', {}).get('liked'):
-    #                 logger.warning(f'Liked tweet: {account=} {input.target_tweet_id=}')
-    #                 db.add_to_set(f'user_likes:{account}', input.target_tweet_id)
-    #         except Exception as e:
-    #             logger.error(f'Failed to like tweet: {account=} {input.target_tweet_id=} {e=}')
-    #             excepted_errors.append(e)
-
-    #     return {"success": True, "message": f"Liked {len(accounts)} tweets", "excepted_errors": excepted_errors}
+    @app.get("/get_tweet_content")
+    async def get_tweet_content(self):
+        tweet = generate_content_by_role(
+            role="advocate",
+            context="Учу Тайский за пять вдохов."
+        )
+        return tweet
 
 
 def get_agent(agent_args: dict):
