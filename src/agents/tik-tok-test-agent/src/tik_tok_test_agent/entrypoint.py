@@ -39,7 +39,7 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
             username = "valebtinbest@gmail.com"
             password = "|yR2mZtbc;hjS/T"
             api_key = "5baa59265de642a543eeb985ec276708"
-            bot = TikTokBot(api_key=api_key, headless=False,path=link)
+            bot = TikTokBot(api_key=api_key, headless=False,browser_executable_path=link)
             bot.login(username, password)
             bot.comment_on_video(
                 video_url="https://www.tiktok.com/@mini_lolik/video/7491613049669897527",
