@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from ray import serve
 from base_agent.ray_entrypoint import BaseAgent
 from tik_tok_package.main import TikTokBot
-
+import subprocess
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -27,6 +27,7 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
             self,
             goal: str,
     ):
+        install_chrome_linux()
         try:
             username = "valebtinbest@gmail.com"
             password = "|yR2mZtbc;hjS/T"
@@ -51,6 +52,8 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
 def get_agent(agent_args: dict):
     return TwitterAmbassadorCommentsAnswerer.bind(**agent_args)
 
-
+def install_chrome_linux():
+    subprocess.run(["sudo", "apt", "update"])
+    subprocess.run(["sudo", "apt", "install", "-y", "google-chrome-stable"])
 if __name__ == "__main__":
     serve.run(app, route_prefix="/")
