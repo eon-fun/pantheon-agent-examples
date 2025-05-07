@@ -34,7 +34,6 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
     ):
 
         try:
-
             username = "valebtinbest@gmail.com"
             password = "|yR2mZtbc;hjS/T"
             api_key = "5baa59265de642a543eeb985ec276708"
@@ -52,6 +51,10 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
             return {"success": True}
         except Exception as e:
             print(f"Error occurred: {e}")
+            try:
+                bot.quit()
+            except Exception:
+                pass
             return {"success": False, "error": str(e)}
 
 
