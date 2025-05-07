@@ -12,7 +12,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-
+def install_chrome_linux():
+    subprocess.run(["sudo", "apt", "update"])
+    subprocess.run(["sudo", "apt", "install", "-y", "google-chrome-stable"])
 @serve.deployment
 @serve.ingress(app)
 class TwitterAmbassadorCommentsAnswerer(BaseAgent):
@@ -22,6 +24,7 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
     @app.post("/{goal}")
     async def handle(self, goal: str, plan: dict | None = None):
         return await self.answer_on_project_tweets_comments(goal)
+
 
     async def answer_on_project_tweets_comments(
             self,
@@ -53,8 +56,6 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
 def get_agent(agent_args: dict):
     return TwitterAmbassadorCommentsAnswerer.bind(**agent_args)
 
-def install_chrome_linux():
-    subprocess.run(["sudo", "apt", "update"])
-    subprocess.run(["sudo", "apt", "install", "-y", "google-chrome-stable"])
+
 if __name__ == "__main__":
     serve.run(app, route_prefix="/")
