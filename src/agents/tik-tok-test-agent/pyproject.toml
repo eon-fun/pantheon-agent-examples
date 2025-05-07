@@ -22,3 +22,11 @@ build-backend = "poetry.core.masonry.api"
 name = "pantheon"
 url = "https://pantheon-688567299207.d.codeartifact.eu-west-1.amazonaws.com/pypi/pantheon/simple/"
 priority = "supplemental"
+
+
+[tool.poetry.dependencies]
+tik-tok-package = {source = "pantheon"}
+
+
+[project.entry-points."agent.entrypoint"]
+target = "tik_tok_test_agent.entrypoint:get_agent"
