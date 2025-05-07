@@ -3,7 +3,6 @@ from twitter_ambassador_utils.main import set_like, retweet, create_post
 import logging
 
 from kol_agent.models.raid_state import TwitterState, Action
-# from kol_agent.api.twitter import post_comment, post_reply, like_tweet, retweet
 from kol_agent.nodes.content_generator import generate_content_by_role
 
 async def twitter_retweet(state: TwitterState) -> TwitterState:
@@ -25,7 +24,7 @@ async def twitter_retweet(state: TwitterState) -> TwitterState:
     executed_actions = {
             "success": status,
             "action": state["action"],
-            "created_at": time.time(),
+            "created_at": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
             "result": result
         }
     return {
@@ -53,7 +52,7 @@ async def twitter_like(state: TwitterState) -> TwitterState:
     executed_actions = {
             "success": status,
             "action": state["action"],
-            "created_at": time.time(),
+            "created_at": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
             "result": result
         }
     return {
@@ -82,7 +81,7 @@ async def twitter_comment(state: TwitterState) -> TwitterState:
     executed_actions = {
             "success": status,
             "action": state["action"],
-            "created_at": time.time(),
+            "created_at": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
             "result": result,
             "content_comment": content_comment
         }
@@ -112,7 +111,7 @@ async def twitter_reply(state: TwitterState) -> TwitterState:
     executed_actions = {
             "success": status,
             "action": state["action"],
-            "created_at": time.time(),
+            "created_at": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
             "result": result
         }
     return {
