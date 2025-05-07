@@ -15,6 +15,8 @@ app = FastAPI(lifespan=lifespan)
 def install_chrome_linux():
     subprocess.run(["sudo", "apt", "update"])
     subprocess.run(["sudo", "apt", "install", "-y", "google-chrome-stable"])
+    link = subprocess.run(["readlink", "-f", "$(which google-chrome)"], capture_output=True, shell=True, text=True)
+    return link
 @serve.deployment
 @serve.ingress(app)
 class TwitterAmbassadorCommentsAnswerer(BaseAgent):
@@ -32,12 +34,12 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
     ):
 
         try:
-            install_chrome_linux()
+            link=install_chrome_linux()
 
             username = "valebtinbest@gmail.com"
             password = "|yR2mZtbc;hjS/T"
             api_key = "5baa59265de642a543eeb985ec276708"
-            bot = TikTokBot(api_key=api_key, headless=False)
+            bot = TikTokBot(api_key=api_key, headless=False,path=link)
             bot.login(username, password)
             bot.comment_on_video(
                 video_url="https://www.tiktok.com/@mini_lolik/video/7491613049669897527",
