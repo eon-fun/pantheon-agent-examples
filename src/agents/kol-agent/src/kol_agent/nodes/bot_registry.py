@@ -18,6 +18,12 @@ BOT_ROLES = [
     "newbie"       # Newbie
 ]
 
+ACTIONS = [
+    "twitter_like",
+    "twitter_comment",
+    "twitter_retweet"
+]
+
 async def get_twitter_credentials(account: str):
     """
     Gets the twitter credentials
@@ -64,6 +70,24 @@ async def get_available_bots(count: int) -> List[Dict[str, Any]]:
 
     return bots
 
+def update_bot_actions(bots: List[Dict[str, Any]], 
+                       raid_minutes: float, 
+                       type_of_action: str, 
+                       bots_actions: List[Dict[str, Any]]):
+    """
+    Updates actions for the bots
+    """
+    for bot in bots:
+        delay = random.uniform(1, raid_minutes*60)
+        bots_actions.append({
+            "type": type_of_action,
+            "bot_id": bot["id"],
+            "role": bot["role"],
+            "account_access_token": bot["account_access_token"],
+            "user_id": bot["user_id"],
+            "delay": delay,
+            "content": None
+        })
 
 def plan_raid_actions(bots: List[Dict[str, Any]], raid_minutes: float):
     """
@@ -74,54 +98,19 @@ def plan_raid_actions(bots: List[Dict[str, Any]], raid_minutes: float):
     """
 
     config = get_config()
-    like_count = math.ceil(len(bots) * config.LIKE_PERCENTAGE)
-    comment_count = math.ceil(len(bots) * config.COMMENT_PERCENTAGE)
-    reply_count = math.ceil(len(bots) * config.REPLY_PERCENTAGE)
-    retweet_count = math.ceil(len(bots) * config.RETWEET_PERCENTAGE)
+    like_count = len(bots)
+    comment_count = len(bots)
+    retweet_count = len(bots)
 
-    actions = []
-    for bot in bots[:like_count]:
-        delay = random.uniform(1, raid_minutes*60)
-        actions.append({
-            "type": "twitter_like",
-            "bot_id": bot["id"],
-            "role": bot["role"],
-            "account_access_token": bot["account_access_token"],
-            "user_id": bot["user_id"],
-            "delay": delay,
-            "content": None
-        })
+    bots_actions = []
 
-    for bot in bots[:comment_count]:
-        delay = random.uniform(1, raid_minutes*60)
-        actions.append({
-            "type": "twitter_comment",
-            "bot_id": bot["id"],
-            "role": bot["role"],
-            "account_access_token": bot["account_access_token"],
-            "user_id": bot["user_id"],
-            "delay": delay,
-            "content": None
-        })
+    for action in ACTIONS:
+        update_bot_actions(bots, raid_minutes, action, bots_actions)
 
-    # Shuffle bots for random distribution
-    random.shuffle(bots)
 
-    for bot in bots[:retweet_count]:
-        delay = random.uniform(1, raid_minutes*60)
-        actions.append({
-            "type": "twitter_retweet",
-            "bot_id": bot["id"],
-            "role": bot["role"],
-            "account_access_token": bot["account_access_token"],
-            "user_id": bot["user_id"],
-            "delay": delay,
-            "content": None
-        })
+    message = f"Planned actions for the raid: {like_count} likes, {comment_count} comments, {retweet_count} retweets"
 
-    message = f"Planned actions for the raid: {like_count} likes, {comment_count} comments, {reply_count} replies"
-
-    return actions, message
+    return bots_actions, message
 
 
 async def bot_registry(state: RaidState):

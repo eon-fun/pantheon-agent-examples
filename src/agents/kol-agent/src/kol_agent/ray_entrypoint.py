@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from base_agent.ray_entrypoint import BaseAgent
 from fastapi import FastAPI
+from fastapi import BackgroundTasks
 from ray import serve
 from langfuse.callback import CallbackHandler
 from pydantic import BaseModel, Field
@@ -52,15 +53,18 @@ class KolAgent(BaseAgent):
         workflow = get_raid_workflow()
         self.graph = workflow.compile().with_config({"callbacks": [langfuse_handler]})
 
+    async def handle_raid(self, state: dict):
+        await self.graph.ainvoke(state)
+
     @app.post("/{goal}")
-    async def handle(self, goal: str, input: InputModel, plan: dict | None = None):
+    async def handle(self, goal: str, input: InputModel, background_tasks: BackgroundTasks, plan: dict | None = None):
         state = {
             "target_tweet_id": input.target_tweet_id,
             "bot_count": input.bot_count,
             "raid_minutes": input.raid_minutes,
             "target_user": input.target_user,
         }
-        await self.graph.ainvoke(state)
+        background_tasks.add_task(self.handle_raid, state)
         return OutputModel(success=True, message="Raid started")
 
     @app.get("/all_accounts")

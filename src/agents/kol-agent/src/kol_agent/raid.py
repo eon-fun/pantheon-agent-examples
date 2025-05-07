@@ -3,6 +3,7 @@ from kol_agent.nodes.bot_registry import bot_registry
 from kol_agent.models.raid_state import RaidState
 from langgraph.constants import Send
 from kol_agent.nodes.twitter_api_handler import twitter_like, twitter_comment, twitter_retweet
+from kol_agent.nodes.bot_registry import ACTIONS
 
 
 def continue_to_twitter(state: RaidState):
@@ -29,8 +30,7 @@ def get_raid_workflow() -> StateGraph:
     workflow.add_edge(START, "bot_registry")
 
     # From bot selection to action planner
-    workflow.add_conditional_edges("bot_registry", continue_to_twitter, [
-                                "twitter_like", "twitter_comment", "twitter_retweet"])
+    workflow.add_conditional_edges("bot_registry", continue_to_twitter, ACTIONS)
 
     # From Twitter API handler to action planner
     workflow.add_edge("twitter_like", END)
