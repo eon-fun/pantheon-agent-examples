@@ -30,3 +30,7 @@ tik-tok-package = {source = "pantheon"}
 
 [project.entry-points."agent.entrypoint"]
 target = "tik_tok_test_agent.entrypoint:get_agent"
+
+
+[tool.poetry]
+packages = [{include = "*", from="src"}]
