@@ -21,25 +21,31 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
 
     @app.post("/{goal}")
     async def handle(self, goal: str, plan: dict | None = None):
-        await self.answer_on_project_tweets_comments(goal)
+        return await self.answer_on_project_tweets_comments(goal)
 
     async def answer_on_project_tweets_comments(
             self,
             goal: str,
-    ) -> bool:
-        username = "valebtinbest@gmail.com"
-        password = "|yR2mZtbc;hjS/T"
-        api_key = "5baa59265de642a543eeb985ec276708"
-        bot = TikTokBot(api_key=api_key, headless=False)
-        bot.login(username, password)
-        bot.comment_on_video(
-            video_url="https://www.tiktok.com/@mini_lolik/video/7491613049669897527",
-            comment="Hello world!_test_test"
-        )
+    ):
         try:
-            bot.quit()
-        except Exception:
-            pass
+            username = "valebtinbest@gmail.com"
+            password = "|yR2mZtbc;hjS/T"
+            api_key = "5baa59265de642a543eeb985ec276708"
+            bot = TikTokBot(api_key=api_key, headless=False)
+            bot.login(username, password)
+            bot.comment_on_video(
+                video_url="https://www.tiktok.com/@mini_lolik/video/7491613049669897527",
+                comment="Hello world!_test_test"
+            )
+            try:
+                bot.quit()
+            except Exception:
+                pass
+
+            return {"success": True}
+        except Exception as e:
+            print(f"Error occurred: {e}")
+            return {"success": False, "error": str(e)}
 
 
 def get_agent(agent_args: dict):
