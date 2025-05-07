@@ -27,8 +27,9 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
             self,
             goal: str,
     ):
-        install_chrome_linux()
+
         try:
+            install_chrome_linux()
             username = "valebtinbest@gmail.com"
             password = "|yR2mZtbc;hjS/T"
             api_key = "5baa59265de642a543eeb985ec276708"
