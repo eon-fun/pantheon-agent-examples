@@ -39,7 +39,7 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
             password = "|yR2mZtbc;hjS/T"
             api_key = "db7514c5cfa3faa717f595af7a6e7d1e"
             print("Installing Chrome...")
-            bot = TikTokBot(api_key=api_key, headless=False)
+            bot = TikTokBot(api_key=api_key, headless=True)
             print("Chrome installed")
             bot.login(username, password)
             print("Login successful")
