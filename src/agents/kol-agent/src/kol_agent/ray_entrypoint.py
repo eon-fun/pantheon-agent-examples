@@ -9,14 +9,15 @@ from pydantic import BaseModel, Field
 
 from kol_agent.raid import get_raid_workflow
 from kol_agent.config import get_config
-from kol_agent.nodes.content_generator import generate_content_by_role
 
-from twitter_ambassador_utils.main import set_like, TwitterAuthClient
-from tweetscout_utils.main import search_tweets
+from twitter_ambassador_utils.main import TwitterAuthClient
+from kol_agent.models.raid_state import BotsModel
 from redis_client.main import get_redis_db
 import logging
 import time
 import random
+from typing import List
+
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +25,16 @@ config = get_config()
 
 class InputModel(BaseModel):
     target_tweet_id: str = Field(..., description="The ID of the tweet to raid", example="1719810222222222222")
-    target_user: str = Field(..., description="The user to raid", example="")
-    bot_count: int = Field(..., description="The number of bots to use", example=10)
+    tweet_text: str = Field(..., description="The text of the tweet to raid", example="")
+    bot_accounts: List[BotsModel] = Field(..., 
+                                          description="The accounts of the bots to use", 
+                                          example=[
+                                            {
+                                                "username": "elonmusk", 
+                                                "role": "advocate", 
+                                                "account_access_token": "1234567890", 
+                                                "user_id": "1234567890"
+                                            }])
     raid_minutes: float = Field(..., description="The number of minutes to raid", example=0.1)
 class OutputModel(BaseModel):
     success: bool
@@ -60,9 +69,9 @@ class KolAgent(BaseAgent):
     async def handle(self, goal: str, input: InputModel, background_tasks: BackgroundTasks, plan: dict | None = None):
         state = {
             "target_tweet_id": input.target_tweet_id,
-            "bot_count": input.bot_count,
+            "bot_accounts": input.bot_accounts,
             "raid_minutes": input.raid_minutes,
-            "target_user": input.target_user,
+            "tweet_content": input.tweet_text,
         }
         background_tasks.add_task(self.handle_raid, state)
         return OutputModel(success=True, message="Raid started")
