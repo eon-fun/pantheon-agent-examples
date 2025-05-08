@@ -49,6 +49,7 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
             )
             print("Comment posted successfully")
             try:
+                print("Quitting bot...")
                 bot.quit()
             except Exception:
                 pass
