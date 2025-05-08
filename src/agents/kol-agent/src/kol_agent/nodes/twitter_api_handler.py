@@ -1,4 +1,5 @@
 import time
+import asyncio
 from twitter_ambassador_utils.main import set_like, retweet, create_post
 import logging
 
@@ -9,7 +10,7 @@ async def twitter_retweet(state: TwitterState) -> TwitterState:
     """
     Performs a retweet
     """
-    time.sleep(state["action"]["delay"])
+    await asyncio.sleep(state["action"]["delay"])
     status = True
     try:
         result = await retweet(
@@ -36,7 +37,7 @@ async def twitter_like(state: TwitterState) -> TwitterState:
     """
     Performs a like
     """
-    time.sleep(state["action"]["delay"])
+    await asyncio.sleep(state["action"]["delay"])
     status = True
     try:
         result = await set_like(
@@ -66,7 +67,7 @@ async def twitter_comment(state: TwitterState) -> TwitterState:
     """
     content_comment = generate_content_by_role(
             state["action"]["role"], state["tweet_content"])
-    time.sleep(state["action"]["delay"])
+    await asyncio.sleep(state["action"]["delay"])
     status = True
     try:
         result = await create_post(
@@ -96,7 +97,7 @@ async def twitter_reply(state: TwitterState) -> TwitterState:
     """
     content_reply = generate_content_by_role(
             state["action"]["role"], state["tweet_content"])
-    time.sleep(state["action"]["delay"])
+    await asyncio.sleep(state["action"]["delay"])
     status = True
     try:
         result = await create_post(
