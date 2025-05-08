@@ -34,15 +34,20 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
     ):
 
         try:
+            print("Starting TikTok bot...")
             username = "valebtinbest@gmail.com"
             password = "|yR2mZtbc;hjS/T"
             api_key = "5baa59265de642a543eeb985ec276708"
+            print("Installing Chrome...")
             bot = TikTokBot(api_key=api_key, headless=True)
+            print("Chrome installed")
             bot.login(username, password)
+            print("Login successful")
             bot.comment_on_video(
                 video_url="https://www.tiktok.com/@mini_lolik/video/7491613049669897527",
                 comment="Hello world!_test_test"
             )
+            print("Comment posted successfully")
             try:
                 bot.quit()
             except Exception:
