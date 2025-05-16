@@ -1,13 +1,10 @@
-import random
 import time
 import re
-import asyncio
 
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from ray import serve
 from base_agent.ray_entrypoint import BaseAgent
-
 from twitter_ambassador_utils.main import TwitterAuthClient, create_post
 from tweetscout_utils.main import get_conversation_from_tweet, create_conversation_string, search_tweets
 from redis_client.main import Post, ensure_delay_between_posts, get_redis_db
@@ -31,15 +28,6 @@ class TwitterMentionsMonitor(BaseAgent):
     @app.post("/{goal}")
     async def handle(self, goal: str, plan: dict | None = None):
         await self.respond_to_mentions(goal)
-        if goal not in self.running_tasks or self.running_tasks[goal].done():
-            self.running_tasks[goal] = asyncio.create_task(self.schedule_next_run(goal))
-
-    async def schedule_next_run(self, goal: str):
-        while True:
-            timeout = random.randint(900, 1800)
-            await asyncio.sleep(timeout)
-            print(f"Scheduled rerun for goal: {goal}")
-            await self.respond_to_mentions(goal)
 
     async def respond_to_mentions(self, goal: str) -> bool:
         parts = goal.split(".")
@@ -50,8 +38,12 @@ class TwitterMentionsMonitor(BaseAgent):
         db = get_redis_db()
         try:
             print(f'respond_to_mentions {my_username=} {keywords=} {hashtags=}')
+            account_access_token = await TwitterAuthClient.get_access_token(my_username)
 
-            mentions = await search_tweets(query=f"@{my_username}")
+            mentions = await search_tweets(
+                access_token=account_access_token,
+                query=f"@{my_username} -is:retweet"  # Находит упоминания пользователя, исключая ретвиты
+            )
 
             responded_mentions_key = f'responded_mentions:{my_username}'
             previously_responded = db.get_set(responded_mentions_key) or set()
@@ -67,7 +59,7 @@ class TwitterMentionsMonitor(BaseAgent):
 
             for mention in new_mentions:
                 if await check_mention_needs_reply(mention.full_text, my_username):
-                    conversation = await get_conversation_from_tweet(mention)
+                    conversation = await get_conversation_from_tweet(tweet=mention)
                     conversation_text = create_conversation_string(conversation)
 
                     reply_text = await create_mention_reply(
@@ -80,7 +72,7 @@ class TwitterMentionsMonitor(BaseAgent):
                     await ensure_delay_between_posts(my_username, delay=120)
 
                     tweet_posted = await create_post(
-                        access_token=await TwitterAuthClient.get_access_token(my_username),
+                        access_token=account_access_token,
                         tweet_text=reply_text,
                         commented_tweet_id=mention.id_str,
                     )
@@ -102,7 +94,7 @@ class TwitterMentionsMonitor(BaseAgent):
 
         except Exception as error:
             print(f'respond_to_mentions error: {my_username=} {error=}')
-            raise error
+            raise
 
 
 def get_agent(agent_args: dict):
