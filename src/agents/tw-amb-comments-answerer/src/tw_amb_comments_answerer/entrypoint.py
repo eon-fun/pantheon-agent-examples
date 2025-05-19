@@ -1,7 +1,5 @@
-import random
 import time
 import re
-import asyncio
 
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
@@ -12,7 +10,6 @@ from twitter_ambassador_utils.main import TwitterAuthClient, create_post
 from tweetscout_utils.main import get_conversation_from_tweet, create_conversation_string, search_tweets
 from redis_client.main import Post, ensure_delay_between_posts, get_redis_db
 from tw_amb_comments_answerer.commands import check_answer_is_needed, create_comment_to_comment
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -31,15 +28,6 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
     @app.post("/{goal}")
     async def handle(self, goal: str, plan: dict | None = None):
         await self.answer_on_project_tweets_comments(goal)
-        if goal not in self.running_tasks or self.running_tasks[goal].done():
-            self.running_tasks[goal] = asyncio.create_task(self.schedule_next_run(goal))
-
-    async def schedule_next_run(self, goal: str):
-        while True:
-            timeout = random.randint(1800, 3600)
-            await asyncio.sleep(timeout)
-            print(f"Scheduled rerun for goal: {goal}")
-            await self.answer_on_project_tweets_comments(goal)
 
     async def answer_on_project_tweets_comments(
             self,
@@ -54,13 +42,16 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
             print(f'answer_on_project_tweets_comments {my_username=} {project_username=} {keywords=} {themes=}')
 
             # Формируем поисковые запросы
-            search_queries = keywords + [f"#{theme}" for theme in themes]
+            search_queries = keywords + themes
             all_project_comments = []
 
-            # Ищем комментарии по всем ключевым словам и темам
+            # Получаем токен доступа для пользователя
+            account_access_token = await TwitterAuthClient.get_access_token(my_username)
+
             for query in search_queries:
                 comments = await search_tweets(
-                    query=f"{query} filter:replies to:{project_username}"
+                    access_token=account_access_token,
+                    query=f"{query} is:reply to:{project_username}"
                 )
                 all_project_comments.extend(comments)
 
@@ -78,7 +69,7 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
 
             for tweet in tweets_to_comment:
                 if await check_answer_is_needed(tweet.full_text, my_username=my_username):
-                    conversation = await get_conversation_from_tweet(tweet)
+                    conversation = await get_conversation_from_tweet(tweet=tweet)
                     comment_text = await create_comment_to_comment(
                         comment_text=create_conversation_string(conversation),
                         keywords=keywords,
@@ -88,7 +79,7 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
 
                     await ensure_delay_between_posts(my_username, delay=60)
                     tweet_posted = await create_post(
-                        access_token=await TwitterAuthClient.get_access_token(my_username),
+                        access_token=account_access_token,
                         tweet_text=comment_text,
                         commented_tweet_id=tweet.id_str,
                     )
@@ -109,7 +100,7 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
             return True
         except Exception as error:
             print(f'answer_on_project_tweets_comments error: {my_username=} {error=}')
-            raise error
+            raise
 
 
 def get_agent(agent_args: dict):

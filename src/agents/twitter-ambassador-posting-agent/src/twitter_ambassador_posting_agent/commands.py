@@ -214,9 +214,15 @@ async def _handle_quote_tweet(project_tweet: Tweet, my_tweets: list[Post], usern
     return post
 
 
-async def _handle_regular_tweet(project_tweets: list[Tweet], my_tweets: list[Post], username: str, keywords: list[str],
-                                themes: list[str]) -> Post:
+async def _handle_regular_tweet(
+        project_tweets: list[Tweet], 
+        my_tweets: list[Post], 
+        username: str, 
+        keywords: list[str],
+        themes: list[str],
+    ) -> Post | None:
     """Regular tweet about project"""
+    print(f'Fetching tweet text for keyword: {keywords}, themes: {themes}')
     tweet_text = await _create_tweet(
         project_tweets=[tweet.full_text for tweet in project_tweets],
         my_tweets=[tweet.text for tweet in my_tweets],
@@ -225,8 +231,13 @@ async def _handle_regular_tweet(project_tweets: list[Tweet], my_tweets: list[Pos
         themes=themes
     )
 
+    print(f'Fetching access token for twitter')
+    access_token = await TwitterAuthClient.get_access_token(username)
+    print(f'Fetched access token successfully')
+
+    print(f'Trying to create a post with tweet text: {tweet_text}')
     result = await create_post(
-        access_token=await TwitterAuthClient.get_access_token(username),
+        access_token=access_token,
         tweet_text=tweet_text,
     )
     if result is None or 'data' not in result or 'id' not in result['data']:
@@ -239,6 +250,7 @@ async def _handle_regular_tweet(project_tweets: list[Tweet], my_tweets: list[Pos
         sender_username=username,
         timestamp=int(time.time())
     )
+    print(f'Storing user post to DB')
     db.add_user_post(username, post)
     db.save_tweet_link('create_ambassador_tweet', result['data']['id'])
     return post
@@ -246,15 +258,51 @@ async def _handle_regular_tweet(project_tweets: list[Tweet], my_tweets: list[Pos
 
 async def _handle_news_tweet(my_tweets: list[Post], username: str, keywords: list[str], themes: list[str]) -> Post:
     """Tweet about news using project context"""
-    since = (datetime.utcnow() - timedelta(days=1)).strftime("%Y-%m-%d_%H:%M:%S_UTC")
 
-    # Используем keywords и themes для поиска новостей
-    search_queries = keywords + [f"#{theme}" for theme in themes]
     all_news_tweets = []
 
-    for query in search_queries:
-        news = await search_tweets(f"{query} min_faves:100 -filter:replies lang:en since:{since}")
-        all_news_tweets.extend(tweet.full_text for tweet in news if len(tweet.full_text) > 200)
+    # Обрабатываем ключевые слова
+    for keyword in keywords:
+        try:
+            # Создаем простой запрос для каждого ключевого слова
+            simple_query = f"{keyword} lang:en -is:retweet"
+            news = await search_tweets(query=simple_query)
+
+            # Фильтруем результаты после получения
+            filtered_news = [tweet for tweet in news
+                             if tweet.favorite_count >= 100
+                             and tweet.in_reply_to_status_id_str is None
+                             and len(tweet.full_text) > 200]
+
+            all_news_tweets.extend(
+                tweet.full_text for tweet in filtered_news[:2])  # Берем только 2 твита для каждого запроса
+        except Exception as e:
+            print(f"Error searching for news with keyword {keyword}: {e}")
+            continue
+
+    # Обрабатываем темы (хэштеги)
+    for theme in themes:
+        try:
+            # Создаем простой запрос для каждой темы
+            simple_query = f"#{theme} lang:en -is:retweet"
+            news = await search_tweets(query=simple_query)
+
+            # Фильтруем результаты после получения
+            filtered_news = [tweet for tweet in news
+                             if tweet.favorite_count >= 100
+                             and tweet.in_reply_to_status_id_str is None
+                             and len(tweet.full_text) > 200]
+
+            all_news_tweets.extend(
+                tweet.full_text for tweet in filtered_news[:2])  # Берем только 2 твита для каждого запроса
+        except Exception as e:
+            print(f"Error searching for news with theme #{theme}: {e}")
+            continue
+
+    # Если не нашли новостей, вернем None
+    if not all_news_tweets:
+        print("No news tweets found")
+        return None
 
     tweet_text = await _create_news_tweet(
         my_tweets=[tweet.text for tweet in my_tweets],
@@ -270,7 +318,7 @@ async def _handle_news_tweet(my_tweets: list[Post], username: str, keywords: lis
     )
     if result is None or 'data' not in result or 'id' not in result['data']:
         print(f"create_post did not return the expected data: {result}")
-        return
+        return None
 
     post = Post(
         id=result['data']['id'],

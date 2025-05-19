@@ -1,5 +1,4 @@
 import re
-
 from send_openai_request.main import send_openai_request
 
 PROMPT = """DONT USE HASHTAG You are an AI and crypto enthusiast with a vision for the future of decentralized tech.    

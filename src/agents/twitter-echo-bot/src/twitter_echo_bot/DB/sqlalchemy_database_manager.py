@@ -9,7 +9,7 @@ from sqlalchemy.orm import DeclarativeBase
 from typing_extensions import AsyncGenerator
 
 from twitter_echo_bot.config.config import config
-from agents_tools_logger.main import log
+from loguru import logger
 
 DATABASE_URL = config.db.url
 
@@ -81,7 +81,7 @@ def handle_exceptions(
         try:
             return await func(*args, **kwargs)
         except Exception as e:
-            log.error(f"Ошибка в методе {func.__name__}: {e}", exc_info=True)
+            logger.error(f"Error in {func.__name__}: {e}", exc_info=True)
             error_msg = f"Error in database: {e}"
             raise RuntimeError(error_msg) from e
 

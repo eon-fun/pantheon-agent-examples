@@ -11,13 +11,12 @@ from config.config import config
 
 from DB.sqlalchemy_database_manager import init_models, get_db
 from ray import serve
-from agents_tools_logger.main import log
 from tools.create_tweets_service import CreateTweetsService
 from tools.get_tweets_service import TwitterCollectorClient
 from twitter_echo_bot.DB.models.users_models import PGUser
 from twitter_echo_bot.services.tracked_accounts_service import update_user_tracked_accounts_service
 from twitter_echo_bot.services.user_service import create_user_service, update_user_service, get_user_service
-
+from loguru import logger
 
 async def init_app():
     await init_models()
@@ -33,7 +32,7 @@ async def run_background_task():
                 await client.start_parsing_tweets()
                 await asyncio.sleep(500)
             except Exception as e:
-                log.error(f"Ошибка при сборе твитов: {e}")
+                logger.error(f"Error when fetching tweets: {e}")
 
     async def create_tweets():
         while True:
@@ -42,7 +41,7 @@ async def run_background_task():
                 await service.start()
                 await asyncio.sleep(5)
             except Exception as e:
-                log.error(f"Ошибка при создании твитов: {e}")
+                logger.error(f"Error when fetching tweets: {e}")
 
     tasks = [
         asyncio.create_task(start_collecting_tweets()),
@@ -54,10 +53,10 @@ async def run_background_task():
 
 @asynccontextmanager
 async def lifespan(application: FastAPI):
-    log.info("Application startup")
+    logger.info("Application startup")
     await run_background_task()
     yield
-    log.info("Application shutdown")
+    logger.info("Application shutdown")
 
 
 app = FastAPI(

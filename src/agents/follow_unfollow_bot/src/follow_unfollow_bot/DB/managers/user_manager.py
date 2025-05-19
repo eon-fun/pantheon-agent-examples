@@ -8,7 +8,6 @@ from follow_unfollow_bot.DB.managers.base import BaseAlchemyManager
 from follow_unfollow_bot.DB.models import AlchemyUser
 from follow_unfollow_bot.DB.models.users_model import PGUserModel
 
-
 class AlchemyUsersManager(BaseAlchemyManager):
     def __init__(self, session: AsyncSession):
         super().__init__(session)
