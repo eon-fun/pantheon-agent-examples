@@ -1,11 +1,14 @@
 from typing import List, Dict, Any
 import random
 import math
-
-from kol_agent.models.raid_state import RaidState
+import logging
+from kol_agent.models.raid_state import RaidState, BotsModel
 from kol_agent.config import get_config
-from kol_agent.api.twitter import get_tweet
+from redis_client.main import get_redis_db
 
+
+from tweetscout_utils.main import get_tweet_by_link
+from twitter_ambassador_utils.main import TwitterAuthClient
 
 # Bot roles
 BOT_ROLES = [
@@ -16,35 +19,32 @@ BOT_ROLES = [
     "newbie"       # Newbie
 ]
 
+ACTIONS = [
+    "twitter_like",
+    "twitter_comment",
+    "twitter_retweet"
+]
 
-def get_available_bots(count: int) -> List[Dict[str, Any]]:
+def update_bot_actions(bots: List[BotsModel], 
+                       raid_minutes: float, 
+                       type_of_action: str, 
+                       bots_actions: List[Dict[str, Any]]):
     """
-    Returns a list of available bots
-
-    Returns:
-        List[Dict[str, Any]]: List of bots
+    Updates actions for the bots
     """
-    # In a real application, there would be a request to the DB or API here
-    # Here we create mock bots for testing
+    for bot in bots:
+        delay = random.uniform(1, raid_minutes*60)
+        bots_actions.append({
+            "type": type_of_action,
+            "username": bot.username,
+            "role": bot.role,
+            "account_access_token": bot.account_access_token,
+            "user_id": bot.user_id,
+            "delay": delay,
+            "content": None
+        })
 
-    # Create "count" bots with different roles and styles
-    bots = []
-    for i in range(count):
-        bot_id = f"bot_{i+1}"
-        role = random.choice(BOT_ROLES)
-
-        # Create a bot persona
-        bot = {
-            "id": bot_id,
-            "role": role
-        }
-
-        bots.append(bot)
-
-    return bots
-
-
-def plan_raid_actions(bots: List[Dict[str, Any]], raid_minutes: float):
+def plan_raid_actions(bots: List[BotsModel], raid_minutes: float):
     """
     Plans actions for the raid
 
@@ -52,52 +52,22 @@ def plan_raid_actions(bots: List[Dict[str, Any]], raid_minutes: float):
         state (RaidState): Current state
     """
 
-    config = get_config()
-    like_count = math.ceil(len(bots) * config.LIKE_PERCENTAGE)
-    comment_count = math.ceil(len(bots) * config.COMMENT_PERCENTAGE)
-    reply_count = math.ceil(len(bots) * config.REPLY_PERCENTAGE)
-    retweet_count = math.ceil(len(bots) * config.RETWEET_PERCENTAGE)
+    like_count = len(bots)
+    comment_count = len(bots)
+    retweet_count = len(bots)
 
-    actions = []
-    for bot in bots[:like_count]:
-        delay = random.uniform(1, raid_minutes*60)
-        actions.append({
-            "type": "twitter_like",
-            "bot_id": bot["id"],
-            "role": bot["role"],
-            "delay": delay,
-            "content": None
-        })
+    bots_actions = []
 
-    for bot in bots[:comment_count]:
-        delay = random.uniform(1, raid_minutes*60)
-        actions.append({
-            "type": "twitter_comment",
-            "bot_id": bot["id"],
-            "role": bot["role"],
-            "delay": delay,
-            "content": None
-        })
-
-    # Shuffle bots for random distribution
-    random.shuffle(bots)
-
-    for bot in bots[:retweet_count]:
-        delay = random.uniform(1, raid_minutes*60)
-        actions.append({
-            "type": "twitter_retweet",
-            "bot_id": bot["id"],
-            "role": bot["role"],
-            "delay": delay,
-            "content": None
-        })
-
-    message = f"Planned actions for the raid: {like_count} likes, {comment_count} comments, {reply_count} replies"
-
-    return actions, message
+    for action in ACTIONS:
+        update_bot_actions(bots, raid_minutes, action, bots_actions)
 
 
-def bot_registry(state: RaidState):
+    message = f"Planned actions for the raid: {like_count} likes, {comment_count} comments, {retweet_count} retweets"
+
+    return bots_actions, message
+
+
+async def bot_registry(state: RaidState):
     """
     LangGraph node for bot management
 
@@ -107,27 +77,18 @@ def bot_registry(state: RaidState):
     Returns:
         RaidState: Updated state
     """
-    # Determine the number of bots
-    bot_count = state["bot_count"]
 
-    # Select bots for the task
-    selected_bots = get_available_bots(bot_count)
 
-    # Update state depending on the task type
-    # updated_state = state.copy()
     updated_state = {}
-    updated_state["tweet_content"] = get_tweet(state["target_tweet_id"])["content"]
+    updated_state["tweet_content"] = state.get("tweet_content", "")
+
     updated_state["messages"] = state.get("messages", [])
 
     bots_actions, message = plan_raid_actions(
-        selected_bots, state["raid_minutes"])
+        state["bot_accounts"], state["raid_minutes"])
     updated_state["bots_actions"] = bots_actions
 
     # Add message to log
-    updated_state["messages"].append({
-        "type": "bot_assignment",
-        "content": f"Selected {len(selected_bots)} bots for the raid"
-    })
     updated_state["messages"].append({
         "type": "bot_assignment",
         "content": message
