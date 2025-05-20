@@ -1,6 +1,6 @@
 [project]
 name = "twitter-echo-bot"
-version = "0.0.1"
+version = "0.1.0"
 description = "This is Twitter bot that collect posts of selected users and repost it after promt processing"
 authors = [
     {name = "bychynski.valiantsin@gmail.com"}
