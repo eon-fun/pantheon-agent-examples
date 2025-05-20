@@ -11,7 +11,6 @@ from tweetscout_utils.main import get_conversation_from_tweet, create_conversati
 from redis_client.main import Post, ensure_delay_between_posts, get_redis_db
 from tw_amb_comments_answerer.commands import check_answer_is_needed, create_comment_to_comment
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
@@ -70,7 +69,7 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
 
             for tweet in tweets_to_comment:
                 if await check_answer_is_needed(tweet.full_text, my_username=my_username):
-                    conversation = await get_conversation_from_tweet(access_token=account_access_token, tweet=tweet)
+                    conversation = await get_conversation_from_tweet(tweet=tweet)
                     comment_text = await create_comment_to_comment(
                         comment_text=create_conversation_string(conversation),
                         keywords=keywords,
@@ -101,7 +100,7 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
             return True
         except Exception as error:
             print(f'answer_on_project_tweets_comments error: {my_username=} {error=}')
-            raise error
+            raise
 
 
 def get_agent(agent_args: dict):

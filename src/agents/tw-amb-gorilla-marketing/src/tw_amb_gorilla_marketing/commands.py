@@ -4,7 +4,6 @@ from twitter_ambassador_utils.main import set_like, TwitterAuthClient
 from tweetscout_utils.main import Tweet, search_tweets
 from send_openai_request.main import send_openai_request
 
-
 PROMPT_FOR_CHECK = """You are a technology and Web3 enthusiast focused on AI and blockchain innovations.
 
 Your task is to analyze tweets and determine if they discuss topics related to our focus areas.

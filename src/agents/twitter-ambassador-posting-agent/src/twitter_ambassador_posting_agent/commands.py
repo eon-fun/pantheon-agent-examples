@@ -214,9 +214,15 @@ async def _handle_quote_tweet(project_tweet: Tweet, my_tweets: list[Post], usern
     return post
 
 
-async def _handle_regular_tweet(project_tweets: list[Tweet], my_tweets: list[Post], username: str, keywords: list[str],
-                                themes: list[str]) -> Post:
+async def _handle_regular_tweet(
+        project_tweets: list[Tweet], 
+        my_tweets: list[Post], 
+        username: str, 
+        keywords: list[str],
+        themes: list[str],
+    ) -> Post | None:
     """Regular tweet about project"""
+    print(f'Fetching tweet text for keyword: {keywords}, themes: {themes}')
     tweet_text = await _create_tweet(
         project_tweets=[tweet.full_text for tweet in project_tweets],
         my_tweets=[tweet.text for tweet in my_tweets],
@@ -225,8 +231,13 @@ async def _handle_regular_tweet(project_tweets: list[Tweet], my_tweets: list[Pos
         themes=themes
     )
 
+    print(f'Fetching access token for twitter')
+    access_token = await TwitterAuthClient.get_access_token(username)
+    print(f'Fetched access token successfully')
+
+    print(f'Trying to create a post with tweet text: {tweet_text}')
     result = await create_post(
-        access_token=await TwitterAuthClient.get_access_token(username),
+        access_token=access_token,
         tweet_text=tweet_text,
     )
     if result is None or 'data' not in result or 'id' not in result['data']:
@@ -239,6 +250,7 @@ async def _handle_regular_tweet(project_tweets: list[Tweet], my_tweets: list[Pos
         sender_username=username,
         timestamp=int(time.time())
     )
+    print(f'Storing user post to DB')
     db.add_user_post(username, post)
     db.save_tweet_link('create_ambassador_tweet', result['data']['id'])
     return post
@@ -254,8 +266,7 @@ async def _handle_news_tweet(my_tweets: list[Post], username: str, keywords: lis
         try:
             # Создаем простой запрос для каждого ключевого слова
             simple_query = f"{keyword} lang:en -is:retweet"
-            news = await search_tweets(access_token=await TwitterAuthClient.get_access_token(username),
-                                       query=simple_query)
+            news = await search_tweets(query=simple_query)
 
             # Фильтруем результаты после получения
             filtered_news = [tweet for tweet in news
@@ -274,8 +285,7 @@ async def _handle_news_tweet(my_tweets: list[Post], username: str, keywords: lis
         try:
             # Создаем простой запрос для каждой темы
             simple_query = f"#{theme} lang:en -is:retweet"
-            news = await search_tweets(access_token=await TwitterAuthClient.get_access_token(username),
-                                       query=simple_query)
+            news = await search_tweets(query=simple_query)
 
             # Фильтруем результаты после получения
             filtered_news = [tweet for tweet in news

@@ -19,6 +19,11 @@ class AbstractAgentOutputModel(pydantic.BaseModel):
     ...
 
 
+class AbstractChatResponse(pydantic.BaseModel):
+    response_text: str
+    action: str | None = None
+
+
 class AbstractExecutor(ABC):
     """Abstract interface for agent execution engines."""
 
@@ -32,6 +37,45 @@ class AbstractExecutor(ABC):
 
         Returns:
             A dictionary mapping step IDs to Task objects representing the plan
+        """
+        pass
+
+    @abstractmethod
+    def chat(self, prompt: Any, **kwargs) -> str:
+        """Generate a chat response based on a prompt and additional parameters.
+
+        Args:
+            prompt: The prompt to use for further chat conversation
+            **kwargs: Additional parameters to use in chatting
+
+        Returns:
+            An str with response
+        """
+        pass
+
+    @abstractmethod
+    def classify_intent(self, prompt: Any, **kwargs) -> str:
+        """Classifies user intent based on a prompt and additional parameters.
+
+        Args:
+            prompt: The prompt to use for intent classification
+            **kwargs: Additional parameters to use in chatting
+
+        Returns:
+            An str with intent
+        """
+        pass
+
+    @abstractmethod
+    def reconfigure(self, prompt: Any, **kwargs) -> dict:
+        """Create new config bases on the currenct config and the user reuqest
+
+        Args:
+            prompt: The prompt to use for updating config
+            **kwargs: Additional parameters to use in chatting
+
+        Returns:
+            A dict with the updated config
         """
         pass
 
@@ -51,6 +95,41 @@ class AbstractPromptBuilder(ABC):
             A prompt object that can be used by an executor
         """
         pass
+
+    @abstractmethod
+    def generate_chat_prompt(self, *args, **kwargs) -> Any:
+        """Generate a prompt for chat.
+
+        Args:
+            *args: Positional arguments for prompt generation
+            **kwargs: Keyword arguments for prompt generation
+
+        Returns:
+            A prompt object that can be used by an executor
+        """
+        pass
+
+    @abstractmethod
+    def generate_intent_classifier_prompt(self, *args, **kwargs) -> Any:
+        """Generat a prompt for intent classification
+        Args:
+            *args: Positional arguments for prompt generation
+            **kwargs: Keyword arguments for prompt generation
+
+        Returns:
+            A prompt object that can be used by an executor
+        """
+
+    @abstractmethod
+    def generate_reconfigure_prompt(self, *args, **kwargs) -> Any:
+        """Generat a prompt for reconfiguration
+        Args:
+            *args: Positional arguments for prompt generation
+            **kwargs: Keyword arguments for prompt generation
+
+        Returns:
+            A prompt object that can be used by an executor
+        """
 
 
 class AbstractWorkflowRunner(ABC):
@@ -134,6 +213,14 @@ class AbstractAgent(ABC):
         Returns:
             A dictionary mapping step IDs to Task objects representing the plan
         """
+        pass
+
+    @abstractmethod
+    def chat(
+        self,
+        user_prompt: str,
+        **kwargs,
+    ) -> AbstractChatResponse:
         pass
 
     @abstractmethod

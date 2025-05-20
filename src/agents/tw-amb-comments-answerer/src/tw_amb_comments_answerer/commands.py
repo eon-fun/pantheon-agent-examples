@@ -1,5 +1,4 @@
 import re
-
 from send_openai_request.main import send_openai_request
 
 PROMPT_FOR_COMMENT = """DONT USE HASHTAG You are a technology community manager. Your task is to create a reply to the conversation using provided knowledge base context.

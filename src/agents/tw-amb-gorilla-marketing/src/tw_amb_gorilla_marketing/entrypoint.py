@@ -5,7 +5,6 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from ray import serve
 from base_agent.ray_entrypoint import BaseAgent
-
 from twitter_ambassador_utils.main import TwitterAuthClient, create_post
 from tweetscout_utils.main import search_tweets
 from tw_amb_gorilla_marketing.commands import check_tweets_for_gorilla_marketing, \
