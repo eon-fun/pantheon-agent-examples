@@ -1,5 +1,5 @@
 [tool.bumpversion]
-current_version = "0.1.0"
+current_version = "0.1.1"
 message = "Bump version of base-agent: {current_version} → {new_version}"
 commit = false
 tag = false
@@ -15,6 +15,11 @@ search = "version = \"{current_version}\""
 replace = "version = \"{new_version}\""
 
 [[tool.bumpversion.files]]
-filename = "chart/Chart.toml"
+filename = "chart/Chart.yaml"
 search = "version: {current_version}"
 replace = "version: {new_version}"
+
+[[tool.bumpversion.files]]
+filename = "src/base_agent/card/config.py"
+search = "version: str = '{current_version}'"
+replace  = "version: str = '{new_version}'"
