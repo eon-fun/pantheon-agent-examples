@@ -1,0 +1,47 @@
+[project]
+name = "twitter-ambassador-posting-agent"
+version = "0.0.29"
+description = "TwitterAmbassadorPostingAgent"
+authors = [{name = "k1llzzy",email = "gekachan04@gmail.com"}]
+readme = "README.md"
+requires-python = ">=3.10,<4"
+
+dependencies = [
+    "fastapi (>=0.115.8,<0.116.0)",
+    "pydantic-settings (>=2.7.1,<3.0.0)",
+    "aiogram (>=3.16.0)",
+    "loguru==0.7.3",
+    "requests (>=2.32.3)",
+    "jinja2 (==3.1.5)",
+    "redis-client (>=0.1.6)",
+    "twitter-ambassador-utils (>=0.1.6)",
+    "tweetscout-utils (==0.0.4)",
+    "send-openai-request (>=0.1.1)",
+]
+
+[tool.poetry]
+packages = [{include = "*", from="src"}]
+
+[[tool.poetry.source]]
+name = "pantheon"
+url = "https://pantheon-688567299207.d.codeartifact.eu-west-1.amazonaws.com/pypi/pantheon/simple/"
+priority = "primary"
+
+
+[tool.poetry.dependencies]
+redis-client = {source = "pantheon"}
+twitter-ambassador-utils = {source = "pantheon"}
+base-agent = {source = "pantheon"}
+tweetscout-utils = {source = "pantheon"}
+send-openai-request = {source = "pantheon"}
+
+[project.entry-points."agent.entrypoint"]
+target = "twitter_ambassador_posting_agent.entrypoint:get_agent"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.4"
+ray = { version = ">=2.42.1,<3.0.0", extras = ["serve"] }
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
