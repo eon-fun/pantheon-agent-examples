@@ -21,7 +21,7 @@ packages = [{include = "*", from="src"}]
 
 
 [tool.poetry.group.dev.dependencies]
-ray = {extras = ["serve"], version = "^2.42.1"}
+ray = {extras = ["serve"], version = "2.42.1"}
 pytest = "^8.3.4"
 
 

@@ -1,0 +1,52 @@
+[project]
+name = "telegram-listener"
+version = "0.1.0"
+description = "Telegram listener agent for collecting messages and populating knowledge base."
+authors = [{name = "Vlad D."}]
+readme = "README.md"
+requires-python = ">=3.10,<4"
+dependencies = [
+    "fastapi>=0.115.0,<0.116.0",
+    "uvicorn[standard]>=0.29.0,<0.30.0",
+    "telethon>=1.34.0,<2.0.0",
+    "pydantic>=2.7.0,<3.0.0",
+    "openai>=1.23.0,<2.0.0",
+    "qdrant-client>=1.9.0,<2.0.0",
+    "psycopg[binary]>=3.1.18,<4.0.0",
+    "python-dotenv>=1.0.0,<2.0.0",
+    "pytest>=8.0.0,<9.0.0",
+    "pytest-asyncio>=0.23.0,<0.24.0",
+    "ruff>=0.3.0,<0.4.0",
+    "redis-client (>=0.1.6)",
+]
+
+[[tool.poetry.source]]
+name = "pantheon"
+url = "https://pantheon-688567299207.d.codeartifact.eu-west-1.amazonaws.com/pypi/pantheon/simple/"
+priority = "primary"
+
+
+[tool.poetry.dependencies]
+services = { version = "^0.1.0", source = "pantheon" }
+redis-client = {source = "pantheon"}
+twitter-ambassador-utils = {source = "pantheon"}
+base-agent = {source = "pantheon"}
+tweetscout-utils = {source = "pantheon"}
+send-openai-request = {source = "pantheon"}
+
+
+[project.entry-points."agent.entrypoint"]
+target = "telegram_listener.entrypoint:get_agent"
+
+[tool.poetry]
+packages = [{include = "*", from="src"}]
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.4"
+ray = { version = ">=2.42.1,<3.0.0", extras = ["serve"] }
+
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api" 
