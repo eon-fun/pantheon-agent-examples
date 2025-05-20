@@ -1,4 +1,4 @@
-# Twitter Auto-Liker Agent (Ray Serve Implementation)
+# Twitter Auto Liker Agent (Ray Serve Implementation)
 
 A scalable Twitter engagement agent built on Ray Serve that automatically likes relevant tweets based on predefined keywords and themes.
 

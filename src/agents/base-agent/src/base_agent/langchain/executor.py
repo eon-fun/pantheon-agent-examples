@@ -1,12 +1,17 @@
-from langchain_core.output_parsers import StrOutputParser
+from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 
+from base_agent.abc import AbstractChatResponse, AbstractExecutor
 from base_agent.langchain.config import BasicLangChainConfig, LangChainConfigWithLangfuse
 from base_agent.prompt.parser import AgentOutputPlanParser
 
 
-class LangChainExecutor:
+class ChatResponse(AbstractChatResponse):
+    session_uuid: str
+
+
+class LangChainExecutor(AbstractExecutor):
     def __init__(self, config: BasicLangChainConfig | LangChainConfigWithLangfuse):
         self.config = config
 
@@ -25,7 +30,7 @@ class LangChainExecutor:
             )
         )
 
-    def generate_plan(self, prompt: PromptTemplate, **kwargs):
+    def generate_plan(self, prompt: PromptTemplate, **kwargs) -> str:
         agent = ChatOpenAI(callbacks=self._callbacks, model=self.config.openai_api_model)
         output_parser = StrOutputParser()
         if "available_functions" in kwargs:
@@ -33,11 +38,29 @@ class LangChainExecutor:
             output_parser = AgentOutputPlanParser(tools=kwargs["available_functions"])
 
         kwargs["available_functions"] = "\n".join(
-            [tool.render_openai_function_spec() for tool in kwargs["available_functions"]]
+            [tool.render_function_spec() for tool in kwargs["available_functions"]]
         )
 
         chain = prompt | agent | output_parser
 
+        return chain.invoke(input=kwargs)
+
+    def chat(self, prompt: PromptTemplate, **kwargs) -> str:
+        agent = ChatOpenAI(callbacks=self._callbacks, model=self.config.openai_api_model)
+        output_parser = StrOutputParser()
+        chain = prompt | agent | output_parser
+        return chain.invoke(input=kwargs)
+
+    def classify_intent(self, prompt: PromptTemplate, **kwargs) -> str:
+        agent = ChatOpenAI(callbacks=self._callbacks, model=self.config.openai_api_model)
+        output_parser = StrOutputParser()
+        chain = prompt | agent | output_parser
+        return chain.invoke(input=kwargs)
+
+    def reconfigure(self, prompt: PromptTemplate, **kwargs) -> dict:
+        agent = ChatOpenAI(callbacks=self._callbacks, model=self.config.openai_api_model)
+        output_parser = JsonOutputParser()
+        chain = prompt | agent | output_parser
         return chain.invoke(input=kwargs)
 
 

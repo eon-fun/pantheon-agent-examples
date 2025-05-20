@@ -1,26 +1,39 @@
 [project]
 name = "twitter-echo-bot"
-version = "0.0.1"
+version = "0.1.0"
 description = "This is Twitter bot that collect posts of selected users and repost it after promt processing"
 authors = [
     {name = "bychynski.valiantsin@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10,<4"
+
 dependencies = [
     "fastapi (>=0.115.11,<0.116.0)",
     "sqlalchemy (>=2.0.39,<3.0.0)",
-    "ray[serve] (>=2.43.0,<3.0.0)",
-    "agents-tools-logger (>=0.1.0)",
-    "send-openai-request (>=0.1.0)",
-    "tweetscout-utils (>=0.1.0)",
+    "loguru==0.7.3",
+    "tweetscout-utils (==0.0.3)",
+    "send-openai-request (>=0.1.1)",
 ]
 
+[[tool.poetry.source]]
+name = "pantheon"
+url = "https://pantheon-688567299207.d.codeartifact.eu-west-1.amazonaws.com/pypi/pantheon/simple/"
+priority = "primary"
+
+
+[tool.poetry.dependencies]
+base-agent = {source = "pantheon"}
+tweetscout-utils = {source = "pantheon"}
+send-openai-request = {source = "pantheon"}
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-
 [project.entry-points."agent.entrypoint"]
 target = "twitter_echo_bot.entrypoint:get_agent"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.4"
+ray = { version = ">=2.42.1,<3.0.0", extras = ["serve"] }
