@@ -1,13 +1,13 @@
 [tool.bumpversion]
 current_version = "0.1.0"
-message = "Bump version of twitter-echo-bot: {current_version} → {new_version}"
+message = "Bump version of agents/telegram-listener: {current_version} → {new_version}"
 commit = false
 tag = false
-tag_name = "agents/twitter-echo-bot-v{new_version}"
+tag_name = "agents/telegram-listener-v{new_version}"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)(\\.(?P<dev>dev\\d+)\\+(?P<branch>.*))?"
 serialize = ["{major}.{minor}.{patch}.{dev}+{branch}", "{major}.{minor}.{patch}"]
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"
 search = "version = \"{current_version}\""
-replace = "version = \"{new_version}\""
+replace = "version = \"{new_version}\"" 

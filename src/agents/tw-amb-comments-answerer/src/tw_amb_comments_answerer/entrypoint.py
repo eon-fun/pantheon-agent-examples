@@ -11,9 +11,11 @@ from tweetscout_utils.main import get_conversation_from_tweet, create_conversati
 from redis_client.main import Post, ensure_delay_between_posts, get_redis_db
 from tw_amb_comments_answerer.commands import check_answer_is_needed, create_comment_to_comment
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
+
 
 
 app = FastAPI(lifespan=lifespan)
