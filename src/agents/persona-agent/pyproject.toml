@@ -1,0 +1,39 @@
+[project]
+name = "persona-agent"
+version = "0.0.1"
+description = "An intelligent persona agent designed to simulate personalized behavior and process user requests with customized personality traits"
+authors = [
+    {name = "mdmeldon", email = "mdmeldon@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.10,<4"
+dependencies = [
+    "fastapi (>=0.115.8,<0.116.0)",
+    "send-openai-request (>=0.0.2, <0.1.0)",
+    "qdrant-client-custom (>=0.0.3, <0.1.0)",
+    "redis-client (>=0.1.0, <0.2.0)",
+]
+
+[project.entry-points."agent.entrypoint"]
+target = "persona_agent.ray_entrypoint:app"
+
+[tool.poetry]
+packages = [{include = "*", from="src"}]
+
+[tool.poetry.group.dev.dependencies]
+ray = {extras = ["serve"], version = "^2.42.1"}
+pytest = "^8.3.4"
+
+[[tool.poetry.source]]
+name = "pantheon"
+url = "https://pantheon-688567299207.d.codeartifact.eu-west-1.amazonaws.com/pypi/pantheon/simple/"
+priority = "supplemental"
+
+[tool.poetry.dependencies]
+send-openai-request = {source = "pantheon"}
+qdrant-client-custom = {source = "pantheon"}
+redis-client = {source = "pantheon"}
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
