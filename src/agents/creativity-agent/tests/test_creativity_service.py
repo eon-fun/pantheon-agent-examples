@@ -1,5 +1,3 @@
-# tests/test_creativity_service.py
-
 import sys
 from unittest.mock import AsyncMock, MagicMock, patch
 
