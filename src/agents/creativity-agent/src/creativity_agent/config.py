@@ -1,7 +1,8 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import Field, HttpUrl
 from functools import lru_cache
-import os
+
+from pydantic import Field, HttpUrl
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -17,7 +18,7 @@ class Settings(BaseSettings):
     log_level: str = Field(default="INFO")
 
 
-@lru_cache()
+@lru_cache
 def get_settings() -> Settings:
     settings = Settings()
     return settings

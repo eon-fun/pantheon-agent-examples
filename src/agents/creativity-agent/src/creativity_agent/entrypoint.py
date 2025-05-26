@@ -1,13 +1,13 @@
-import httpx
-import ray
-from ray import serve
-from fastapi import FastAPI, HTTPException, Body, Depends, Request
-from typing import Any, Dict, Union, Optional, List
 import logging
 import traceback
-from pydantic import BaseModel, Field, HttpUrl
+from typing import Any, Dict, Optional
 
-from .config import get_settings, Settings
+import httpx
+from fastapi import Body, FastAPI, HTTPException
+from pydantic import BaseModel
+from ray import serve
+
+from .config import Settings, get_settings
 
 
 class StatusResponse(BaseModel):
@@ -255,7 +255,7 @@ def agent_builder(args: Optional[Dict[str, Any]] = None) -> serve.handle.Deploym
     runtime_args = args or {}
     logger.info(f"Building CreativityService deployment with runtime args: {runtime_args}")
 
-   
+
     logger.info("Binding deployment 'CreativityService'...")
 
     return CreativityService.bind()
