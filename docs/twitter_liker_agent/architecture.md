@@ -6,7 +6,7 @@ The `TwitterLikerAgent` is a Ray Serve-based agent that automatically likes twee
 
 ## Component Diagram
 
-See [`architecture.mmd`](./architecture.mmd) for a high-level component layout, including:
+See [`architecture.puml`](./architecture.puml) for a high-level component layout, including:
 - The FastAPI + Ray Serve deployment
 - External service dependencies: Twitter API and Redis
 - Internal utility packages: `twitter_ambassador_utils`, `tweetscout_utils`, and `redis_client`
