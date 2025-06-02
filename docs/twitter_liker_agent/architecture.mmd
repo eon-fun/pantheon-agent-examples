@@ -1,0 +1,21 @@
+```mermaid
+flowchart TD
+    A[POST /{goal} Request] --> B[Parse username, keywords, themes]
+    B --> C[Get access token from TwitterAuthClient]
+    C --> D[Get liked tweet IDs from Redis]
+    B --> E[Search tweets (keywords + themes) via tweetscout_utils]
+    E --> F[Filter already liked tweets]
+    F --> G[Randomly select 1–3 tweets]
+    G --> H[Like tweet using Twitter API via set_like]
+    H --> I[Add tweet ID to Redis set]
+
+    subgraph External Services
+        TwitterAPI[(Twitter API)]
+        Redis[(Redis DB)]
+    end
+
+    C --> TwitterAPI
+    H --> TwitterAPI
+    D --> Redis
+    I --> Redis
+```
