@@ -1,0 +1,24 @@
+@startuml
+title TwitterLikerAgent - Main Flow
+
+actor Client
+
+Client -> Agent : POST /{goal}
+Agent -> Agent : Parse username, keywords, themes
+Agent -> TwitterAuthClient : get_access_token(username)
+TwitterAuthClient -> TwitterAPI : Request OAuth token
+
+Agent -> Redis : get_set(user_likes:{username})
+Agent -> tweetscout_utils : search_tweets(query)
+Agent -> Agent : Collect unique tweets
+
+Agent -> Agent : Filter already liked tweets
+Agent -> Agent : Randomly select 1–3 tweets
+
+loop For each selected tweet
+    Agent -> TwitterAPI : set_like(token, tweet_id, user_id)
+    TwitterAPI --> Agent : {"liked": true}
+    Agent -> Redis : add_to_set(user_likes:{username}, tweet_id)
+end
+
+@enduml
