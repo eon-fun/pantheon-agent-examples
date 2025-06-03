@@ -1,0 +1,21 @@
+@startuml TelegramListenerAgent Architecture
+
+actor User as "Telegram User"
+component TelegramListenerAgent {
+    component "FastAPI Controller" as api
+    component "Telethon Client" as client
+    component "Connection Manager" as manager
+    component "Data Processor" as processor
+}
+
+database "Telegram MTProto" as telegram
+queue "Message Queue" as queue
+
+api -down-> client : controls
+client -right-> telegram : connects
+client -down-> manager : handles\nconnections
+manager --> client : auto-reconnect
+client -> processor : forwards\nmessages
+processor --> queue : processed\ndata
+
+@enduml
