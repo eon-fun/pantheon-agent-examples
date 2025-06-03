@@ -1,0 +1,40 @@
+@startuml Twitter Gorilla Marketing Agent
+
+skinparam monochrome true
+skinparam defaultFontSize 10
+
+actor User as "API User"
+participant "Main Agent" as Agent
+database Redis
+participant "Twitter API" as Twitter
+participant "OpenAI" as AI
+
+User -> Agent: POST /{goal}
+activate Agent
+
+Agent -> Twitter: Get access_token
+Twitter --> Agent: token
+
+loop For each keyword
+    Agent -> Twitter: Search tweets
+    Twitter --> Agent: Raw results
+end
+
+group AI Validation
+    Agent -> AI: Check relevance (PROMPT_FOR_CHECK)
+    AI --> Agent: true/false
+end
+
+loop For top 2 tweets
+    Agent -> AI: Generate comment
+    AI --> Agent: Comment text
+    Agent -> Redis: Check delay
+    Redis --> Agent: OK
+    Agent -> Twitter: Post reply
+    Twitter --> Agent: Tweet ID
+    Agent -> Redis: Store history
+end
+
+Agent --> User: Response
+
+@enduml
