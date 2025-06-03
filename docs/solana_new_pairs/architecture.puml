@@ -1,0 +1,27 @@
+
+### 3. docs/solana_new_pairs_bot/architecture.puml
+```plantuml
+@startuml SolanaNewPairsBot Architecture
+
+component "Dextools API" as dextools
+component "Solana RPC" as solana
+component "Telegram API" as telegram
+
+rectangle SolanaNewPairsBot {
+  component "Data Collector" as collector
+  component "DB Storage" as db
+  component "Telegram Poster" as poster
+  component "Message Worker" as worker
+  component "FastAPI" as api
+
+  collector --> dextools
+  collector --> solana
+  collector --> db
+  db --> poster
+  poster --> telegram
+  telegram --> worker
+  worker --> db
+  api --> collector
+}
+
+@enduml

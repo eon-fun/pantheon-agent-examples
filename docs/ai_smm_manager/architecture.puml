@@ -1,0 +1,40 @@
+@startuml
+title NewsAggregatorBot - Architecture
+
+component "Telegram Bot" as Bot {
+    [Command Interface]
+    [Message Queue]
+}
+
+component "Content Processors" as Processors {
+    [Web Scraper]
+    [Twitter Client]
+    [AI Rewriter]
+}
+
+database "Redis" as Redis {
+    [Processed Links]
+    [Source Lists]
+}
+
+[News Websites] as News
+[Twitter API] as Twitter
+[AI APIs] as AI
+
+Bot --> Processors: Triggers collection
+Processors --> News: Scrape articles
+Processors --> Twitter: Fetch tweets
+Processors --> AI: Rewrite content
+Processors --> Redis: Track processed items
+Redis --> Processors: Prevent duplicates
+Processors --> Bot: Queue content
+Bot --> Telegram: Publish posts
+
+note right of Processors
+    Processing Flow:
+    1. Source collection
+    2. Content extraction
+    3. AI rewriting
+    4. Queue management
+end note
+@enduml

@@ -1,26 +1,37 @@
 # Architecture & Flow
 
 ## Overview
+AsyncCryptoAISystem implements a complete market analysis pipeline with:
 
-The `TwitterLikerAgent` is a Ray Serve-based agent that automatically likes tweets on behalf of a specified Twitter user. It uses a goal string to derive keywords and themes, searches for relevant tweets, filters out already liked ones using Redis, and then performs like actions via the Twitter API.
+1. **Data Collection Layer**:
+   - OHLCV candle data (1h, 4h, 1d)
+   - Order book depth
+   - Whale transaction tracking
+   - Derivatives market data
+
+2. **Analysis Layer**:
+   - 20+ technical indicators
+   - Market structure detection
+   - Divergence analysis
+   - Volume profile analysis
+
+3. **AI Integration**:
+   - Anthropic Claude processing
+   - Trade idea generation
+   - Risk assessment
+   - Market commentary
 
 ## Component Diagram
+See [`architecture.puml`](./architecture.puml) showing:
+- Data collection components
+- Analysis modules
+- AI integration
+- Redis caching layer
 
-See [`architecture.puml`](./architecture.puml) for a high-level component layout, including:
-- The FastAPI + Ray Serve deployment
-- External service dependencies: Twitter API and Redis
-- Internal utility packages: `twitter_ambassador_utils`, `tweetscout_utils`, and `redis_client`
-
-## Flow Description
-
-1. **User sends POST /{goal} request** to the agent.
-2. The agent:
-   - Parses the `goal` string into `username`, `keywords`, and `themes`
-   - Authenticates with Twitter using `TwitterAuthClient`
-   - Retrieves the set of previously liked tweets from Redis
-   - Performs searches via `search_tweets()` for both keywords and themes
-   - Filters out already liked tweets
-   - Likes 1 to 3 new tweets using the Twitter API (`set_like`)
-   - Records liked tweet IDs back into Redis
-
-This process ensures that no tweet is liked more than once, and introduces randomized timing to simulate human-like behavior.
+## Indicator Coverage
+| Category | Indicators |
+|----------|------------|
+| Momentum | RSI, MACD, Stochastic |
+| Volatility | ATR, Bollinger Bands |
+| Volume | OBV, VWAP, Volume Profile |
+| Structure | Pivot Points, Ichimoku, Swing Points |

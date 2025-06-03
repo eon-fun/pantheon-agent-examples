@@ -1,24 +1,35 @@
 @startuml
-title TwitterLikerAgent - Main Flow
+title AsyncCryptoAISystem - Architecture
 
-actor Client
+component "AsyncCryptoAISystem" as System {
+    [Data Collector]
+    [AI Analyzer]
+    [Results Processor]
+}
 
-Client -> Agent : POST /{goal}
-Agent -> Agent : Parse username, keywords, themes
-Agent -> TwitterAuthClient : get_access_token(username)
-TwitterAuthClient -> TwitterAPI : Request OAuth token
+database "Redis" as Redis {
+    [Market Data]
+    [Analysis Results]
+}
 
-Agent -> Redis : get_set(user_likes:{username})
-Agent -> tweetscout_utils : search_tweets(query)
-Agent -> Agent : Collect unique tweets
+[Market APIs] as Market
+[Anthropic Claude] as AI
 
-Agent -> Agent : Filter already liked tweets
-Agent -> Agent : Randomly select 1–3 tweets
+System -> Market: Fetch OHLCV data
+System -> Market: Get order books
+System -> Market: Retrieve whale activity
+Market --> System: Raw market data
+System -> AI: Send analysis requests
+AI --> System: Generated insights
+System --> Redis: Store results
 
-loop For each selected tweet
-    Agent -> TwitterAPI : set_like(token, tweet_id, user_id)
-    TwitterAPI --> Agent : {"liked": true}
-    Agent -> Redis : add_to_set(user_likes:{username}, tweet_id)
-end
-
+note right of System
+    Analysis Pipeline:
+    1. Data collection
+    2. Technical analysis
+    3. AI processing
+    4. Result storage
+    Runs every 5 minutes
+end note
 @enduml
+

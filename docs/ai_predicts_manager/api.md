@@ -1,61 +1,53 @@
 # API & Configuration Reference
 
-## Public Endpoint
+## Core Methods
 
-### `POST /{goal}`
+### `run_analysis(num_coins=5)`
+Main analysis loop (continuous operation)
 
-Triggers the Twitter liking behavior for a given user and goal definition.
+### `analyze_data(market_data)`
+Process raw market data through AI
 
-#### Path Parameters
+### `integrate_analysis(candles, order_book)`
+Comprehensive technical analysis
 
-- `goal` — a dot-delimited string composed of:
-  - **Username** — the Twitter username to act as (e.g. `myuser`)
-  - **Keywords** — one or more search terms (e.g. `python-ai`)
-  - **Themes** — one or more theme tags (e.g. `startup-research`)
+## Configuration
 
-**Example:**
-```
-POST /myuser.python-ai.startup-research
-```
+### Environment Variables
+| Variable | Description |
+|----------|-------------|
+| `ANTHROPIC_API_KEY` | Claude API access |
+| `REDIS_URL` | Results caching |
+| `MARKET_DATA_*` | Data provider config |
 
-#### Request Body
+### Analysis Parameters
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `num_coins` | 5 | Top coins to analyze |
+| `timeframes` | 1h,4h,1d | Analysis periods |
+| `interval` | 300s | Analysis frequency |
 
-The request body is optional and may include a `plan` dictionary (currently unused):
-
+## Output Format
 ```json
 {
-  "plan": {
-    "like_limit": 3
+  "trade_alerts": [{
+    "symbol": "BTC",
+    "type": "long",
+    "entry": "42000-42200",
+    "targets": ["42500", "43000"],
+    "stop": "41800",
+    "risk_reward": 2.5,
+    "thesis": "Bullish RSI divergence",
+    "risk_level": "medium"
+  }],
+  "market_alpha": {
+    "structure": "Bullish higher lows",
+    "smart_money": "Accumulating at support",
+    "key_levels": {
+      "BTC": {
+        "support": ["42000", "41500"],
+        "resistance": ["42500", "43000"]
+      }
+    }
   }
 }
-```
-
-#### Behavior
-
-- Parses the goal string into username, keywords, and themes.
-- Uses `tweetscout_utils.search_tweets` to find tweets.
-- Filters tweets already liked (stored in Redis).
-- Likes 1–3 random tweets not previously liked.
-- Tracks newly liked tweet IDs in Redis.
-
-#### Response
-
-Returns HTTP 200 OK on completion. No body is returned.
-
----
-
-## Configuration Reference
-
-### Redis Keys
-
-- `user_likes:{username}` — Redis Set storing tweet IDs liked by the user.
-
-### Required Environment Variables
-
-| Variable                 | Description                            |
-|--------------------------|----------------------------------------|
-| `TWITTER_CLIENT_ID`      | Twitter OAuth client ID                |
-| `TWITTER_CLIENT_SECRET`  | Twitter OAuth client secret            |
-| Redis credentials        | Used implicitly by `get_redis_db()`    |
-
-All environment variables are assumed to be managed securely outside the code.

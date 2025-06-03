@@ -1,0 +1,29 @@
+@startuml
+title CreativityService - Architecture
+
+component "FastAPI" as API {
+    [HTTP Interface]
+    [Request Handler]
+}
+
+component "Ray Serve" as Ray {
+    [CreativityService]
+}
+
+database "Creatify API" as Creatify {
+    [Lipsync]
+    [AI Shorts]
+}
+
+API -> Ray: Routes requests
+Ray -> Creatify: API Calls
+Creatify --> Ray: Media Results
+Ray --> API: Returns responses
+
+note right of Ray
+    Handles:
+    - Authentication
+    - Error handling
+    - Request tracing
+end note
+@enduml

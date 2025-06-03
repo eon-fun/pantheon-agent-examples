@@ -1,47 +1,47 @@
-# TwitterLikerAgent
+# AsyncCryptoAISystem
 
 ## Purpose & Scope
-
-TwitterLikerAgent is a Ray Serve-based microservice that searches for tweets based on given keywords and themes, then likes a random selection of them using the user's Twitter account.
+AsyncCryptoAISystem provides comprehensive cryptocurrency market analysis by:
+- Collecting real-time market data from multiple sources
+- Performing advanced technical analysis
+- Generating AI-powered trading insights
+- Identifying market structure and key levels
+- Detecting whale activity and order flow patterns
 
 ## Prerequisites
-
 - Python 3.10+
-- Ray Serve runtime
-- Redis database
-- Twitter developer credentials (handled via `TwitterAuthClient`)
-- Dependencies from internal Pantheon CodeArtifact repository
+- Anthropic Claude API access
+- Cryptocurrency market data API access
+- Redis for caching and state management
+- Dependencies from PyPI (listed in `requirements.txt`)
 
 ### Required Environment Variables
-
-- `TWITTER_CLIENT_ID`, `TWITTER_CLIENT_SECRET` — Twitter API credentials
-- Redis host credentials (implicitly used by `get_redis_db`)
-- Internal packages must be resolvable via Poetry and configured source
+- `ANTHROPIC_API_KEY` - Anthropic Claude API key
+- `REDIS_URL` - Redis connection string
+- `MARKET_DATA_API_KEY` - Cryptocurrency data provider key
 
 ## Quickstart
-
 1. **Install dependencies:**
-
    ```bash
-   poetry install
-2. **Run the agent locally using Ray Serve:**
-    
-    ```bash
-   poetry run python twitter_ambassador_liker/entrypoint.py
-   ```
-3. **Send a test request:**
-
-    ```bash
-   curl -X POST http://localhost:8000/myusername.keyword1-keyword2.theme1-theme2
+   pip install -r requirements.txt
    ```
 
-**The agent will:**
+2. **Set environment variables:**
+   ```bash
+   export ANTHROPIC_API_KEY="your_claude_key"
+   export REDIS_URL="redis://localhost:6379"
+   ```
 
- - Retrieve access token for myusername
+3. **Run the system:**
+   ```python
+   from async_crypto_ai_system import AsyncCryptoAISystem
+   system = AsyncCryptoAISystem("your_claude_key")
+   asyncio.run(system.run_analysis())
+   ```
 
- - Search for tweets using keyword1, keyword2, theme1, theme2
-
- - Like up to 3 unseen tweets
-
- - Store liked tweet IDs in Redis to prevent duplication
-
+**Key Features:**
+- Multi-timeframe technical analysis
+- AI-generated trade ideas
+- Market structure identification
+- Risk metric calculation
+- Continuous monitoring

@@ -47,13 +47,6 @@ TwitterCommentatorAgent is a Ray Serve microservice that automatically comments 
 * Stores commented tweet IDs in Redis to avoid duplicates.
 * Ensures delays between posts to respect rate limits.
 
-## Project Structure
-
-* `entrypoint.py` — Main Ray Serve deployment with FastAPI endpoints.
-* `commands.py` — AI-powered comment generation using OpenAI API.
-* `redis_client` — Redis interface for tracking posted comments.
-* Dependencies on internal Pantheon packages: `twitter-ambassador-utils`, `tweetscout-utils`, `send-openai-request`, and `redis-client`.
-
 ## Development
 
 * Tests are run via pytest.
