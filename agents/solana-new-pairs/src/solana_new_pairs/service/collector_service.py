@@ -1,3 +1,5 @@
+import os
+
 from solana_new_pairs.DB.manager.coin_manager import AlchemyBaseCoinManager
 from solana_new_pairs.DB.manager.rug_check_manager import AlchemyRugCheckDataManager
 from solana_new_pairs.DB.sqlalchemy_database_manager import get_db
@@ -66,7 +68,7 @@ class FullDataCollector:
         return data
 
     async def collect_data_from_dex_tools(self):
-        dex_tools_api = DextoolsAPIWrapper(api_key="Kv7BZ8mwvU4vFoaaS8eEJ3UvmXG4x7Qk71uLesRF", plan="trial")
+        dex_tools_api = DextoolsAPIWrapper(api_key=os.getenv("DEXTOOLS_API_KEY", "your-api-key-here"), plan="trial")
         try:
             data = await dex_tools_api.get_pool_by_address(chain=self.chain, address=self.address)
 

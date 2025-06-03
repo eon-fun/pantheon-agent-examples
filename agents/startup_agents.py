@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 import ray
 from aiogram import Bot, Dispatcher, types
@@ -14,14 +15,14 @@ from telethon.errors import SessionPasswordNeededError
 from telethon.tl.types import InputPeerEmpty
 
 # Configuration
-API_ID = "26012476"
-API_HASH = "d0ba6cd225c5dea4d2f7eb717adbeaac"
-TELEGRAM_BOT_TOKEN = "8039253205:AAEFwlG0c2AmhwIXnqC9Q5TsBo_x-7jM2a0"
-SESSION_NAME = "my_telegram_session"
-TELEGRAM_CHANNEL_ID = "@panteoncryptonews"
+API_ID = os.getenv("TELEGRAM_API_ID")
+API_HASH = os.getenv("TELEGRAM_API_HASH")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+SESSION_NAME = os.getenv("TELEGRAM_SESSION_NAME", "my_telegram_session")
+TELEGRAM_CHANNEL_ID = os.getenv("TELEGRAM_CHANNEL_ID", "@your_channel")
 
-NEWS_TELEGRAM_BOT_TOKEN = "7633131821:AAForOPCLS045IFHihMf49UozGwKL7IMbpU"
-NEWS_TELEGRAM_CHANNEL_ID = "@pantheoncryptotest"
+NEWS_TELEGRAM_BOT_TOKEN = os.getenv("NEWS_TELEGRAM_BOT_TOKEN")
+NEWS_TELEGRAM_CHANNEL_ID = os.getenv("NEWS_TELEGRAM_CHANNEL_ID", "@your_news_channel")
 
 
 class AgentOrchestrator:

@@ -1,4 +1,5 @@
 import asyncio
+import os
 from html import escape
 
 import aiohttp
@@ -9,11 +10,9 @@ from database.redis.redis_client import RedisDB
 from services.ai_connectors.openai_client import send_openai_request
 
 # Constants
-TELEGRAM_BOT_TOKEN = "8039253205:AAEFwlG0c2AmhwIXnqC9Q5TsBo_x-7jM2a0"
-TELEGRAM_CHANNEL_ID = "@panteoncryptonews"
-TWITTER_BEARER_TOKEN = (
-    "AAAAAAAAAAAAAAAAAAAAAALFxQEAAAAAccmjfpy9O9AoKsiWm3EiKRmlYW0%3DKxQgwMPoButLHfAL1Zoledy4bdko6ufQNLTQuxDpCfZxfgthkI"
-)
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHANNEL_ID = os.getenv("TELEGRAM_CHANNEL_ID", "@your_channel")
+TWITTER_BEARER_TOKEN = os.getenv("TWITTER_BEARER_TOKEN")
 
 REDIS_LAST_PROCESSED_TWEETS = "last_processed_tweets"
 REDIS_SUBSCRIBED_TWITTER_ACCOUNTS = "subscribed_twitter_accounts"

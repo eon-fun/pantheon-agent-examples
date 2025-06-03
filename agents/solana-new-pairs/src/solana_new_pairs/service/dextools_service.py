@@ -1,4 +1,5 @@
 import logging
+import os
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
@@ -108,7 +109,7 @@ class DextoolsAPIWrapper:
 
 
 async def main():
-    API_KEY = "Kv7BZ8mwvU4vFoaaS8eEJ3UvmXG4x7Qk71uLesRF"  # Укажите ваш API-ключ
+    API_KEY = os.getenv("DEXTOOLS_API_KEY", "your-api-key-here")  # Укажите ваш API-ключ
     api = DextoolsAPIWrapper(api_key=API_KEY, plan="trial")  # Лимит: 2 запроса в секунду
 
     try:

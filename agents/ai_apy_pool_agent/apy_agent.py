@@ -1,5 +1,6 @@
 import asyncio
 import json
+import os
 import time
 
 import requests
@@ -7,8 +8,8 @@ from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
 from aiogram.types import Message
 
-TELEGRAM_BOT_TOKEN = "7633131821:AAForOPCLS045IFHihMf49UozGwKL7IMbpU"
-ENSO_API_KEY = "1e02632d-6feb-4a75-a157-documentation"
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+ENSO_API_KEY = os.getenv("ENSO_API_KEY", "your-api-key-here")
 
 
 class APYAgent:

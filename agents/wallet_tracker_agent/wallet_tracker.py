@@ -1,4 +1,5 @@
 import asyncio
+import os
 import sys
 from dataclasses import dataclass
 
@@ -46,15 +47,15 @@ WATCHED_WALLETS_KEY = "watched_wallets"
 PROCESSED_TXS_KEY = "processed_transactions"
 
 # Telegram конфигурация
-TELEGRAM_BOT_TOKEN = "7633131821:AAForOPCLS045IFHihMf49UozGwKL7IMbpU"
-TELEGRAM_CHANNEL_ID = "@pantheoncryptotest"
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHANNEL_ID = os.getenv("TELEGRAM_CHANNEL_ID", "@your_channel")
 
 bot = Bot(token=TELEGRAM_BOT_TOKEN)
 dp = Dispatcher()
 
 # API конфигурация
-ANKR_API_KEY = "0edb7f866074ee92aa1c799f1829524801c36af92624abaaa8ba5517b98104f4"
-ANKR_API_URL = f"https://rpc.ankr.com/multichain/{ANKR_API_KEY}"
+ANKR_API_KEY = os.getenv("ANKR_API_KEY")
+ANKR_API_URL = f"https://rpc.ankr.com/multichain/{ANKR_API_KEY}" if ANKR_API_KEY else None
 
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())

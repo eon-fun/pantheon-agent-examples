@@ -1,3 +1,4 @@
+import os
 import subprocess
 from contextlib import asynccontextmanager
 
@@ -40,9 +41,9 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
     ):
         try:
             print("Starting TikTok bot...")
-            username = "valebtinbest@gmail.com"
-            password = "|yR2mZtbc;hjS/T"
-            api_key = "db7514c5cfa3faa717f595af7a6e7d1e"
+            username = os.getenv("TIKTOK_USERNAME")
+            password = os.getenv("TIKTOK_PASSWORD")
+            api_key = os.getenv("TIKTOK_API_KEY")
             print("Installing Chrome...")
             bot = TikTokBot(api_key=api_key, headless=False)
             print("Chrome installed")

@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 
 import aiohttp
@@ -36,8 +37,8 @@ class WalletTrackingAgent:
         # Initialize constants
         self.WATCHED_WALLETS_KEY = "watched_wallets"
         self.PROCESSED_TXS_KEY = "processed_transactions"
-        self.ANKR_API_KEY = "0edb7f866074ee92aa1c799f1829524801c36af92624abaaa8ba5517b98104f4"
-        self.ANKR_API_URL = f"https://rpc.ankr.com/multichain/{self.ANKR_API_KEY}"
+        self.ANKR_API_KEY = os.getenv("ANKR_API_KEY")
+        self.ANKR_API_URL = f"https://rpc.ankr.com/multichain/{self.ANKR_API_KEY}" if self.ANKR_API_KEY else None
 
         # Initialize Redis
         self.db = RedisDB()

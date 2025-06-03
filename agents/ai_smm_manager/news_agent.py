@@ -1,4 +1,5 @@
 import asyncio
+import os
 from urllib.parse import urljoin
 
 import aiohttp
@@ -19,20 +20,18 @@ TWITTER_ACCOUNTS_KEY = "twitter_accounts"
 PROCESSED_TWEETS_KEY = "processed_tweets"
 
 # Telegram конфигурация
-TELEGRAM_BOT_TOKEN = "7633131821:AAForOPCLS045IFHihMf49UozGwKL7IMbpU"
-TELEGRAM_CHANNEL_ID = "@pantheoncryptotest"
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHANNEL_ID = os.getenv("TELEGRAM_CHANNEL_ID", "@your_channel")
 
-TWITTER_BASIC_BEARER_TOKEN = (
-    "AAAAAAAAAAAAAAAAAAAAAALFxQEAAAAAccmjfpy9O9AoKsiWm3EiKRmlYW0%3DKxQgwMPoButLHfAL1Zoledy4bdko6ufQNLTQuxDpCfZxfgthkI"
-)
-GROK_API_URL = "https://api.x.ai/v1/chat/completions"
-GROK_API_KEY = (
-    "xai-qRLBA9NVS913EhUy2jCdqPpayHTuJ4UH1E3N1W3BbtRmAU87maYuPMG2Ci3AVJnemXILApAK1AdvMKFy"  # Ваш API ключ для Grok
-)
+TWITTER_BASIC_BEARER_TOKEN = os.getenv("TWITTER_BASIC_BEARER_TOKEN")
+GROK_API_URL = os.getenv("GROK_API_URL", "https://api.x.ai/v1/chat/completions")
+GROK_API_KEY = os.getenv("GROK_API_KEY")
 
-PROMPT = "You are a Telegram post author for a cryptocurrency news channel. "
-"Write concise and engaging posts in English with proper Markdown formatting. "
-"But dont use ###."
+PROMPT = (
+    "You are a Telegram post author for a cryptocurrency news channel. "
+    "Write concise and engaging posts in English with proper Markdown formatting. "
+    "But dont use ###."
+)
 "Extract the most important points from the input text, include a short "
 "headline with emojis, highlight key terms or names using bold formatting, "
 "and use italic for emphasis. End the post with a simple, engaging closing "
