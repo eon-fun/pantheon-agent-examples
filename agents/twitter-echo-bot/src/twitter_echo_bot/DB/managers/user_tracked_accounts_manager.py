@@ -1,6 +1,4 @@
-
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from twitter_echo_bot.DB.managers.base import BaseAlchemyManager
 
 

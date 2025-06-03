@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -7,18 +7,18 @@ from pydantic import BaseModel, Field
 class TelegramUser(BaseModel):
     id: int
     is_bot: bool
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    username: Optional[str] = None
+    first_name: str | None = None
+    last_name: str | None = None
+    username: str | None = None
 
 
 class TelegramMessageData(BaseModel):
     message_id: int
     chat_id: int
     sender: TelegramUser
-    text: Optional[str] = None
+    text: str | None = None
     timestamp: datetime
-    raw_message: Dict[str, Any]
+    raw_message: dict[str, Any]
 
 
 class StoredMessage(BaseModel):
@@ -26,16 +26,16 @@ class StoredMessage(BaseModel):
     message_id: int
     chat_id: int
     user_id: int
-    username: Optional[str] = None
-    text: Optional[str] = None
+    username: str | None = None
+    text: str | None = None
     message_timestamp: datetime
     processed_at: datetime = Field(default_factory=datetime.utcnow)
-    embedding_model: Optional[str] = None
+    embedding_model: str | None = None
 
 
 class QdrantPayload(BaseModel):
-    text: Optional[str] = None
+    text: str | None = None
     chat_id: int
     user_id: int
-    username: Optional[str] = None
+    username: str | None = None
     message_timestamp: datetime

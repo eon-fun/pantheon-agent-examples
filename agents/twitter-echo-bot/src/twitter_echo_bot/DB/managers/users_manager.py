@@ -1,6 +1,5 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from twitter_echo_bot.DB.managers.base import BaseAlchemyManager
 from twitter_echo_bot.DB.models.users_models import AlchemyUser, PGUser
 
@@ -9,27 +8,22 @@ class AlchemyUsersManager(BaseAlchemyManager):
     def __init__(self, session: AsyncSession):
         super().__init__(session)
 
-    async def get_filtered_users(self,):
+    async def get_filtered_users(self):
         result = await self.session.execute(
-            select(AlchemyUser)
-            .where(AlchemyUser.persona_descriptor.isnot(None))
-            .where(AlchemyUser.prompt.is_(None))
+            select(AlchemyUser).where(AlchemyUser.persona_descriptor.isnot(None)).where(AlchemyUser.prompt.is_(None))
         )
         result = result.scalars().all()
         return [PGUser.from_orm(result) for result in result]
 
     async def add_prompt_to_user(self, user_id: int, prompt: str):
-        """
-        Добавляет или обновляет prompt для пользователя с указанным user_id.
-        """
-
+        """Добавляет или обновляет prompt для пользователя с указанным user_id."""
         result = await self.session.execute(select(AlchemyUser).where(AlchemyUser.id == user_id))
         user = result.scalars().one()
         user.prompt = prompt
         await self.session.commit()
         return user
 
-    async def get_user_by_id(self, user_id: int)->PGUser:
+    async def get_user_by_id(self, user_id: int) -> PGUser:
         result = await self.session.execute(select(AlchemyUser).where(AlchemyUser.id == user_id))
         user = result.scalars().one()
         return PGUser.from_orm(user)

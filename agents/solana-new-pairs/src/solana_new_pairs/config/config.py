@@ -1,5 +1,5 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from agents_tools_logger.main import log
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class DBSettings(BaseSettings):
@@ -32,18 +32,20 @@ class FastAPISettings(BaseSettings):
 
 class DexToolsSettings(BaseSettings):
     api_key: str
-    plan : str = "trial"
+    plan: str = "trial"
     rate_limit_by_second: int = 1
 
     class Config:
         env_prefix = "DEX_"  # Все переменные должны начинаться с DEX_
         env_file = ".env"  # Путь до .env файла (если нужен)
 
+
 class BotSettings(BaseSettings):
     bot_token: str
     chat_id: int
     send_delay: int = 1
     max_length_message_for_photo: int = 1024
+
 
 class Config(BaseSettings):
     app_title: str = "follow_unfollow_bot"

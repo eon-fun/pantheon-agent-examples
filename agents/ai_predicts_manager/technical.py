@@ -1,7 +1,7 @@
-import numpy as np
-from typing import List, Dict, Optional, Tuple
-import pandas as pd
 from asyncio import Lock
+
+import numpy as np
+import pandas as pd
 
 
 class TechnicalAnalysis:
@@ -11,14 +11,14 @@ class TechnicalAnalysis:
         self.lock = Lock()  # Add lock for thread safety in async operations
 
     @staticmethod
-    async def calculate_vwap(candles: List[Dict], period: int = 24) -> List[float]:
+    async def calculate_vwap(candles: list[dict], period: int = 24) -> list[float]:
         """Enhanced VWAP with configurable period and numpy optimization"""
         if not candles:
             return []
 
         # Convert to numpy arrays for faster calculation
-        typical_prices = np.array([(c['high'] + c['low'] + c['close']) / 3 for c in candles])
-        volumes = np.array([c['volume'] for c in candles])
+        typical_prices = np.array([(c["high"] + c["low"] + c["close"]) / 3 for c in candles])
+        volumes = np.array([c["volume"] for c in candles])
 
         # Calculate rolling VWAP
         cumul_tp_vol = np.multiply(typical_prices, volumes)
@@ -28,49 +28,49 @@ class TechnicalAnalysis:
         return vwap.tolist()
 
     @staticmethod
-    async def calculate_rsi(closes: List[float], period: int = 14) -> List[float]:
+    async def calculate_rsi(closes: list[float], period: int = 14) -> list[float]:
         """Calculate RSI values"""
         if not closes:
             return []
 
         deltas = np.diff(closes)
-        seed = deltas[:period + 1]
+        seed = deltas[: period + 1]
 
         # Handle zero case
         up = seed[seed >= 0].sum() / period
         down = -seed[seed < 0].sum() / period
 
         if down == 0:
-            rs = float('inf')
+            rs = float("inf")
         else:
             rs = up / down
 
         rsi = np.zeros_like(closes)
-        rsi[:period] = 100. - 100. / (1. + rs)
+        rsi[:period] = 100.0 - 100.0 / (1.0 + rs)
 
         for i in range(period, len(closes)):
             delta = deltas[i - 1]
             if delta > 0:
                 upval = delta
-                downval = 0.
+                downval = 0.0
             else:
-                upval = 0.
+                upval = 0.0
                 downval = -delta
 
             up = (up * (period - 1) + upval) / period
             down = (down * (period - 1) + downval) / period
 
             if down == 0:
-                rs = float('inf')
+                rs = float("inf")
             else:
                 rs = up / down
 
-            rsi[i] = 100. - 100. / (1. + rs)
+            rsi[i] = 100.0 - 100.0 / (1.0 + rs)
 
         return rsi.tolist()
 
     @staticmethod
-    async def calculate_macd(closes: List[float]) -> Tuple[List[float], List[float], List[float]]:
+    async def calculate_macd(closes: list[float]) -> tuple[list[float], list[float], list[float]]:
         """Calculate MACD, Signal, and Histogram"""
         if not closes:
             return [], [], []
@@ -83,8 +83,9 @@ class TechnicalAnalysis:
         return macd.tolist(), signal.tolist(), hist.tolist()
 
     @staticmethod
-    async def calculate_bollinger_bands(closes: List[float], period: int = 20) -> Tuple[
-        List[float], List[float], List[float]]:
+    async def calculate_bollinger_bands(
+        closes: list[float], period: int = 20
+    ) -> tuple[list[float], list[float], list[float]]:
         """Calculate Bollinger Bands"""
         if not closes:
             return [], [], []
@@ -97,8 +98,9 @@ class TechnicalAnalysis:
         return upper_band.tolist(), mid_band.tolist(), lower_band.tolist()
 
     @staticmethod
-    async def calculate_atr(highs: List[float], lows: List[float], closes: List[float], period: int = 14) -> List[
-        float]:
+    async def calculate_atr(
+        highs: list[float], lows: list[float], closes: list[float], period: int = 14
+    ) -> list[float]:
         """Calculate Average True Range"""
         if not any([highs, lows, closes]):
             return []
@@ -117,8 +119,9 @@ class TechnicalAnalysis:
         return atr
 
     @staticmethod
-    async def calculate_stochastic(highs: List[float], lows: List[float], closes: List[float],
-                                   k_period: int = 14, d_period: int = 3) -> Tuple[List[float], List[float]]:
+    async def calculate_stochastic(
+        highs: list[float], lows: list[float], closes: list[float], k_period: int = 14, d_period: int = 3
+    ) -> tuple[list[float], list[float]]:
         """Calculate Stochastic Oscillator"""
         if not any([highs, lows, closes]):
             return [], []
@@ -128,7 +131,7 @@ class TechnicalAnalysis:
 
         # Handle division by zero
         denom = highest_high - lowest_low
-        denom = denom.replace(0, float('inf'))
+        denom = denom.replace(0, float("inf"))
 
         k = 100 * ((pd.Series(closes) - lowest_low) / denom)
         d = k.rolling(window=d_period).mean()
@@ -136,7 +139,7 @@ class TechnicalAnalysis:
         return k.tolist(), d.tolist()
 
     @staticmethod
-    async def calculate_obv(closes: List[float], volumes: List[float]) -> List[float]:
+    async def calculate_obv(closes: list[float], volumes: list[float]) -> list[float]:
         """Calculate On-Balance Volume"""
         if not closes or not volumes:
             return []
@@ -152,7 +155,7 @@ class TechnicalAnalysis:
         return obv
 
     @staticmethod
-    async def calculate_pivot_points(high: float, low: float, close: float) -> Dict[str, float]:
+    async def calculate_pivot_points(high: float, low: float, close: float) -> dict[str, float]:
         """Calculate Pivot Points and Support/Resistance levels"""
         pivot = (high + low + close) / 3
         r1 = (2 * pivot) - low
@@ -162,59 +165,55 @@ class TechnicalAnalysis:
         s2 = pivot - (high - low)
         s3 = low - 2 * (high - pivot)
 
-        return {
-            'pivot': pivot,
-            'r1': r1, 'r2': r2, 'r3': r3,
-            's1': s1, 's2': s2, 's3': s3
-        }
+        return {"pivot": pivot, "r1": r1, "r2": r2, "r3": r3, "s1": s1, "s2": s2, "s3": s3}
 
     @staticmethod
-    async def calculate_ichimoku(highs: List[float], lows: List[float],
-                                 tenkan_period: int = 9,
-                                 kijun_period: int = 26,
-                                 senkou_span_b_period: int = 52) -> Dict[str, List[float]]:
+    async def calculate_ichimoku(
+        highs: list[float],
+        lows: list[float],
+        tenkan_period: int = 9,
+        kijun_period: int = 26,
+        senkou_span_b_period: int = 52,
+    ) -> dict[str, list[float]]:
         """Calculate Ichimoku Cloud components"""
         if not highs or not lows:
-            return {
-                'tenkan_sen': [],
-                'kijun_sen': [],
-                'senkou_span_a': [],
-                'senkou_span_b': []
-            }
+            return {"tenkan_sen": [], "kijun_sen": [], "senkou_span_a": [], "senkou_span_b": []}
 
-        async def donchian(highs: List[float], lows: List[float], period: int) -> List[float]:
+        async def donchian(highs: list[float], lows: list[float], period: int) -> list[float]:
             high_series = pd.Series(highs)
             low_series = pd.Series(lows)
-            return ((high_series.rolling(window=period).max() +
-                     low_series.rolling(window=period).min()) / 2).tolist()
+            return ((high_series.rolling(window=period).max() + low_series.rolling(window=period).min()) / 2).tolist()
 
         tenkan_sen = await donchian(highs, lows, tenkan_period)
         kijun_sen = await donchian(highs, lows, kijun_period)
 
         # Senkou Span A
-        senkou_span_a = [(t + k) / 2 if t is not None and k is not None else None
-                         for t, k in zip(tenkan_sen, kijun_sen)]
+        senkou_span_a = [
+            (t + k) / 2 if t is not None and k is not None else None
+            for t, k in zip(tenkan_sen, kijun_sen, strict=False)
+        ]
 
         # Senkou Span B
         senkou_span_b = await donchian(highs, lows, senkou_span_b_period)
 
         return {
-            'tenkan_sen': tenkan_sen,
-            'kijun_sen': kijun_sen,
-            'senkou_span_a': senkou_span_a,
-            'senkou_span_b': senkou_span_b
+            "tenkan_sen": tenkan_sen,
+            "kijun_sen": kijun_sen,
+            "senkou_span_a": senkou_span_a,
+            "senkou_span_b": senkou_span_b,
         }
 
     @staticmethod
-    async def detect_divergence(prices: List[float], indicator_values: List[float],
-                                lookback: int = 10) -> Dict[str, bool]:
+    async def detect_divergence(
+        prices: list[float], indicator_values: list[float], lookback: int = 10
+    ) -> dict[str, bool]:
         """Detect Regular and Hidden Divergences"""
         if len(prices) < lookback or len(indicator_values) < lookback:
             return {
-                'regular_bullish': False,
-                'regular_bearish': False,
-                'hidden_bullish': False,
-                'hidden_bearish': False
+                "regular_bullish": False,
+                "regular_bearish": False,
+                "hidden_bullish": False,
+                "hidden_bearish": False,
             }
 
         # Get last n periods
@@ -226,10 +225,10 @@ class TechnicalAnalysis:
         indicator_trend = recent_indicator[-1] > recent_indicator[0]
 
         return {
-            'regular_bullish': not price_trend and indicator_trend,
-            'regular_bearish': price_trend and not indicator_trend,
-            'hidden_bullish': price_trend and not indicator_trend,
-            'hidden_bearish': not price_trend and indicator_trend
+            "regular_bullish": not price_trend and indicator_trend,
+            "regular_bearish": price_trend and not indicator_trend,
+            "hidden_bullish": price_trend and not indicator_trend,
+            "hidden_bearish": not price_trend and indicator_trend,
         }
 
 
@@ -240,31 +239,34 @@ class MarketStructure:
         self.lock = Lock()  # Add lock for thread safety in async operations
 
     @staticmethod
-    async def identify_swing_points(highs: List[float], lows: List[float],
-                                    threshold: float = 0.001) -> Dict[str, List[Tuple[int, float]]]:
+    async def identify_swing_points(
+        highs: list[float], lows: list[float], threshold: float = 0.001
+    ) -> dict[str, list[tuple[int, float]]]:
         """Identify swing highs and lows"""
         if not highs or not lows or len(highs) < 5 or len(lows) < 5:
-            return {'highs': [], 'lows': []}
+            return {"highs": [], "lows": []}
 
         swing_highs = []
         swing_lows = []
 
         for i in range(2, len(highs) - 2):
             # Swing high
-            if (highs[i] > highs[i - 1] and highs[i] > highs[i - 2] and
-                    highs[i] > highs[i + 1] and highs[i] > highs[i + 2]):
+            if (
+                highs[i] > highs[i - 1]
+                and highs[i] > highs[i - 2]
+                and highs[i] > highs[i + 1]
+                and highs[i] > highs[i + 2]
+            ):
                 swing_highs.append((i, highs[i]))
 
             # Swing low
-            if (lows[i] < lows[i - 1] and lows[i] < lows[i - 2] and
-                    lows[i] < lows[i + 1] and lows[i] < lows[i + 2]):
+            if lows[i] < lows[i - 1] and lows[i] < lows[i - 2] and lows[i] < lows[i + 1] and lows[i] < lows[i + 2]:
                 swing_lows.append((i, lows[i]))
 
-        return {'highs': swing_highs, 'lows': swing_lows}
+        return {"highs": swing_highs, "lows": swing_lows}
 
     @staticmethod
-    async def analyze_volume_profile(prices: List[float], volumes: List[float],
-                                     num_bins: int = 50) -> Dict[str, float]:
+    async def analyze_volume_profile(prices: list[float], volumes: list[float], num_bins: int = 50) -> dict[str, float]:
         """Analyze volume profile"""
         if not prices or not volumes:
             return {}
@@ -275,16 +277,16 @@ class MarketStructure:
 
         if min_price == max_price:
             return {
-                'poc': min_price,
-                'value_area_high': min_price,
-                'value_area_low': min_price,
-                'volume_distribution': {}
+                "poc": min_price,
+                "value_area_high": min_price,
+                "value_area_low": min_price,
+                "volume_distribution": {},
             }
 
         bin_size = (max_price - min_price) / num_bins
 
         volume_profile = {}
-        for price, volume in zip(prices, volumes):
+        for price, volume in zip(prices, volumes, strict=False):
             bin_idx = int((price - min_price) / bin_size)
             if bin_idx not in volume_profile:
                 volume_profile[bin_idx] = 0
@@ -312,9 +314,8 @@ class MarketStructure:
         value_area_low = min_price + min(value_area_bins) * bin_size
 
         return {
-            'poc': poc_price,
-            'value_area_high': value_area_high,
-            'value_area_low': value_area_low,
-            'volume_distribution': dict(sorted(volume_profile.items()))
+            "poc": poc_price,
+            "value_area_high": value_area_high,
+            "value_area_low": value_area_low,
+            "volume_distribution": dict(sorted(volume_profile.items())),
         }
-    

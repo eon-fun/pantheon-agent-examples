@@ -3,10 +3,9 @@ from collections.abc import Sequence
 from enum import StrEnum
 
 import yaml
+from base_agent.models import InputItem, OutputItem, ParameterItem, ToolModel, Workflow, WorkflowStep
 from langchain.agents.agent import AgentOutputParser
 from langchain.schema import OutputParserException
-
-from base_agent.models import InputItem, OutputItem, ParameterItem, ToolModel, Workflow, WorkflowStep
 
 
 class RegexPattern(StrEnum):
@@ -61,9 +60,9 @@ class AgentOutputPlanParser(AgentOutputParser, extra="allow"):
                         if placeholder in obj:
                             obj = obj.replace(placeholder, template)
                     return obj
-                elif isinstance(obj, list):
+                if isinstance(obj, list):
                     return [restore_templates(item) for item in obj]
-                elif isinstance(obj, dict):
+                if isinstance(obj, dict):
                     return {k: restore_templates(v) for k, v in obj.items()}
                 return obj
 
@@ -99,24 +98,17 @@ class AgentOutputPlanParser(AgentOutputParser, extra="allow"):
         except yaml.YAMLError as e:
             raise OutputParserException(f"Failed to parse YAML content: {e}") from e
 
-
     def _parse_parameters(self, params: list | dict) -> list:
         if isinstance(params, dict):
             return [ParameterItem(name=name, value=value) for name, value in params.items()]
-        else:
-            return [
-                ParameterItem(name=input_item.get("name", ""), value=input_item.get("value", ""))
-                for input_item in params
-            ]
+        return [
+            ParameterItem(name=input_item.get("name", ""), value=input_item.get("value", "")) for input_item in params
+        ]
 
     def _parse_inputs(self, inputs: list | dict) -> list:
         if isinstance(inputs, dict):
             return [InputItem(name=name, value=value) for name, value in inputs.items()]
-        else:
-            return [
-                InputItem(name=input_item.get("name", ""), value=input_item.get("value", ""))
-                for input_item in inputs
-            ]
+        return [InputItem(name=input_item.get("name", ""), value=input_item.get("value", "")) for input_item in inputs]
 
 
 ### Helper functions
@@ -130,6 +122,7 @@ def _find_tool(tool_name: str, tools: Sequence[ToolModel]) -> ToolModel:
 
     Returns:
         Tool or StructuredTool.
+
     """
     for tool in tools:
         if tool.package_name == tool_name or tool.function_name == tool_name:

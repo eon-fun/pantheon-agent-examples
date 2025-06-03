@@ -1,20 +1,18 @@
-from typing import Optional, List
-
+from follow_unfollow_bot.DB.managers.base import BaseAlchemyManager
+from follow_unfollow_bot.DB.models import AlchemyUser
+from follow_unfollow_bot.DB.models.users_model import PGUserModel
 from sqlalchemy import select, update
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from follow_unfollow_bot.DB.managers.base import BaseAlchemyManager
-from follow_unfollow_bot.DB.models import AlchemyUser
-from follow_unfollow_bot.DB.models.users_model import PGUserModel
 
 class AlchemyUsersManager(BaseAlchemyManager):
     def __init__(self, session: AsyncSession):
         super().__init__(session)
 
-    async def create_user(self, user_id: int,username) -> PGUserModel:
+    async def create_user(self, user_id: int, username) -> PGUserModel:
         """Создаёт запись пользователя"""
-        user = AlchemyUser(id=user_id, followers_today=0,username=username)
+        user = AlchemyUser(id=user_id, followers_today=0, username=username)
         self.session.add(user)
         await self.session.commit()
         await self.session.refresh(user)
@@ -31,12 +29,12 @@ class AlchemyUsersManager(BaseAlchemyManager):
         except NoResultFound:
             print(f"Пользователь {user_id} не найден")
 
-    async def get_user(self, user_id: int) -> Optional[PGUserModel]:
+    async def get_user(self, user_id: int) -> PGUserModel | None:
         """Получает пользователя по ID, если он существует"""
         query = select(AlchemyUser).where(AlchemyUser.id == user_id)
         result = await self.session.execute(query)
-        user= result.scalar_one_or_none()
-        return  PGUserModel.from_orm(user)
+        user = result.scalar_one_or_none()
+        return PGUserModel.from_orm(user)
 
     async def delete_user(self, user_id: int):
         """Удаляет пользователя по ID"""
@@ -47,17 +45,13 @@ class AlchemyUsersManager(BaseAlchemyManager):
         await self.session.commit()
         return PGUserModel.from_orm(user)
 
-
-    async def get_all_users(self)->List[PGUserModel]:
+    async def get_all_users(self) -> list[PGUserModel]:
         query = select(AlchemyUser)
         result = await self.session.execute(query)
         users = result.scalars().all()
         return [PGUserModel.from_orm(user) for user in users]
 
-    async def reset_followers_today(self,):
+    async def reset_followers_today(self):
         """Обнуление подписок за сегодня у всех пользователей"""
-
-        await self.session.execute(
-            update(AlchemyUser).values(followers_today=0)
-        )
+        await self.session.execute(update(AlchemyUser).values(followers_today=0))
         await self.session.commit()

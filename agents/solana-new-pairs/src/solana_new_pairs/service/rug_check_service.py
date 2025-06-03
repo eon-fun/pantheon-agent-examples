@@ -1,5 +1,6 @@
+from typing import Any
+
 import aiohttp
-from typing import Any, Dict
 
 
 class RugCheckAPI:
@@ -8,22 +9,21 @@ class RugCheckAPI:
     def __init__(self):
         self.session = aiohttp.ClientSession()
 
-    async def _request(self, endpoint: str) -> Dict[str, Any]:
-        """ Выполняет GET-запрос. """
+    async def _request(self, endpoint: str) -> dict[str, Any]:
+        """Выполняет GET-запрос."""
         async with self.session.get(f"{self.BASE_URL}{endpoint}") as response:
             if response.status != 200:
                 raise Exception(f"Error {response.status}: {await response.text()}")
             return await response.json()
 
-    async def get_token_report(self, token_address: str) -> Dict[str, Any]:
-        """ Получает отчёт о токене. """
+    async def get_token_report(self, token_address: str) -> dict[str, Any]:
+        """Получает отчёт о токене."""
         endpoint = f"/tokens/{token_address}/report"
         return await self._request(endpoint)
 
     async def close(self):
-        """ Закрывает сессию. """
+        """Закрывает сессию."""
         await self.session.close()
-
 
 
 # Пример использования

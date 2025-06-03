@@ -10,9 +10,7 @@ class BasicAgentConfig(BaseSettings):
     agents: dict[str, str] = {}
 
     def __str__(self) -> str:
-        """
-        Serialize the config to a pretty JSON string for prompt usage.
-        """
+        """Serialize the config to a pretty JSON string for prompt usage."""
         return json.dumps(self.model_dump(), indent=2, ensure_ascii=False)
 
 

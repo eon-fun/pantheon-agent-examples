@@ -1,16 +1,15 @@
 import asyncio
 from contextlib import asynccontextmanager
 
+from base_agent.ray_entrypoint import BaseAgent
 from fastapi import FastAPI
-from starlette.middleware.cors import CORSMiddleware
 from ray import serve
-
-from solana_new_pairs.DB.sqlalchemy_database_manager import init_models
-from solana_new_pairs.bot.auto_poster import post_new_coins_in_bot, message_worker
+from solana_new_pairs.bot.auto_poster import message_worker, post_new_coins_in_bot
 from solana_new_pairs.bot.bot import start_bot
 from solana_new_pairs.config.config import config
+from solana_new_pairs.DB.sqlalchemy_database_manager import init_models
 from solana_new_pairs.service.dextools_service import DextoolsAPIWrapper, collect_and_store_data
-from base_agent.ray_entrypoint import BaseAgent
+from starlette.middleware.cors import CORSMiddleware
 
 
 async def main():
@@ -18,7 +17,6 @@ async def main():
     dex_tools_api = DextoolsAPIWrapper(api_key=config.dex_tools.api_key, plan=config.dex_tools.plan)
 
     async def start_collecting_data_from_dextools(dex_tools_api: DextoolsAPIWrapper):
-
         while True:
             try:
                 await collect_and_store_data(dex_tools_api)  # Твой код обновления
@@ -39,14 +37,13 @@ async def main():
             await asyncio.sleep(1)
 
     async def bot_task():
-
         await start_bot()
 
     tasks = [
         asyncio.create_task(bot_task()),
         asyncio.create_task(start_collecting_data_from_dextools(dex_tools_api)),
         asyncio.create_task(post_new_coins()),
-        asyncio.create_task(message_worker())
+        asyncio.create_task(message_worker()),
     ]
 
     await asyncio.gather(*tasks)

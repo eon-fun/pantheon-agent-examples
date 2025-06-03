@@ -1,6 +1,5 @@
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from twitter_echo_bot.DB.managers.base import BaseAlchemyManager
 from twitter_echo_bot.DB.models import AlchemyUserTweetMatch
 from twitter_echo_bot.DB.models.user_tweet_matches_models import PGUserTweetMatch
@@ -11,9 +10,7 @@ class AlchemyUserTweetMatchManager(BaseAlchemyManager):
         super().__init__(session)
 
     async def get_unprocessed_tweets(self) -> list[PGUserTweetMatch]:
-        """
-        Получает все твиты, которые ещё не были запощены (is_processed = False).
-        """
+        """Получает все твиты, которые ещё не были запощены (is_processed = False)."""
         result = await self.session.execute(
             select(AlchemyUserTweetMatch)
             .where(AlchemyUserTweetMatch.is_processed == False)  # Ищем только не обработанные записи

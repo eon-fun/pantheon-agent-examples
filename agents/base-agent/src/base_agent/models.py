@@ -44,7 +44,6 @@ class ToolModel(BaseModel):
     - parameters: {self.parameters_spec}
     - inputs: {self.openai_function_spec["function"]["parameters"]}
 """
-    
 
 
 class ParameterItem(BaseModel):
@@ -120,10 +119,12 @@ class Workflow(BaseModel):
     steps: list[WorkflowStep]
     outputs: list[OutputItem] = Field(default_factory=list)
 
+
 class ChatRequest(BaseModel):
     message: str
     action: str | None = None
     session_uuid: str | None = None
+
 
 class ChatMessageModel(BaseModel):
     role: str = Field(..., description="Sender role: 'user' or 'assistant'")
@@ -135,10 +136,12 @@ class ChatContextModel(BaseModel):
     uuid: str = Field(..., description="Unique chat/session UUID")
     history: list[ChatMessageModel] = Field(default_factory=list, description="Chronological chat messages")
 
+
 class ChatRequest(BaseModel):
     message: str
     action: str | None = None
     session_uuid: str | None = None
+
 
 class ChatMessageModel(BaseModel):
     role: str = Field(..., description="Sender role: 'user' or 'assistant'")

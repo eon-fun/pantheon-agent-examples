@@ -1,17 +1,17 @@
-import ray
 import asyncio
-from telethon import TelegramClient, events, functions
-from telethon.errors import SessionPasswordNeededError
-from aiogram import Bot, Dispatcher, types
-from aiogram.filters import Command
-from aiogram.enums import ParseMode
-from telethon.tl.types import InputPeerEmpty
 
+import ray
+from aiogram import Bot, Dispatcher, types
+from aiogram.enums import ParseMode
+from aiogram.filters import Command
+from simple_ai_agents.ai_avatar.ray_avatar import AvatarAgent
 from simple_ai_agents.ai_dialogue_manager.ray_dialogue_manager import MessageProcessor
 from simple_ai_agents.ai_smm_manager.ray_news_agent import NewsAgent
 from simple_ai_agents.ai_twitter_summary.ray_twitter_summary import TweetProcessor
-from simple_ai_agents.ai_avatar.ray_avatar import AvatarAgent
 from simple_ai_agents.wallet_tracker_agent.ray_wallet_tracker import WalletTrackingAgent
+from telethon import TelegramClient, events, functions
+from telethon.errors import SessionPasswordNeededError
+from telethon.tl.types import InputPeerEmpty
 
 # Configuration
 API_ID = "26012476"
@@ -46,19 +46,20 @@ class AgentOrchestrator:
     async def get_read_messages_data(self):
         """Fetch information about read messages from Telegram."""
         try:
-            dialogs = await self.telethon_client(functions.messages.GetDialogsRequest(
-                offset_date=None,
-                offset_id=0,
-                offset_peer=InputPeerEmpty(),
-                limit=100,
-                hash=0
-            ))
+            dialogs = await self.telethon_client(
+                functions.messages.GetDialogsRequest(
+                    offset_date=None, offset_id=0, offset_peer=InputPeerEmpty(), limit=100, hash=0
+                )
+            )
             return [
                 {
                     "chat_id": (
-                        d.peer.user_id if hasattr(d.peer, "user_id")
-                        else d.peer.channel_id if hasattr(d.peer, "channel_id")
-                        else d.peer.chat_id if hasattr(d.peer, "chat_id")
+                        d.peer.user_id
+                        if hasattr(d.peer, "user_id")
+                        else d.peer.channel_id
+                        if hasattr(d.peer, "channel_id")
+                        else d.peer.chat_id
+                        if hasattr(d.peer, "chat_id")
                         else None
                     ),
                     "max_id": d.read_inbox_max_id,
@@ -114,22 +115,24 @@ class AgentOrchestrator:
                     "id": str(event.message.id),
                     "text": event.text,
                     "sender_username": sender_username,
-                    "action": "mentioned" if event.message.mentioned else "replied" if event.message.reply_to else "wrote",
+                    "action": "mentioned"
+                    if event.message.mentioned
+                    else "replied"
+                    if event.message.reply_to
+                    else "wrote",
                     "chat_name": chat.title if hasattr(chat, "title") and chat.title else "Private Chat",
                     "chat_id": chat.id,
-                    "timestamp": event.message.date.timestamp()
+                    "timestamp": event.message.date.timestamp(),
                 }
                 await self.message_processor.process_message.remote(message_data)
             except Exception as e:
                 print(f"❌ Error handling new message: {e}")
 
-        @self.telethon_client.on(events.NewMessage(pattern='/new_style'))
+        @self.telethon_client.on(events.NewMessage(pattern="/new_style"))
         async def handle_new_style_command(event):
             """Handle the /new_style command."""
             try:
-                success = await self.avatar_agent.update_user_style.remote(
-                    self.telethon_client, event.sender_id
-                )
+                success = await self.avatar_agent.update_user_style.remote(self.telethon_client, event.sender_id)
                 if success:
                     await event.respond("✅ Communication style updated successfully!")
                 else:
@@ -141,14 +144,11 @@ class AgentOrchestrator:
         @self.telethon_client.on(events.NewMessage)
         async def handle_avatar_message(event):
             """Handle messages for AI avatar."""
-            if event.out or event.text.startswith('/'):
+            if event.out or event.text.startswith("/"):
                 return
 
             try:
-                message_data = {
-                    'user_id': event.sender_id,
-                    'text': event.text
-                }
+                message_data = {"user_id": event.sender_id, "text": event.text}
                 response = await self.avatar_agent.process_message.remote(message_data)
                 await event.respond(response)
             except Exception as e:
@@ -243,9 +243,7 @@ class AgentOrchestrator:
                 if summary:
                     print("✅ Tweet summary generated")
                     await self.aiogram_bot.send_message(
-                        chat_id=TELEGRAM_CHANNEL_ID,
-                        text=summary,
-                        parse_mode=ParseMode.HTML
+                        chat_id=TELEGRAM_CHANNEL_ID, text=summary, parse_mode=ParseMode.HTML
                     )
                 else:
                     print("ℹ️ No new tweets to process")
@@ -266,9 +264,7 @@ class AgentOrchestrator:
                         for summary in summaries:
                             try:
                                 await self.aiogram_bot_news.send_message(
-                                    chat_id=NEWS_TELEGRAM_CHANNEL_ID,
-                                    text=summary,
-                                    parse_mode=ParseMode.MARKDOWN
+                                    chat_id=NEWS_TELEGRAM_CHANNEL_ID, text=summary, parse_mode=ParseMode.MARKDOWN
                                 )
                                 await asyncio.sleep(2)
                             except Exception as e:
@@ -293,9 +289,7 @@ class AgentOrchestrator:
                     print(f"✅ Found {len(messages)} new transactions")
                     for msg_data in messages:
                         await self.aiogram_bot.send_message(
-                            chat_id=TELEGRAM_CHANNEL_ID,
-                            text=msg_data["message"],
-                            parse_mode=ParseMode.MARKDOWN
+                            chat_id=TELEGRAM_CHANNEL_ID, text=msg_data["message"], parse_mode=ParseMode.MARKDOWN
                         )
                 else:
                     print("ℹ️ No new transactions")
@@ -334,14 +328,7 @@ class AgentOrchestrator:
         wallet_task = asyncio.create_task(self.process_wallets_periodically())
 
         # Ждем завершения всех задач
-        await asyncio.gather(
-            dp_task_1,
-            dp_task_2,
-            tweets_task,
-            news_task,
-            telethon_task,
-            wallet_task
-        )
+        await asyncio.gather(dp_task_1, dp_task_2, tweets_task, news_task, telethon_task, wallet_task)
 
 
 async def main():

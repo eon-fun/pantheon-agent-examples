@@ -1,9 +1,8 @@
 from typing import Any
 
 import httpx
-from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
-
 from base_agent.ai_registry.config import AiRegistryConfig
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 
 class AiRegistryClient:

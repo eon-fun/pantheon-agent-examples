@@ -1,5 +1,4 @@
 ## TODO: Вынести логику клиента в отдельную библиотеку
-from typing import Optional
 
 from redis_client.main import RedisDB, get_redis_db
 from telethon import TelegramClient
@@ -16,21 +15,17 @@ FLOOD_SLEEP_THRESHOLD = 60
 
 
 class TelethonClientManager:
-    """
-    A manager class for handling TelegramClient instances with Redis-based session storage.
-    """
+    """A manager class for handling TelegramClient instances with Redis-based session storage."""
 
     def __init__(self, redis_service: RedisDB):
-        """
-        Initialize the manager with the RedisDB service.
+        """Initialize the manager with the RedisDB service.
 
         :param redis_service: Instance of RedisDB for session storage.
         """
         self.redis = redis_service
 
     async def create_client(self, phone_number: str, api_id: int, api_hash: str) -> TelegramClient:
-        """
-        Create a new TelegramClient and save it to Redis.
+        """Create a new TelegramClient and save it to Redis.
 
         :param phone_number: User's phone number (used as the key in Redis).
         :param api_id: Telegram API ID.
@@ -49,9 +44,7 @@ class TelethonClientManager:
         return client
 
     async def start_login(self, phone_number: str) -> str:
-        """
-        Start the login process by sending a code to the user's phone number.
-        """
+        """Start the login process by sending a code to the user's phone number."""
         # logger.info(f"Initializing login process for phone number: {phone_number}...")
         print(f"INFO: Initializing login process for phone number: {phone_number}...")
 
@@ -82,10 +75,9 @@ class TelethonClientManager:
             raise RuntimeError(f"Failed to start login for {phone_number}: {e}")
 
     async def complete_login(
-        self, phone_number: str, phone_code: Optional[str] = None, password: Optional[str] = None
+        self, phone_number: str, phone_code: str | None = None, password: str | None = None
     ) -> None:
-        """
-        Complete the login process by verifying the code or entering the 2FA password.
+        """Complete the login process by verifying the code or entering the 2FA password.
 
         :param phone_number: User's phone number.
         :param phone_code: Code received from Telegram.
@@ -105,8 +97,7 @@ class TelethonClientManager:
             raise RuntimeError(f"Failed to complete login for {phone_number}: {e}")
 
     async def disconnect_client(self, phone_number: str):
-        """
-        Disconnect the client and remove the session from Redis.
+        """Disconnect the client and remove the session from Redis.
 
         :param phone_number: User's phone number.
         """
@@ -115,8 +106,7 @@ class TelethonClientManager:
         self.redis.delete(f"telegram_session:{phone_number}")
 
     def get_client_session_string(self, phone_number: str) -> str:
-        """
-        Get the session string for a specific phone number.
+        """Get the session string for a specific phone number.
 
         :param phone_number: User's phone number.
         :return: Serialized session string.
@@ -127,8 +117,7 @@ class TelethonClientManager:
         return session_string
 
     def _save_session(self, phone_number: str, client: TelegramClient):
-        """
-        Save the client's session to Redis.
+        """Save the client's session to Redis.
 
         :param phone_number: User's phone number.
         :param client: TelegramClient instance.
@@ -137,8 +126,7 @@ class TelethonClientManager:
         self.redis.set(f"telegram_session:{phone_number}", session_string)
 
     async def _get_client(self, phone_number: str) -> TelegramClient:
-        """
-        Retrieve a client using hardcoded session string, API ID, and API Hash.
+        """Retrieve a client using hardcoded session string, API ID, and API Hash.
         The phone_number argument is kept for interface compatibility but is mostly ignored
         for client instantiation when using hardcoded values.
         """

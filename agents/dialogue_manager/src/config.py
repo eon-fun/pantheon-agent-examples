@@ -1,9 +1,8 @@
-from pydantic_settings import BaseSettings
 from functools import lru_cache
 
-from telethon import TelegramClient
-
 from database.redis.redis_client import RedisDB
+from pydantic_settings import BaseSettings
+from telethon import TelegramClient
 
 db = RedisDB()
 
@@ -21,13 +20,8 @@ def get_settings():
     return Settings()
 
 
-
 def create_telethon_client():
-    return TelegramClient(
-        get_settings().SESSION_NAME,
-        int(get_settings().API_ID),
-        get_settings().API_HASH
-    )
+    return TelegramClient(get_settings().SESSION_NAME, int(get_settings().API_ID), get_settings().API_HASH)
 
 
 def get_telethon_client():

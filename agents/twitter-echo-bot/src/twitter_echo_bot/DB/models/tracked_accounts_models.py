@@ -1,16 +1,15 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Text, TIMESTAMP
-from sqlalchemy.orm import relationship
 from datetime import datetime
-from pydantic import BaseModel, Field
-from datetime import datetime
-from typing import Optional
 
+from pydantic import Field
+from sqlalchemy import TIMESTAMP, Column, Integer, String
+from sqlalchemy.orm import relationship
 from twitter_echo_bot.DB.models.base import BaseConfigModel
 from twitter_echo_bot.DB.sqlalchemy_database_manager import Base
+
+
 class AlchemyTrackedAccount(Base):
-    """
-    Аккаунты Twitter, которые отслеживаются.
-    """
+    """Аккаунты Twitter, которые отслеживаются."""
+
     __tablename__ = "tracked_accounts"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -23,11 +22,8 @@ class AlchemyTrackedAccount(Base):
 
 
 class PGTrackedAccount(BaseConfigModel):
-    """
-    Модель отслеживаемого аккаунта.
-    """
+    """Модель отслеживаемого аккаунта."""
+
     id: int
     twitter_handle: str
     last_checked: datetime = Field(default_factory=datetime.utcnow)
-
-

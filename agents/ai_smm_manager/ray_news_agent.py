@@ -1,22 +1,18 @@
-import ray
-import asyncio
-import aiohttp
-from bs4 import BeautifulSoup
 from urllib.parse import urljoin
-from aiohttp import ClientConnectorError
-from tenacity import retry, stop_after_attempt, wait_fixed
-from aiogram.enums import ParseMode
 
+import aiohttp
+import ray
+from bs4 import BeautifulSoup
 from database.redis.redis_client import RedisDB
 from services.ai_connectors.openai_client import send_openai_request
 
 PROMPT = """
-You are a Telegram post author for a cryptocurrency news channel. 
-Write concise and engaging posts in English with proper Markdown formatting. 
+You are a Telegram post author for a cryptocurrency news channel.
+Write concise and engaging posts in English with proper Markdown formatting.
 But dont use ###.
-Extract the most important points from the input text, include a short 
-headline with emojis, highlight key terms or names using bold formatting, 
-and use italic for emphasis. End the post with a simple, engaging closing 
+Extract the most important points from the input text, include a short
+headline with emojis, highlight key terms or names using bold formatting,
+and use italic for emphasis. End the post with a simple, engaging closing
 line like 'Stay tuned for more updates! 🚀📈' or similar. And some hashtags.
 """
 
@@ -69,8 +65,8 @@ class NewsAgent:
                 async with session.get(url, headers=headers) as response:
                     response.raise_for_status()
                     soup = BeautifulSoup(await response.text(), "html.parser")
-                    paragraphs = soup.find_all('p')
-                    return ' '.join([p.get_text() for p in paragraphs])
+                    paragraphs = soup.find_all("p")
+                    return " ".join([p.get_text() for p in paragraphs])
         except Exception as e:
             print(f"❌ Error scraping article {url}: {e}")
             return None

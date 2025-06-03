@@ -3,7 +3,6 @@ import asyncio
 # import logging # Commented out
 import sys
 from contextlib import asynccontextmanager
-from typing import Optional
 
 from base_agent.ray_entrypoint import BaseAgent
 from dotenv import load_dotenv
@@ -27,7 +26,7 @@ load_dotenv()
 # TELEGRAM_PHONE_NUMBER = os.getenv("TELEGRAM_PHONE_NUMBER")
 # TARGET_CHAT_ID_STR = os.getenv("TARGET_CHAT_ID")
 TELEGRAM_PHONE_NUMBER = ""
-TARGET_CHAT_ID = 
+TARGET_CHAT_ID = ""
 
 # LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper() # Commented out as logger is removed
 
@@ -95,14 +94,12 @@ class TelegramListenerAgent(BaseAgent):
             )
 
         self.telethon_manager: TelethonClientManager = get_telethon_client_service()
-        self.client: Optional[TelegramClient] = None
-        self.listener_task: Optional[asyncio.Task] = None
+        self.client: TelegramClient | None = None
+        self.listener_task: asyncio.Task | None = None
         self._stop_event = asyncio.Event()
         self.phone_number = TELEGRAM_PHONE_NUMBER
         self.target_chat_id = TARGET_CHAT_ID
-        print(
-            f"INFO: Agent instance created for phone: {self.phone_number}, target chat: {self.target_chat_id}"
-        ) 
+        print(f"INFO: Agent instance created for phone: {self.phone_number}, target chat: {self.target_chat_id}")
         print("DEBUG: TelegramListenerAgent.__init__ - End", file=sys.stderr)
 
     async def _message_handler(self, event: events.NewMessage.Event):
@@ -110,7 +107,6 @@ class TelegramListenerAgent(BaseAgent):
         if self.client and self.client.is_connected():  # Added check for connection
             asyncio.create_task(self._process_event_safely(event, self.client))
         else:
-         
             print(
                 f"WARNING: Telegram client not ready in _message_handler for event from chat {event.chat_id}. Attempting to get client.",
                 file=sys.stderr,
@@ -133,9 +129,7 @@ class TelegramListenerAgent(BaseAgent):
         try:
             await process_new_message(event, telegram_client)
         except Exception as e:
-            print(
-                f"ERROR: Error processing message {getattr(event.message, 'id', 'N/A')}: {e}", file=sys.stderr
-            )
+            print(f"ERROR: Error processing message {getattr(event.message, 'id', 'N/A')}: {e}", file=sys.stderr)
 
     async def _get_telethon_client(self) -> TelegramClient:
         """Retrieves and connects the Telethon client using the manager."""
@@ -208,12 +202,10 @@ class TelegramListenerAgent(BaseAgent):
                 )  # Was logger.error
                 self._stop_event.set()
             except FloodWaitError as e:
-                print(
-                    f"WARNING: Flood wait encountered: {e.seconds} seconds. Sleeping...", file=sys.stderr
-                ) 
+                print(f"WARNING: Flood wait encountered: {e.seconds} seconds. Sleeping...", file=sys.stderr)
                 await asyncio.sleep(e.seconds + 5)
             except AuthKeyError:
-                print(  
+                print(
                     f"ERROR: Authentication key error during listener loop for {self.phone_number}. Session invalid. Stopping listener.",
                     file=sys.stderr,
                 )
@@ -222,7 +214,7 @@ class TelegramListenerAgent(BaseAgent):
                 print(
                     f"ERROR: Connection error during listener loop: {e}. Retrying connection shortly...",
                     file=sys.stderr,
-                )  
+                )
                 if self.client:
                     try:
                         self.client.remove_event_handler(self._message_handler)
@@ -269,9 +261,7 @@ class TelegramListenerAgent(BaseAgent):
             raise HTTPException(status_code=503, detail="Data processing backend not initialized.")
 
         if self.listener_task and not self.listener_task.done():
-            print(
-                "WARNING: Start request received but listener task is already running.", file=sys.stderr
-            ) 
+            print("WARNING: Start request received but listener task is already running.", file=sys.stderr)
             return {"status": "Listener already running."}
 
         print("INFO: Received request to start listener...")

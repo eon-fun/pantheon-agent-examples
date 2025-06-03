@@ -1,7 +1,5 @@
 from typing import Any
 
-from pydantic import BaseModel, Field, computed_field, field_serializer, field_validator
-
 from base_agent.abc import (
     AbstractAgentCard,
     AbstractAgentInputModel,
@@ -10,6 +8,7 @@ from base_agent.abc import (
     AbstractAgentSkill,
 )
 from base_agent.utils import create_pydantic_model_from_json_schema
+from pydantic import BaseModel, Field, field_serializer, field_validator
 
 
 class AgentSKill(AbstractAgentSkill):
@@ -28,7 +27,7 @@ class AgentSKill(AbstractAgentSkill):
         ..., description="Output model for the skill", alias="output_schema"
     )
 
-    @field_serializer("params_model", "input_model", "output_model", when_used='always')
+    @field_serializer("params_model", "input_model", "output_model", when_used="always")
     def create_models(self, model: BaseModel, _info) -> dict:
         return model.model_json_schema()
 
@@ -36,21 +35,27 @@ class AgentSKill(AbstractAgentSkill):
     @classmethod
     def validate_params(cls, value: Any) -> BaseModel:
         if isinstance(value, dict):
-            return create_pydantic_model_from_json_schema("DynamicParamsModel", value, base_klass=AbstractAgentParamsModel)
+            return create_pydantic_model_from_json_schema(
+                "DynamicParamsModel", value, base_klass=AbstractAgentParamsModel
+            )
         return value
-    
+
     @field_validator("input_model", mode="before")
     @classmethod
     def validate_input(cls, value: Any) -> BaseModel:
         if isinstance(value, dict):
-            return create_pydantic_model_from_json_schema("DynamicInputModel", value, base_klass=AbstractAgentInputModel)
+            return create_pydantic_model_from_json_schema(
+                "DynamicInputModel", value, base_klass=AbstractAgentInputModel
+            )
         return value
 
     @field_validator("output_model", mode="before")
     @classmethod
     def validate_output(cls, value: Any) -> BaseModel:
         if isinstance(value, dict):
-            return create_pydantic_model_from_json_schema("DynamicOutputModel", value, base_klass=AbstractAgentOutputModel)
+            return create_pydantic_model_from_json_schema(
+                "DynamicOutputModel", value, base_klass=AbstractAgentOutputModel
+            )
         return value
 
 

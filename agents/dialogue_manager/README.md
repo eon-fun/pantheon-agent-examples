@@ -39,7 +39,7 @@ Telegram AI Dialogue Manager is an intelligent assistant that collects, analyzes
    - Formats the remaining messages with contextual information
    - Sends them to OpenAI with a specific prompt
    - Returns a concise summary of all interactions
-   
+
 ## Security Notes
 
 - Your Telegram session is stored locally in the `my_telegram_session` file.

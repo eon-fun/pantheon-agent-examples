@@ -1,20 +1,18 @@
-from langgraph.graph import StateGraph, START, END
-from kol_agent.nodes.bot_registry import bot_registry
 from kol_agent.models.raid_state import RaidState
+from kol_agent.nodes.bot_registry import ACTIONS, bot_registry
+from kol_agent.nodes.twitter_api_handler import twitter_comment, twitter_like, twitter_retweet
 from langgraph.constants import Send
-from kol_agent.nodes.twitter_api_handler import twitter_like, twitter_comment, twitter_retweet
-from kol_agent.nodes.bot_registry import ACTIONS
+from langgraph.graph import END, START, StateGraph
 
 
 def continue_to_twitter(state: RaidState):
-    return [Send(
-        action["type"],
-        {
-            "action": action,
-            "target_tweet_id": state["target_tweet_id"],
-            "tweet_content": state["tweet_content"]
-        }
-    ) for action in state["bots_actions"]]
+    return [
+        Send(
+            action["type"],
+            {"action": action, "target_tweet_id": state["target_tweet_id"], "tweet_content": state["tweet_content"]},
+        )
+        for action in state["bots_actions"]
+    ]
 
 
 def get_raid_workflow() -> StateGraph:

@@ -1,13 +1,8 @@
-import ray
-import asyncio
-import aiohttp
-from aiogram import Bot, Dispatcher
-from aiogram.types import Message
-from aiogram.filters import Command
-from database.redis.redis_client import RedisDB
 from dataclasses import dataclass
-from typing import Optional, List
-import sys
+
+import aiohttp
+import ray
+from database.redis.redis_client import RedisDB
 
 
 @dataclass
@@ -19,16 +14,16 @@ class Transaction:
     timestamp: int
     hash: str
     chain: str
-    price: Optional[float] = None
+    price: float | None = None
 
 
-def hex_to_decimal(hex_string: str, base_type: str = 'value') -> float:
+def hex_to_decimal(hex_string: str, base_type: str = "value") -> float:
     """Конвертация hex значения в decimal"""
-    if not hex_string.startswith('0x'):
+    if not hex_string.startswith("0x"):
         return float(hex_string)
     try:
         dec_value = int(hex_string, 16)
-        if base_type == 'value':
+        if base_type == "value":
             return float(dec_value)
         return dec_value  # для timestamp возвращаем int
     except ValueError:
@@ -48,7 +43,7 @@ class WalletTrackingAgent:
         self.db = RedisDB()
         print("✅ WalletTrackingAgent initialized")
 
-    async def check_wallet_transactions(self, wallet_address: str) -> List[Transaction]:
+    async def check_wallet_transactions(self, wallet_address: str) -> list[Transaction]:
         """Получение транзакций через Ankr RPC API"""
         processed_txs = set(self.db.get_set(f"{self.PROCESSED_TXS_KEY}:{wallet_address}"))
         transactions = []
@@ -61,14 +56,12 @@ class WalletTrackingAgent:
                 "blockchain": ["eth", "bsc", "polygon", "arbitrum", "optimism"],
                 "pageSize": 50,
                 "pageToken": "",
-                "fromBlock": "latest"
+                "fromBlock": "latest",
             },
-            "id": 1
+            "id": 1,
         }
 
-        headers = {
-            "Content-Type": "application/json"
-        }
+        headers = {"Content-Type": "application/json"}
 
         try:
             print(f"Отправка запроса к Ankr RPC API для кошелька {wallet_address}")
@@ -79,30 +72,30 @@ class WalletTrackingAgent:
                         return []
 
                     data = await response.json()
-                    if 'error' in data:
+                    if "error" in data:
                         print(f"Ошибка API: {data['error']}")
                         return []
 
-                    transactions_data = data.get('result', {}).get('transactions', [])
+                    transactions_data = data.get("result", {}).get("transactions", [])
                     print(f"Получено {len(transactions_data)} транзакций")
 
                     for tx in transactions_data:
-                        tx_hash = tx.get('hash')
+                        tx_hash = tx.get("hash")
                         if tx_hash in processed_txs:
                             continue
 
                         try:
-                            value = hex_to_decimal(tx.get('value', '0x0'), 'value')
-                            timestamp = hex_to_decimal(tx.get('timestamp', '0x0'), 'timestamp')
+                            value = hex_to_decimal(tx.get("value", "0x0"), "value")
+                            timestamp = hex_to_decimal(tx.get("timestamp", "0x0"), "timestamp")
 
                             transaction = Transaction(
                                 wallet=wallet_address,
-                                type='buy' if tx.get('to', '').lower() == wallet_address.lower() else 'sell',
-                                token=tx.get('currency', {}).get('symbol', 'ETH'),
-                                amount=value / (10 ** 18),  # Конвертация из Wei в ETH
+                                type="buy" if tx.get("to", "").lower() == wallet_address.lower() else "sell",
+                                token=tx.get("currency", {}).get("symbol", "ETH"),
+                                amount=value / (10**18),  # Конвертация из Wei в ETH
                                 timestamp=timestamp,
                                 hash=tx_hash,
-                                chain=tx.get('blockchain', 'eth')
+                                chain=tx.get("blockchain", "eth"),
                             )
                             transactions.append(transaction)
                         except Exception as e:
@@ -121,7 +114,7 @@ class WalletTrackingAgent:
             "polygon": "polygonscan.com",
             "bsc": "bscscan.com",
             "arbitrum": "arbiscan.io",
-            "optimism": "optimistic.etherscan.io"
+            "optimism": "optimistic.etherscan.io",
         }
 
         explorer_url = f"https://{chain_urls.get(tx.chain, 'etherscan.io')}/tx/{tx.hash}"
@@ -161,7 +154,7 @@ class WalletTrackingAgent:
         """Returns the list of watched wallets."""
         return self.db.get_set(self.WATCHED_WALLETS_KEY)
 
-    async def process_wallets(self) -> List[dict]:
+    async def process_wallets(self) -> list[dict]:
         """Main method to process wallets and check for new transactions."""
         try:
             wallets = await self.get_wallet_list()
@@ -173,11 +166,7 @@ class WalletTrackingAgent:
                 transactions = await self.check_wallet_transactions(wallet)
                 for tx in transactions:
                     message = self.format_transaction_message(tx)
-                    all_messages.append({
-                        "message": message,
-                        "tx_hash": tx.hash,
-                        "wallet": wallet
-                    })
+                    all_messages.append({"message": message, "tx_hash": tx.hash, "wallet": wallet})
                     self.db.add_to_set(f"{self.PROCESSED_TXS_KEY}:{wallet}", tx.hash)
 
             return all_messages

@@ -16,7 +16,6 @@ class Intents(StrEnumMixIn):
     ADD_KNOWLEDGE = "add_knowledge"
     CHIT_CHAT = "chit_chat"
 
-
     @property
     def all(self) -> set[str]:
         return {self.CHANGE_SETTINGS, self.ADD_KNOWLEDGE, self.CHIT_CHAT}
@@ -45,7 +44,6 @@ class EntrypointGroup(StrEnumMixIn):
     MEMORY_ENTRYPOINT = "memory.entrypoint"
 
     CARD_ENTRYPOINT = "card.entrypoint"
-
 
     @property
     def group_name(self):

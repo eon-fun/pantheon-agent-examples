@@ -1,17 +1,18 @@
-import ray
 import json
-from telethon import functions, types
-from telethon.tl.types import InputPeerEmpty, PeerUser, PeerChannel, PeerChat
+
+import ray
 from database.redis.redis_client import RedisDB  # Ваш клиент Redis
 from services.ai_connectors.openai_client import send_openai_request  # Ваш OpenAI клиент
+from telethon import functions
+from telethon.tl.types import InputPeerEmpty, PeerChannel, PeerChat, PeerUser
 
 TELEGRAM_PROMPT = """
-You are an assistant summarizing messages in a chat. 
-Your task is to create a brief summary of what each user discussed without answering any questions. 
-For example: 
+You are an assistant summarizing messages in a chat.
+Your task is to create a brief summary of what each user discussed without answering any questions.
+For example:
 @username mentioned something about topic X.
 @another_user brought up another topic Y.
-Also note if someone was mentioned or replied to in the chat and include the chat name. 
+Also note if someone was mentioned or replied to in the chat and include the chat name.
 Do not provide solutions, just summarize the content of the messages concisely.
 """
 
@@ -51,8 +52,7 @@ class MessageProcessor:
             for msg in messages:
                 msg_data = json.loads(msg)
                 is_read = any(
-                    msg_data["chat_id"] == chat_info["chat_id"] and
-                    int(msg_data["id"]) <= chat_info["max_id"]
+                    msg_data["chat_id"] == chat_info["chat_id"] and int(msg_data["id"]) <= chat_info["max_id"]
                     for chat_info in read_messages_data
                 )
                 if not is_read:
@@ -76,10 +76,12 @@ class MessageProcessor:
                 print("ℹ️ No messages to summarize")
                 return "No messages to process."
 
-            combined_text = "\n".join([
-                f"[{json.loads(msg)['chat_name']}] {json.loads(msg)['sender_username']} {json.loads(msg)['action']}: {json.loads(msg)['text']}"
-                for msg in messages
-            ])
+            combined_text = "\n".join(
+                [
+                    f"[{json.loads(msg)['chat_name']}] {json.loads(msg)['sender_username']} {json.loads(msg)['action']}: {json.loads(msg)['text']}"
+                    for msg in messages
+                ]
+            )
 
             self.db.delete("telegram_messages")
 
@@ -110,9 +112,9 @@ class MessageProcessor:
                 "text": event.text,
                 "sender_username": sender_username,
                 "action": "mentioned" if event.message.mentioned else "replied" if event.message.reply_to else "wrote",
-                "chat_name": chat.title if hasattr(chat, 'title') and chat.title else "Private Chat",
+                "chat_name": chat.title if hasattr(chat, "title") and chat.title else "Private Chat",
                 "chat_id": chat.id,
-                "timestamp": event.message.date.timestamp()
+                "timestamp": event.message.date.timestamp(),
             }
 
             await self.process_message(message_data)
@@ -123,23 +125,28 @@ class MessageProcessor:
 async def get_read_messages_data(client):
     """Fetch information about read messages from Telegram."""
     try:
-        dialogs = await client(functions.messages.GetDialogsRequest(
-            offset_date=None,
-            offset_id=0,
-            offset_peer=InputPeerEmpty(),  # Исправлено: корректное использование InputPeerEmpty
-            limit=100,
-            hash=0
-        ))
+        dialogs = await client(
+            functions.messages.GetDialogsRequest(
+                offset_date=None,
+                offset_id=0,
+                offset_peer=InputPeerEmpty(),  # Исправлено: корректное использование InputPeerEmpty
+                limit=100,
+                hash=0,
+            )
+        )
 
         return [
             {
                 "chat_id": (
-                    d.peer.user_id if isinstance(d.peer, PeerUser)
-                    else d.peer.channel_id if isinstance(d.peer, PeerChannel)
-                    else d.peer.chat_id if isinstance(d.peer, PeerChat)
+                    d.peer.user_id
+                    if isinstance(d.peer, PeerUser)
+                    else d.peer.channel_id
+                    if isinstance(d.peer, PeerChannel)
+                    else d.peer.chat_id
+                    if isinstance(d.peer, PeerChat)
                     else None
                 ),
-                "max_id": d.read_inbox_max_id
+                "max_id": d.read_inbox_max_id,
             }
             for d in dialogs.dialogs
         ]

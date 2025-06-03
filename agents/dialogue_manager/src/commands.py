@@ -1,31 +1,31 @@
-from telethon import functions
-from telethon.errors import SessionPasswordNeededError, PhoneCodeInvalidError, PhoneNumberUnoccupiedError
-from telethon.tl.types import PeerUser, PeerChannel, PeerChat, InputPeerEmpty
-
 from config import get_telethon_client
+from telethon import functions
+from telethon.errors import PhoneCodeInvalidError, PhoneNumberUnoccupiedError, SessionPasswordNeededError
+from telethon.tl.types import InputPeerEmpty, PeerChannel, PeerChat, PeerUser
 
 client = get_telethon_client()
 
 
 async def get_read_messages_data(client):
     try:
-        dialogs = await client(functions.messages.GetDialogsRequest(
-            offset_date=None,
-            offset_id=0,
-            offset_peer=InputPeerEmpty(),
-            limit=100,
-            hash=0
-        ))
+        dialogs = await client(
+            functions.messages.GetDialogsRequest(
+                offset_date=None, offset_id=0, offset_peer=InputPeerEmpty(), limit=100, hash=0
+            )
+        )
 
         return [
             {
                 "chat_id": (
-                    d.peer.user_id if isinstance(d.peer, PeerUser)
-                    else d.peer.channel_id if isinstance(d.peer, PeerChannel)
-                    else d.peer.chat_id if isinstance(d.peer, PeerChat)
+                    d.peer.user_id
+                    if isinstance(d.peer, PeerUser)
+                    else d.peer.channel_id
+                    if isinstance(d.peer, PeerChannel)
+                    else d.peer.chat_id
+                    if isinstance(d.peer, PeerChat)
                     else None
                 ),
-                "max_id": d.read_inbox_max_id
+                "max_id": d.read_inbox_max_id,
             }
             for d in dialogs.dialogs
         ]

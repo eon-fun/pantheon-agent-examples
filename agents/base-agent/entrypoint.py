@@ -17,11 +17,9 @@ if __name__ == "__main__":
 
     app = FastAPI()
 
-
     @app.post("/chat")
     async def chat_with_agent(payload: ChatRequest):
         return await handle.chat.remote(payload.message, payload.action, payload.session_uuid)
-
 
     @app.get("/card")
     async def get_card():

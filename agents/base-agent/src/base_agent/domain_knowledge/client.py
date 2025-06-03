@@ -1,9 +1,8 @@
 from typing import Any
 
 import httpx
-from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
-
 from base_agent.domain_knowledge.config import LightRagConfig, retries
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 # ------  Retries --------- #
 stop = stop_after_attempt(retries.stop_attempts)

@@ -2,15 +2,14 @@ import uuid
 from typing import Any
 
 import ray
-from ray import workflow
-from ray.runtime_env import RuntimeEnv
-
 from base_agent import abc
 from base_agent.const import EntrypointGroup
 from base_agent.models import Workflow, WorkflowStep
 from base_agent.orchestration.config import BasicWorkflowConfig
 from base_agent.orchestration.utils import get_workflows_from_files
 from base_agent.utils import get_entry_points
+from ray import workflow
+from ray.runtime_env import RuntimeEnv
 
 
 @ray.remote
@@ -25,8 +24,10 @@ class DAGRunner(abc.AbstractWorkflowRunner):
 
     def reconfigure(self, config: dict[str, Any]) -> None:
         """Reconfigure the agent with new settings.
+
         Args:
             config: New configuration settings
+
         """
         self.config = BasicWorkflowConfig(**config)
 
@@ -59,7 +60,6 @@ class DAGRunner(abc.AbstractWorkflowRunner):
 
     def create_step(self, step: WorkflowStep):
         """Creates a remote function for a step"""
-
         runtime_env = RuntimeEnv(pip=[step.tool.render_pip_dependency()], env_vars=step.env_vars)
 
         @ray.workflow.options(checkpoint=True)

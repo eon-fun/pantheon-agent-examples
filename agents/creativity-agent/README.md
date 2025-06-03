@@ -47,6 +47,3 @@ The agent exposes the Creatify API functionality via HTTP endpoints relative to 
 - `/lipsyncs_v2/{lipsync_id}/render/` (POST)
 - `/lipsyncs_v2/{lipsync_id}/` (GET)
 - `/_health/` (GET) - Health check
-
-
-

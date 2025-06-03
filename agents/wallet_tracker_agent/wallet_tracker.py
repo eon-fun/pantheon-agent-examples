@@ -1,13 +1,12 @@
 import asyncio
+import sys
+from dataclasses import dataclass
+
 import aiohttp
 from aiogram import Bot, Dispatcher
-from aiogram.types import Message
 from aiogram.filters import Command
+from aiogram.types import Message
 from database.redis.redis_client import RedisDB
-from dataclasses import dataclass
-from typing import Optional
-import asyncio
-import sys
 
 
 @dataclass
@@ -19,21 +18,22 @@ class Transaction:
     timestamp: int
     hash: str
     chain: str
-    price: Optional[float] = None
+    price: float | None = None
 
 
-def hex_to_decimal(hex_string: str, base_type: str = 'value') -> float:
+def hex_to_decimal(hex_string: str, base_type: str = "value") -> float:
     """Конвертация hex значения в decimal
 
     Args:
         hex_string: Hex строка для конвертации
         base_type: Тип значения ('value' или 'timestamp')
+
     """
-    if not hex_string.startswith('0x'):
+    if not hex_string.startswith("0x"):
         return float(hex_string)
     try:
         dec_value = int(hex_string, 16)
-        if base_type == 'value':
+        if base_type == "value":
             return float(dec_value)
         return dec_value  # для timestamp возвращаем int
     except ValueError:
@@ -56,7 +56,7 @@ dp = Dispatcher()
 ANKR_API_KEY = "0edb7f866074ee92aa1c799f1829524801c36af92624abaaa8ba5517b98104f4"
 ANKR_API_URL = f"https://rpc.ankr.com/multichain/{ANKR_API_KEY}"
 
-if sys.platform == 'win32':
+if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
@@ -73,14 +73,12 @@ async def check_wallet_transactions(wallet_address: str) -> list[Transaction]:
             "blockchain": ["eth", "bsc", "polygon", "arbitrum", "optimism"],
             "pageSize": 50,
             "pageToken": "",
-            "fromBlock": "latest"
+            "fromBlock": "latest",
         },
-        "id": 1
+        "id": 1,
     }
 
-    headers = {
-        "Content-Type": "application/json"
-    }
+    headers = {"Content-Type": "application/json"}
 
     try:
         print(f"Отправка запроса к Ankr RPC API для кошелька {wallet_address}")
@@ -98,37 +96,37 @@ async def check_wallet_transactions(wallet_address: str) -> list[Transaction]:
 
                 try:
                     data = await response.json()
-                    print(f"Данные успешно распарсены")
+                    print("Данные успешно распарсены")
                 except ValueError as e:
                     print(f"Ошибка парсинга JSON: {e}\nОтвет: {response_text}")
                     return []
 
-                if 'error' in data:
+                if "error" in data:
                     print(f"Ошибка API: {data['error']}")
                     return []
 
-                transactions_data = data.get('result', {}).get('transactions', [])
+                transactions_data = data.get("result", {}).get("transactions", [])
                 print(f"Получено {len(transactions_data)} транзакций")
 
                 for tx in transactions_data:
-                    tx_hash = tx.get('hash')
+                    tx_hash = tx.get("hash")
                     if tx_hash in processed_txs:
                         print(f"Транзакция {tx_hash} уже обработана")
                         continue
 
                     try:
                         # Конвертируем hex значения в decimal
-                        value = hex_to_decimal(tx.get('value', '0x0'), 'value')
-                        timestamp = hex_to_decimal(tx.get('timestamp', '0x0'), 'timestamp')
+                        value = hex_to_decimal(tx.get("value", "0x0"), "value")
+                        timestamp = hex_to_decimal(tx.get("timestamp", "0x0"), "timestamp")
 
                         transaction = Transaction(
                             wallet=wallet_address,
-                            type='buy' if tx.get('to', '').lower() == wallet_address.lower() else 'sell',
-                            token=tx.get('currency', {}).get('symbol', 'ETH'),
-                            amount=value / (10 ** 18),  # Конвертация из Wei в ETH
+                            type="buy" if tx.get("to", "").lower() == wallet_address.lower() else "sell",
+                            token=tx.get("currency", {}).get("symbol", "ETH"),
+                            amount=value / (10**18),  # Конвертация из Wei в ETH
                             timestamp=timestamp,
                             hash=tx_hash,
-                            chain=tx.get('blockchain', 'eth')
+                            chain=tx.get("blockchain", "eth"),
                         )
                         transactions.append(transaction)
                         print(f"Добавлена новая транзакция: {transaction}")
@@ -145,11 +143,11 @@ def format_transaction_message(tx: Transaction) -> str:
     """Форматирование данных транзакции для сообщения"""
     action_emoji = "🟢" if tx.type == "buy" else "🔴"
     chain_urls = {
-            "eth": "etherscan.io",
+        "eth": "etherscan.io",
         "polygon": "polygonscan.com",
         "bsc": "bscscan.com",
         "arbitrum": "arbiscan.io",
-        "optimism": "optimistic.etherscan.io"
+        "optimism": "optimistic.etherscan.io",
     }
 
     explorer_url = f"https://{chain_urls.get(tx.chain, 'etherscan.io')}/tx/{tx.hash}"
@@ -218,11 +216,7 @@ async def monitor_wallets():
 
                 for tx in transactions:
                     message = format_transaction_message(tx)
-                    await bot.send_message(
-                        chat_id=TELEGRAM_CHANNEL_ID,
-                        text=message,
-                        parse_mode="Markdown"
-                    )
+                    await bot.send_message(chat_id=TELEGRAM_CHANNEL_ID, text=message, parse_mode="Markdown")
                     db.add_to_set(f"{PROCESSED_TXS_KEY}:{wallet}", tx.hash)
                     print(f"Отправлено сообщение о транзакции {tx.hash}")
 

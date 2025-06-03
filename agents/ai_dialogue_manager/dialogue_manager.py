@@ -1,10 +1,11 @@
 import asyncio
-from telethon import TelegramClient, events, functions
-from telethon.errors import SessionPasswordNeededError, PhoneCodeInvalidError, PhoneNumberUnoccupiedError
-from telethon.tl.types import Message, PeerUser, PeerChannel, PeerChat, InputPeerEmpty
-from services.ai_connectors.openai_client import send_openai_request
-from database.redis.redis_client import RedisDB
 import json
+
+from database.redis.redis_client import RedisDB
+from services.ai_connectors.openai_client import send_openai_request
+from telethon import TelegramClient, events, functions
+from telethon.errors import PhoneCodeInvalidError, PhoneNumberUnoccupiedError, SessionPasswordNeededError
+from telethon.tl.types import InputPeerEmpty, Message, PeerChannel, PeerChat, PeerUser
 
 # Конфигурация
 API_ID = ""  # Подставить от нужного акка
@@ -37,7 +38,7 @@ async def collect_messages(event):
             sender = await event.get_sender()
             chat = await event.get_chat()
             chat_id = chat.id
-            chat_name = chat.title if hasattr(chat, 'title') and chat.title else "Личный чат"
+            chat_name = chat.title if hasattr(chat, "title") and chat.title else "Личный чат"
             username = sender.username if sender and sender.username else None
             name = f"@{username}" if username else (sender.first_name if sender and sender.first_name else "Unknown")
 
@@ -57,7 +58,7 @@ async def collect_messages(event):
                 "action": action,
                 "chat_name": chat_name,
                 "chat_id": chat_id,
-                "timestamp": event.message.date.timestamp()
+                "timestamp": event.message.date.timestamp(),
             }
             db.add_to_sorted_set(REDIS_MESSAGES_KEY, int(message_data["timestamp"]), json.dumps(message_data))
             print(f"✅ Сообщение сохранено из чата '{chat_name}': {event.text[:50]}...")
@@ -66,13 +67,11 @@ async def collect_messages(event):
 async def clean_read_messages():
     """Проверяет и удаляет прочитанные сообщения из Redis."""
     try:
-        dialogs = await client(functions.messages.GetDialogsRequest(
-            offset_date=None,
-            offset_id=0,
-            offset_peer=InputPeerEmpty(),
-            limit=100,
-            hash=0
-        ))
+        dialogs = await client(
+            functions.messages.GetDialogsRequest(
+                offset_date=None, offset_id=0, offset_peer=InputPeerEmpty(), limit=100, hash=0
+            )
+        )
 
         messages = db.get_sorted_set(REDIS_MESSAGES_KEY)
         updated_messages = []
@@ -83,11 +82,16 @@ async def clean_read_messages():
             message_id = int(msg_data["id"])
 
             # Находим диалог для текущего сообщения
-            dialog = next((d for d in dialogs.dialogs if (
-                    isinstance(d.peer, PeerUser) and d.peer.user_id == chat_id) or (
-                                   isinstance(d.peer, PeerChannel) and d.peer.channel_id == chat_id) or (
-                                   isinstance(d.peer, PeerChat) and d.peer.chat_id == chat_id)
-                           ), None)
+            dialog = next(
+                (
+                    d
+                    for d in dialogs.dialogs
+                    if (isinstance(d.peer, PeerUser) and d.peer.user_id == chat_id)
+                    or (isinstance(d.peer, PeerChannel) and d.peer.channel_id == chat_id)
+                    or (isinstance(d.peer, PeerChat) and d.peer.chat_id == chat_id)
+                ),
+                None,
+            )
 
             if dialog and dialog.read_inbox_max_id >= message_id:
                 print(f"🗑 Удаляем прочитанное сообщение ID {message_id} из чата {chat_id}.")
@@ -112,19 +116,18 @@ async def generate_summary():
         return "Нет сообщений для обработки."
 
     # Преобразуем список сообщений в единый текст с указанием username, действия и названия чата
-    combined_text = "\n".join([
-        f"[{json.loads(msg)['chat_name']}] {json.loads(msg)['sender_username']} {json.loads(msg)['action']}: {json.loads(msg)['text']}"
-        for msg in messages
-    ])
+    combined_text = "\n".join(
+        [
+            f"[{json.loads(msg)['chat_name']}] {json.loads(msg)['sender_username']} {json.loads(msg)['action']}: {json.loads(msg)['text']}"
+            for msg in messages
+        ]
+    )
 
     # Очищаем Redis после генерации сводки
     db.delete(REDIS_MESSAGES_KEY)
 
     # Формируем запрос к OpenAI
-    messages = [
-        {"role": "system", "content": PROMPT},
-        {"role": "user", "content": combined_text}
-    ]
+    messages = [{"role": "system", "content": PROMPT}, {"role": "user", "content": combined_text}]
 
     try:
         summary = await send_openai_request(messages)

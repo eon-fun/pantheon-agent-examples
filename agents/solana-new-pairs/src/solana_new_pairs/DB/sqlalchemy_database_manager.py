@@ -1,18 +1,16 @@
 import asyncio
 import functools
+from collections.abc import Callable, Coroutine
 from contextlib import asynccontextmanager
-from typing import Any, Callable, Coroutine
+from typing import Any
 
+from agents_tools_logger.main import log
+from solana_new_pairs.config.config import config
 from sqlalchemy import MetaData, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 from sqlmodel import SQLModel
 from typing_extensions import AsyncGenerator
-
-
-from agents_tools_logger.main import log
-
-from solana_new_pairs.config.config import config
 
 DATABASE_URL = config.db.url
 
@@ -37,6 +35,7 @@ class Base(DeclarativeBase):
 async_engine = create_async_engine(DATABASE_URL, echo=False)
 async_session = async_sessionmaker(async_engine, expire_on_commit=False)
 
+
 @asynccontextmanager
 async def get_db2():
     async with async_engine.begin() as session:  # Начало транзакции
@@ -44,6 +43,7 @@ async def get_db2():
             yield session  # Возвращаем сессию для использования
         finally:
             await session.close()  # Закрываем сессию по завершении
+
 
 async def get_db() -> AsyncGenerator[AsyncSession, Any]:
     """Get a database session.
@@ -63,13 +63,11 @@ async def init_models() -> None:
     In a real-life example we would use Alembic to manage migrations.
     """
     async with async_engine.begin() as conn:
-        from .models.coin_model import BaseCoin
-        from .models.dex_tools_model import DexToolsData
-        from .models.rug_check_model import RugCheckData
         print("Creating tables")
-        await conn.run_sync(SQLModel.metadata.drop_all) # Убрать перед RP!
+        await conn.run_sync(SQLModel.metadata.drop_all)  # Убрать перед RP!
         await conn.run_sync(SQLModel.metadata.create_all)
         print("Tables created")
+
 
 def decorate_all_methods(decorator):
     def decorate(cls):
@@ -81,9 +79,7 @@ def decorate_all_methods(decorator):
     return decorate
 
 
-def handle_exceptions(
-        func: Callable[..., Coroutine[Any, Any, Any]]
-) -> Callable[..., Coroutine[Any, Any, Any]]:
+def handle_exceptions(func: Callable[..., Coroutine[Any, Any, Any]]) -> Callable[..., Coroutine[Any, Any, Any]]:
     @functools.wraps(func)
     async def wrapper(*args, **kwargs):
         try:

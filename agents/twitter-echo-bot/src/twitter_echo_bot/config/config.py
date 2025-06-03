@@ -1,21 +1,26 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import Field
 from loguru import logger
+from pydantic import Field
+from pydantic_settings import BaseSettings
+
 
 class FastAPISettings(BaseSettings):
-    allowed_origins: list[str] = Field(default=[
-        "http://localhost:8080",
-        "http://localhost:3001",
-        "http://localhost:3002",
-        "http://localhost:1111",
-    ])
+    allowed_origins: list[str] = Field(
+        default=[
+            "http://localhost:8080",
+            "http://localhost:3001",
+            "http://localhost:3002",
+            "http://localhost:1111",
+        ]
+    )
     allowed_methods: list[str] = Field(default=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
-    allowed_headers: list[str] = Field(default=[
-        "Access-Control-Allow-Headers",
-        "Content-Type",
-        "Authorization",
-        "Access-Control-Allow-Origin",
-    ])
+    allowed_headers: list[str] = Field(
+        default=[
+            "Access-Control-Allow-Headers",
+            "Content-Type",
+            "Authorization",
+            "Access-Control-Allow-Origin",
+        ]
+    )
     allowed_credentials: bool = Field(default=True)
 
 

@@ -1,16 +1,15 @@
 import json
-
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
-from ray import serve
-from base_agent.ray_entrypoint import BaseAgent
-from redis_client.ray_entrypoint import main as redis_client
-from openai_request.ray_entrypoint import main as send_openai_request
-from telethon import events
 
+from base_agent.ray_entrypoint import BaseAgent
+from dialogue_manager.commands import get_read_messages_data, telethon_auth
 from dialogue_manager.config import get_settings, get_telethon_client
 from dialogue_manager.prompts import AI_PROMPT
-from dialogue_manager.commands import telethon_auth, get_read_messages_data
+from fastapi import FastAPI
+from openai_request.ray_entrypoint import main as send_openai_request
+from ray import serve
+from redis_client.ray_entrypoint import main as redis_client
+from telethon import events
 
 
 @asynccontextmanager
@@ -51,7 +50,9 @@ class DialogueManager(BaseAgent):
 
             print(f"🔍 Processing message data: {message_data}")
 
-            db.add_to_sorted_set(get_settings().REDIS_MESSAGES_KEY, int(message_data["timestamp"]), json.dumps(message_data))
+            db.add_to_sorted_set(
+                get_settings().REDIS_MESSAGES_KEY, int(message_data["timestamp"]), json.dumps(message_data)
+            )
         except Exception as e:
             print(f"❌ Error processing message: {e}")
 
@@ -67,8 +68,7 @@ class DialogueManager(BaseAgent):
             for msg in messages:
                 msg_data = json.loads(msg)
                 is_read = any(
-                    msg_data["chat_id"] == chat_info["chat_id"] and
-                    int(msg_data["id"]) <= chat_info["max_id"]
+                    msg_data["chat_id"] == chat_info["chat_id"] and int(msg_data["id"]) <= chat_info["max_id"]
                     for chat_info in read_messages_data
                 )
                 if not is_read:
@@ -91,10 +91,12 @@ class DialogueManager(BaseAgent):
                 print("ℹ️ No messages to summarize")
                 return "No messages to process."
 
-            combined_text = "\n".join([
-                f"[{json.loads(msg)['chat_name']}] {json.loads(msg)['sender_username']} {json.loads(msg)['action']}: {json.loads(msg)['text']}"
-                for msg in messages
-            ])
+            combined_text = "\n".join(
+                [
+                    f"[{json.loads(msg)['chat_name']}] {json.loads(msg)['sender_username']} {json.loads(msg)['action']}: {json.loads(msg)['text']}"
+                    for msg in messages
+                ]
+            )
 
             db.delete(get_settings().REDIS_MESSAGES_KEY)
 
@@ -124,9 +126,9 @@ class DialogueManager(BaseAgent):
                 "text": event.text,
                 "sender_username": sender_username,
                 "action": "mentioned" if event.message.mentioned else "replied" if event.message.reply_to else "wrote",
-                "chat_name": chat.title if hasattr(chat, 'title') and chat.title else "Private Chat",
+                "chat_name": chat.title if hasattr(chat, "title") and chat.title else "Private Chat",
                 "chat_id": chat.id,
-                "timestamp": event.message.date.timestamp()
+                "timestamp": event.message.date.timestamp(),
             }
 
             await self.process_message(message_data)

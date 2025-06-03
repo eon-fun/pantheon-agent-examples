@@ -1,19 +1,15 @@
-from typing import List
-
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from twitter_echo_bot.DB.managers.base import BaseAlchemyManager
-from twitter_echo_bot.DB.models.tracked_accounts_models import PGTrackedAccount, AlchemyTrackedAccount
+from twitter_echo_bot.DB.models.tracked_accounts_models import AlchemyTrackedAccount, PGTrackedAccount
 
 
 class AlchemyTrackedAccountsManager(BaseAlchemyManager):
     def __init__(self, session: AsyncSession):
         super().__init__(session)
 
-    async def get_all_tracked_accounts(self,) -> List[PGTrackedAccount]:
-        """
-        Получает все отслеживаемые аккаунты Twitter.
+    async def get_all_tracked_accounts(self) -> list[PGTrackedAccount]:
+        """Получает все отслеживаемые аккаунты Twitter.
 
         :param session: Асинхронная сессия SQLAlchemy.
         :return: Список объектов AlchemyTrackedAccount.
@@ -29,8 +25,9 @@ class AlchemyTrackedAccountsManager(BaseAlchemyManager):
             WHERE twitter_handle = ANY(:twitter_handles)
         """)
         result = await self.session.execute(existing_query, {"twitter_handles": twitter_handles})
-        existing_accounts = {row[0] for row in
-                             result.fetchall()}  # row.twitter_handle не всегда работает, поэтому row[0]
+        existing_accounts = {
+            row[0] for row in result.fetchall()
+        }  # row.twitter_handle не всегда работает, поэтому row[0]
 
         # Определяем, какие хэндлы ещё не записаны в БД
         new_handles = [handle for handle in twitter_handles if handle not in existing_accounts]
@@ -42,9 +39,7 @@ class AlchemyTrackedAccountsManager(BaseAlchemyManager):
                 VALUES (:twitter_handle)
                 ON CONFLICT (twitter_handle) DO NOTHING;
             """)
-            await self.session.execute(
-                insert_query, [{"twitter_handle": handle} for handle in new_handles]
-            )
+            await self.session.execute(insert_query, [{"twitter_handle": handle} for handle in new_handles])
             await self.session.commit()  # Фиксируем вставку, иначе не увидим новые записи
 
         # Добавляем связи в user_tracked_accounts
@@ -54,8 +49,7 @@ class AlchemyTrackedAccountsManager(BaseAlchemyManager):
             ON CONFLICT DO NOTHING;
         """)
         await self.session.execute(
-            insert_links_query,
-            [{"user_id": user_id, "twitter_handle": handle} for handle in twitter_handles]
+            insert_links_query, [{"user_id": user_id, "twitter_handle": handle} for handle in twitter_handles]
         )
 
         await self.session.commit()

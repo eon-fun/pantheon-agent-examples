@@ -1,12 +1,13 @@
 import asyncio
-from telethon import TelegramClient, events
-from telethon.errors import SessionPasswordNeededError, PhoneCodeInvalidError
-from services.ai_connectors.openai_client import send_openai_request
+
 from database.redis.redis_client import RedisDB
+from services.ai_connectors.openai_client import send_openai_request
+from telethon import TelegramClient, events
+from telethon.errors import PhoneCodeInvalidError, SessionPasswordNeededError
 
 # Конфигурация
-API_ID = "26012476"
-API_HASH = "d0ba6cd225c5dea4d2f7eb717adbeaac"
+API_ID = ""  # Подставить от нужного акка
+API_HASH = ""  # Подставить от нужного акка
 SESSION_NAME = "ai_avatar_session"
 OPENAI_PROMPT_TEMPLATE = (
     "You are an AI avatar embedded in Telegram. Your primary goal is to assist users by answering their queries naturally, conversationally, and in a relatable manner."
@@ -94,7 +95,7 @@ async def handle_user_message(event):
         await event.reply("Произошла ошибка при обработке вашего запроса.")
 
 
-@client.on(events.NewMessage(pattern='/new_style'))
+@client.on(events.NewMessage(pattern="/new_style"))
 async def on_new_style_command(event):
     await handle_new_style_command(event)
 

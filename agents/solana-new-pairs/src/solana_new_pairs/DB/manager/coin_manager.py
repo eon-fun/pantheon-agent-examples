@@ -1,11 +1,11 @@
-from sqlalchemy.future import select
-from sqlalchemy.orm import selectinload, joinedload
-from sqlalchemy.ext.asyncio import AsyncSession
-from solana_new_pairs.DB.manager.base import BaseAlchemyManager
-from solana_new_pairs.DB.models.coin_model import BaseCoin
 from datetime import datetime, timedelta
 
+from solana_new_pairs.DB.manager.base import BaseAlchemyManager
+from solana_new_pairs.DB.models.coin_model import BaseCoin
 from solana_new_pairs.DB.models.rug_check_model import RugCheckData
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy.orm import joinedload
 
 
 class AlchemyBaseCoinManager(BaseAlchemyManager):
@@ -29,18 +29,22 @@ class AlchemyBaseCoinManager(BaseAlchemyManager):
             .where(BaseCoin.token_address == address)
             .options(
                 joinedload(BaseCoin.dex_tools_data),
-                joinedload(BaseCoin.rug_check_data.and_(RugCheckData.updated_at >= one_minute_ago))
+                joinedload(BaseCoin.rug_check_data.and_(RugCheckData.updated_at >= one_minute_ago)),
             )
         )
         result = await self.session.execute(query)
         coin = result.scalars().first()
-        return {
-            "id": coin.id,
-            "token_address": coin.token_address,
-            "creation_time": coin.creation_time,
-            "dex_tools_data": coin.dex_tools_data or None,
-            "rug_check_data": coin.rug_check_data or None,
-        } if coin else None
+        return (
+            {
+                "id": coin.id,
+                "token_address": coin.token_address,
+                "creation_time": coin.creation_time,
+                "dex_tools_data": coin.dex_tools_data or None,
+                "rug_check_data": coin.rug_check_data or None,
+            }
+            if coin
+            else None
+        )
 
     async def mark_unposted_as_posted(self):
         """Обновляет все записи с is_posted=False на is_posted=True и возвращает их."""

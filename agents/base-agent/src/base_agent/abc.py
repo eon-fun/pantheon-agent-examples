@@ -3,38 +3,27 @@ from collections.abc import Sequence
 from typing import Any
 
 import pydantic
-
 from base_agent.models import AgentModel, ToolModel, Workflow
 
 
 class AbstractAgentCard(pydantic.BaseModel):
     """Abstract interface for agent cards."""
 
-    ...
-
 
 class AbstractAgentSkill(pydantic.BaseModel):
     """Abstract interface for agent skills."""
-
-    ...
 
 
 class AbstractAgentParamsModel(pydantic.BaseModel):
     """Abstract interface for agent params model."""
 
-    ...
-
 
 class AbstractAgentInputModel(pydantic.BaseModel):
     """Abstract interface for agent intput model"""
 
-    ...
-
 
 class AbstractAgentOutputModel(pydantic.BaseModel):
     """Abstract interface for agennt output model"""
-
-    ...
 
 
 class AbstractChatResponse(pydantic.BaseModel):
@@ -61,8 +50,8 @@ class AbstractExecutor(ABC):
 
         Returns:
             A dictionary mapping step IDs to Task objects representing the plan
+
         """
-        pass
 
     @abstractmethod
     def chat(self, prompt: Any, **kwargs) -> str:
@@ -74,8 +63,8 @@ class AbstractExecutor(ABC):
 
         Returns:
             An str with response
+
         """
-        pass
 
     @abstractmethod
     def classify_intent(self, prompt: Any, **kwargs) -> str:
@@ -87,8 +76,8 @@ class AbstractExecutor(ABC):
 
         Returns:
             An str with intent
+
         """
-        pass
 
     @abstractmethod
     def reconfigure(self, prompt: Any, **kwargs) -> dict:
@@ -100,8 +89,8 @@ class AbstractExecutor(ABC):
 
         Returns:
             A dict with the updated config
+
         """
-        pass
 
 
 class AbstractPromptBuilder(ABC):
@@ -117,8 +106,8 @@ class AbstractPromptBuilder(ABC):
 
         Returns:
             A prompt object that can be used by an executor
+
         """
-        pass
 
     @abstractmethod
     def generate_chat_prompt(self, *args, **kwargs) -> Any:
@@ -130,8 +119,8 @@ class AbstractPromptBuilder(ABC):
 
         Returns:
             A prompt object that can be used by an executor
+
         """
-        pass
 
     @abstractmethod
     def generate_intent_classifier_prompt(self, *args, **kwargs) -> Any:
@@ -142,6 +131,7 @@ class AbstractPromptBuilder(ABC):
 
         Returns:
             A prompt object that can be used by an executor
+
         """
 
     @abstractmethod
@@ -153,6 +143,7 @@ class AbstractPromptBuilder(ABC):
 
         Returns:
             A prompt object that can be used by an executor
+
         """
 
 
@@ -172,38 +163,36 @@ class AbstractWorkflowRunner(ABC):
 
         Returns:
             The result of executing the plan
+
         """
-        pass
 
     @classmethod
     @abstractmethod
     def start_daemon(cls) -> None:
         """Start the workflow runner engine."""
-        pass
 
     @classmethod
     @abstractmethod
     def stop_daemon(cls) -> None:
         """Stop the workflow runner engine."""
-        pass
 
     @abstractmethod
     def run_background_workflows(self, *args, **kwargs) -> None:
         """Run static workflows in the workflow runner engine."""
-        pass
 
     @abstractmethod
     async def list_workflows(self, *args, **kwargs) -> None:
-         """List all workflows in the workflow runner engine."""
-         pass
+        """List all workflows in the workflow runner engine."""
 
     @abstractmethod
     def reconfigure(self, config: dict[str, Any]) -> None:
         """Reconfigure the agent with new settings.
+
         Args:
             config: New configuration settings
+
         """
-        pass
+
 
 class AbstractAgent(ABC):
     """Abstract base class for agent implementations."""
@@ -224,8 +213,8 @@ class AbstractAgent(ABC):
 
         Returns:
             The result of achieving the goal
+
         """
-        pass
 
     @abstractmethod
     def get_most_relevant_agents(self, goal: str) -> list[AgentModel]:
@@ -236,8 +225,8 @@ class AbstractAgent(ABC):
 
         Returns:
             A list of the most relevant agents for the goal
+
         """
-        pass
 
     @abstractmethod
     def get_most_relevant_tools(self, goal: str) -> list[ToolModel]:
@@ -248,8 +237,8 @@ class AbstractAgent(ABC):
 
         Returns:
             A list of the most relevant tools for the goal
+
         """
-        pass
 
     @abstractmethod
     def generate_plan(
@@ -265,9 +254,8 @@ class AbstractAgent(ABC):
 
         Returns:
             A dictionary mapping step IDs to Task objects representing the plan
-        """
-        pass
 
+        """
 
     @abstractmethod
     def chat(
@@ -286,8 +274,8 @@ class AbstractAgent(ABC):
 
         Returns:
             The result of executing the plan
+
         """
-        pass
 
     @abstractmethod
     def reconfigure(self, config: dict[str, Any]) -> None:
@@ -295,8 +283,8 @@ class AbstractAgent(ABC):
 
         Args:
             config: New configuration settings
+
         """
-        pass
 
     @abstractmethod
     async def handoff(self, endpoint: str, goal: str, plan: dict) -> Any:
@@ -309,5 +297,5 @@ class AbstractAgent(ABC):
 
         Returns:
             The result from the agent that was handed off to
+
         """
-        pass

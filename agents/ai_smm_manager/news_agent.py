@@ -1,15 +1,15 @@
 import asyncio
-import aiohttp
-from bs4 import BeautifulSoup
-from aiogram import Bot, Dispatcher
-from aiogram.types import Message
-from aiogram.filters import Command
 from urllib.parse import urljoin
-from aiohttp import ClientConnectorError
-from tenacity import retry, stop_after_attempt, wait_fixed
 
-from services.ai_connectors.openai_client import send_openai_request
+import aiohttp
+from aiogram import Bot, Dispatcher
+from aiogram.filters import Command
+from aiogram.types import Message
+from aiohttp import ClientConnectorError
+from bs4 import BeautifulSoup
 from database.redis.redis_client import RedisDB
+from services.ai_connectors.openai_client import send_openai_request
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 # Инициализация Redis
 db = RedisDB()
@@ -22,9 +22,13 @@ PROCESSED_TWEETS_KEY = "processed_tweets"
 TELEGRAM_BOT_TOKEN = "7633131821:AAForOPCLS045IFHihMf49UozGwKL7IMbpU"
 TELEGRAM_CHANNEL_ID = "@pantheoncryptotest"
 
-TWITTER_BASIC_BEARER_TOKEN = 'AAAAAAAAAAAAAAAAAAAAAALFxQEAAAAAccmjfpy9O9AoKsiWm3EiKRmlYW0%3DKxQgwMPoButLHfAL1Zoledy4bdko6ufQNLTQuxDpCfZxfgthkI'
+TWITTER_BASIC_BEARER_TOKEN = (
+    "AAAAAAAAAAAAAAAAAAAAAALFxQEAAAAAccmjfpy9O9AoKsiWm3EiKRmlYW0%3DKxQgwMPoButLHfAL1Zoledy4bdko6ufQNLTQuxDpCfZxfgthkI"
+)
 GROK_API_URL = "https://api.x.ai/v1/chat/completions"
-GROK_API_KEY = "xai-qRLBA9NVS913EhUy2jCdqPpayHTuJ4UH1E3N1W3BbtRmAU87maYuPMG2Ci3AVJnemXILApAK1AdvMKFy"  # Ваш API ключ для Grok
+GROK_API_KEY = (
+    "xai-qRLBA9NVS913EhUy2jCdqPpayHTuJ4UH1E3N1W3BbtRmAU87maYuPMG2Ci3AVJnemXILApAK1AdvMKFy"  # Ваш API ключ для Grok
+)
 
 PROMPT = "You are a Telegram post author for a cryptocurrency news channel. "
 "Write concise and engaging posts in English with proper Markdown formatting. "
@@ -84,10 +88,7 @@ async def fetch_tweets_from_grok(query: str):
     }
     payload = {
         "model": "grok-beta",
-        "messages": [
-            {"role": "system", "content": GROK_PROMPT},
-            {"role": "user", "content": query}
-        ]
+        "messages": [{"role": "system", "content": GROK_PROMPT}, {"role": "user", "content": query}],
     }
 
     try:
@@ -130,7 +131,7 @@ async def rewrite_text(text):
 
 @dp.message(Command("find_in_grok"))
 async def find_in_grok(message: Message):
-    query = message.text[len("/find_in_grok "):].strip()
+    query = message.text[len("/find_in_grok ") :].strip()
     if not query:
         await message.reply("⚠️ Укажите запрос для поиска в Grok.")
         return
@@ -182,8 +183,8 @@ async def scrape_site(url):
             async with session.get(url, headers=headers) as response:
                 response.raise_for_status()
                 soup = BeautifulSoup(await response.text(), "html.parser")
-                paragraphs = soup.find_all('p')
-                return ' '.join([p.get_text() for p in paragraphs])
+                paragraphs = soup.find_all("p")
+                return " ".join([p.get_text() for p in paragraphs])
     except aiohttp.ClientConnectorError as e:
         print(f"❌ Ошибка соединения при парсинге {url}: {e}")
     except asyncio.TimeoutError:
@@ -206,8 +207,8 @@ async def fetch_tweets_from_accounts():
         try:
             print(f"🔍 Получение твитов для @{account}")
             async with aiohttp.ClientSession(
-                    timeout=aiohttp.ClientTimeout(total=30),
-                    connector=aiohttp.TCPConnector(ssl=False)  # Отключаем SSL-верификацию
+                timeout=aiohttp.ClientTimeout(total=30),
+                connector=aiohttp.TCPConnector(ssl=False),  # Отключаем SSL-верификацию
             ) as session:
                 # Шаг 1: Получаем user_id по username
                 user_info_url = f"https://api.twitter.com/2/users/by/username/{account}"
@@ -298,7 +299,9 @@ async def periodic_task():
         print("🔎 Проверка статей и твитов...")
         await process_new_articles()
         await process_twitter_posts()
-        await asyncio.sleep(10)  # Пауза в поиске статьей и твитов. Рекомендую минимум 1 час, пока в тест режиме - 10 сек
+        await asyncio.sleep(
+            10
+        )  # Пауза в поиске статьей и твитов. Рекомендую минимум 1 час, пока в тест режиме - 10 сек
 
 
 # 10. Главная функция

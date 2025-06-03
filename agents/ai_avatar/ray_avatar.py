@@ -1,7 +1,6 @@
 import ray
-from telethon import events
-from services.ai_connectors.openai_client import send_openai_request
 from database.redis.redis_client import RedisDB
+from services.ai_connectors.openai_client import send_openai_request
 
 OPENAI_PROMPT_TEMPLATE = (
     "You are an AI avatar embedded in Telegram. Your primary goal is to assist users by answering their queries naturally, conversationally, and in a relatable manner."
@@ -56,8 +55,8 @@ class AvatarAgent:
     async def process_message(self, message_data):
         """Processes a user message and generates a response."""
         try:
-            user_id = str(message_data['user_id'])
-            user_message = message_data['text']
+            user_id = str(message_data["user_id"])
+            user_message = message_data["text"]
             recent_messages = self.db.get(f"style_{user_id}") or ""
             last_reply = self.db.get(f"last_reply_{user_id}") or ""
 
