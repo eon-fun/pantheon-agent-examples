@@ -1,0 +1,22 @@
+@startuml
+title TwitterMentionsAnswerer - Response Flow
+
+actor "Twitter User" as User
+participant "Twitter API" as Twitter
+participant "MentionsMonitor" as Monitor
+database "Redis" as Redis
+participant "OpenAI" as AI
+
+User -> Twitter: Mentions @username
+Twitter -> Monitor: Poll for new mentions
+Monitor -> Redis: Check responded_mentions
+alt New mention found
+    Monitor -> Twitter: Fetch conversation context
+    Twitter --> Monitor: Full thread
+    Monitor -> AI: Generate context-aware reply
+    AI --> Monitor: Response text
+    Monitor -> Twitter: Post reply
+    Twitter --> Monitor: Confirmation
+    Monitor -> Redis: Record mention ID
+end
+@enduml

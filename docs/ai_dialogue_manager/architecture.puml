@@ -1,0 +1,35 @@
+@startuml
+title Telegram Summarizer - Main Flow
+
+actor User as "Telegram User"
+participant "Summarizer Bot" as Bot
+participant "Telegram API" as Telegram
+participant "Redis DB" as Redis
+participant "OpenAI API" as OpenAI
+
+User -> Bot: Sends message
+Bot -> Telegram: Fetch chat info
+Telegram --> Bot: Chat metadata
+
+alt is_unread OR is_mentioned OR is_reply
+    Bot -> Redis: Store message\n(timestamped JSON)
+    Redis --> Bot: Storage confirmation
+end
+
+User -> Bot: /summary command
+Bot -> Redis: Retrieve all messages
+Redis --> Bot: Message set
+Bot -> Bot: Filter read messages
+Bot -> OpenAI: Send for summarization\n(with PROMPT template)
+OpenAI --> Bot: Generated summary
+Bot -> User: Return formatted digest
+Bot -> Redis: Clean processed messages
+
+note right of Redis
+    Data Structure:
+    Sorted Set with:
+    - Score: timestamp
+    - Value: JSON message
+end note
+
+@enduml
