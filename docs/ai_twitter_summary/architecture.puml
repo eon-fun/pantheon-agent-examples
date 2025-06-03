@@ -1,0 +1,33 @@
+@startuml
+title AiTwitterSummary - Architecture
+
+component "Ray" as Ray {
+    [TweetProcessor]
+    [Periodic Task]
+}
+
+database "Redis" as Redis {
+    [Tracked Accounts]
+    [Processed Tweets]
+}
+
+[Twitter API] as Twitter
+[OpenAI] as AI
+[Telegram] as Telegram
+
+Ray -> Twitter: Fetch tweets
+Twitter --> Ray: New tweets
+Ray -> AI: Generate summaries
+AI --> Ray: Formatted content
+Ray -> Telegram: Post updates
+Ray --> Redis: Track state
+
+note right of Ray
+    Processing Flow:
+    1. Account monitoring
+    2. Tweet collection
+    3. AI summarization
+    4. Telegram publishing
+    Runs every 30 seconds
+end note
+@enduml
