@@ -1,8 +1,9 @@
-from sqlalchemy.orm import relationship
-from sqlmodel import Field, SQLModel, Column, Integer, String
 from datetime import datetime
-from typing import Optional, ClassVar
+from typing import ClassVar
+
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import relationship
+from sqlmodel import Column, Field, Integer, SQLModel
 
 
 class RugCheckData(SQLModel, table=True):

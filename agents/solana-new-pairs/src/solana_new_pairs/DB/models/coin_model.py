@@ -1,8 +1,8 @@
+from datetime import datetime
 from typing import ClassVar
 
 from sqlalchemy.orm import relationship
-from sqlmodel import Field, SQLModel, Column, Integer, String
-from datetime import datetime
+from sqlmodel import Column, Field, Integer, SQLModel, String
 
 
 class BaseCoin(SQLModel, table=True):

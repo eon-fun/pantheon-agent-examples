@@ -1,11 +1,10 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, TIMESTAMP, String, func
-from sqlalchemy.orm import relationship
+from datetime import datetime
 
+from sqlalchemy import TIMESTAMP, Boolean, Column, ForeignKey, Integer, String, func
+from sqlalchemy.orm import relationship
 from twitter_echo_bot.DB.models.base import BaseConfigModel
 from twitter_echo_bot.DB.sqlalchemy_database_manager import Base
-from pydantic import BaseModel
-from datetime import datetime
-from typing import Optional
+
 
 class AlchemyUserTweetMatch(Base):
     __tablename__ = "user_tweet_matches"
@@ -19,7 +18,6 @@ class AlchemyUserTweetMatch(Base):
     # Связи
     user = relationship("AlchemyUser", back_populates="tweet_matches")
     tweet = relationship("AlchemyTweetHistory", back_populates="user_matches")
-
 
 
 class PGUserTweetMatch(BaseConfigModel):

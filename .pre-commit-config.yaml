@@ -1,0 +1,38 @@
+# .pre-commit-config.yaml
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+    -   id: check-yaml
+        exclude: ^agents/base-agent/chart/
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace
+    -   id: check-merge-conflict
+    -   id: check-added-large-files
+        exclude: repomix-output.xml
+
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.12
+    hooks:
+    -   id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+        files: ^agents/.*\.py$
+    -   id: ruff-format
+        files: ^agents/.*\.py$
+
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.16.0
+    hooks:
+    -   id: mypy
+        args: [--ignore-missing-imports, --show-error-codes]
+        files: ^agents/.*\.py$
+        exclude: ^agents/(ai_predicts_manager|base-agent|creativity-agent|example-agent|kol-agent|persona-agent|solana-new-pairs|telegram-listener|tik-tok-test-agent|tw-amb-comments-answerer|tw-amb-gorilla-marketing|tw-amb-mention-answerer|twitter-ambassador-commentator|twitter-ambassador-liker|twitter-ambassador-posting-agent|twitter-echo-bot)/.*$
+        additional_dependencies: [
+            "pydantic>=2.0.0",
+            "fastapi>=0.100.0",
+            "types-requests",
+            "types-redis",
+            "types-pyyaml",
+            "openai",
+            "langchain"
+        ]

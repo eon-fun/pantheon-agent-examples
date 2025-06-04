@@ -3,7 +3,6 @@ import enum
 import os
 import sys
 from datetime import datetime, timedelta
-from typing import List, Optional
 
 from openai import AsyncOpenAI
 from pydantic import BaseModel, Field
@@ -87,7 +86,7 @@ def initialize_qdrant():
         raise
 
 
-async def get_embedding(text: str) -> Optional[List[float]]:
+async def get_embedding(text: str) -> list[float] | None:
     """Generates text embedding using OpenAI API."""
     if not text or not isinstance(text, str) or not text.strip():
         print("DEBUG: Skipping embedding for empty or non-string input.")
@@ -107,7 +106,7 @@ async def get_embedding(text: str) -> Optional[List[float]]:
         return None
 
 
-def save_embedding_to_qdrant(collection_name: str, qdrant_point_id: int, embedding: List[float], payload: dict):
+def save_embedding_to_qdrant(collection_name: str, qdrant_point_id: int, embedding: list[float], payload: dict):
     if not embedding:
         print(
             f"DEBUG: No embedding provided for Qdrant point ID {qdrant_point_id} in {collection_name}. Skipping Qdrant save."
@@ -137,7 +136,7 @@ def save_embedding_to_qdrant(collection_name: str, qdrant_point_id: int, embeddi
 
 
 async def send_telegram_message(
-    client: TelegramClient, chat_id: int, message_text: str, reply_to_message_id: Optional[int] = None
+    client: TelegramClient, chat_id: int, message_text: str, reply_to_message_id: int | None = None
 ):
     """Sends a message to a Telegram chat, optionally replying to a specific message."""
     try:
@@ -203,15 +202,14 @@ Provide your classification and a brief reasoning.
                 f"DEBUG: Message classification: {parsed_result.category.value}, Reasoning: '{parsed_result.reasoning}'"
             )
             return parsed_result
-        else:
-            print(
-                f"ERROR: Message classification did not return the expected Pydantic model. Type: {type(parsed_result)}",
-                file=sys.stderr,
-            )
-            return MessageClassificationResult(
-                category=MessageCategory.UNCATEGORIZED,
-                reasoning="Error in classification processing, unexpected response structure.",
-            )
+        print(
+            f"ERROR: Message classification did not return the expected Pydantic model. Type: {type(parsed_result)}",
+            file=sys.stderr,
+        )
+        return MessageClassificationResult(
+            category=MessageCategory.UNCATEGORIZED,
+            reasoning="Error in classification processing, unexpected response structure.",
+        )
     except Exception as e:
         print(f"ERROR: Failed to perform message classification: {e}", file=sys.stderr)
         return MessageClassificationResult(
@@ -287,18 +285,17 @@ Expanded: "Information about the $EON token in the Pantheon (EON) project, its u
         if isinstance(parsed_result, QueryExpansionResult):
             print(f"DEBUG: Query expansion result: expanded_query='{parsed_result.expanded_query}'")
             return parsed_result
-        else:
-            print(
-                f"ERROR: Query expansion did not return the expected Pydantic model. Type: {type(parsed_result)}",
-                file=sys.stderr,
-            )
-            return QueryExpansionResult(expanded_query=user_message)
+        print(
+            f"ERROR: Query expansion did not return the expected Pydantic model. Type: {type(parsed_result)}",
+            file=sys.stderr,
+        )
+        return QueryExpansionResult(expanded_query=user_message)
     except Exception as e:
         print(f"ERROR: Failed to expand query: {e}", file=sys.stderr)
         return QueryExpansionResult(expanded_query=user_message)
 
 
-async def search_knowledge_base(query_embedding: List[float], top_k: int = 5) -> List[str]:
+async def search_knowledge_base(query_embedding: list[float], top_k: int = 5) -> list[str]:
     """Searches the knowledge base for relevant text chunks."""
     if not query_embedding:
         print("DEBUG: No query embedding provided for knowledge base search.")
@@ -319,7 +316,7 @@ async def search_knowledge_base(query_embedding: List[float], top_k: int = 5) ->
         return []
 
 
-async def generate_final_answer(user_message: str, contexts: List[str]) -> FinalAnswerResult:
+async def generate_final_answer(user_message: str, contexts: list[str]) -> FinalAnswerResult:
     """Generates a final answer using OpenAI structured output, based on user message and contexts."""
     context_str = "\n\n".join(f"Context {i + 1}:\n{ctx}" for i, ctx in enumerate(contexts))
     if not contexts:
@@ -367,12 +364,11 @@ Based on the user's question and the provided context, generate a helpful answer
         if isinstance(parsed_result, FinalAnswerResult):
             print(f"DEBUG: Final answer generation result: answer='{parsed_result.answer[:100]}...'")
             return parsed_result
-        else:
-            print(
-                f"ERROR: Final answer generation did not return the expected Pydantic model. Type: {type(parsed_result)}",
-                file=sys.stderr,
-            )
-            return FinalAnswerResult(answer="I encountered an issue while formulating my response. Please try again.")
+        print(
+            f"ERROR: Final answer generation did not return the expected Pydantic model. Type: {type(parsed_result)}",
+            file=sys.stderr,
+        )
+        return FinalAnswerResult(answer="I encountered an issue while formulating my response. Please try again.")
     except Exception as e:
         print(f"ERROR: Failed to generate final answer: {e}", file=sys.stderr)
         return FinalAnswerResult(answer=f"I am unable to answer at this moment due to an error: {str(e)}")
@@ -433,19 +429,19 @@ async def process_new_message(event: events.NewMessage.Event, telegram_client: T
         await ban_user_for_24_hours(telegram_client, chat_id, user_id)
         return
 
-    elif classification_result.category == MessageCategory.OFF_TOPIC:
+    if classification_result.category == MessageCategory.OFF_TOPIC:
         print(
             f"INFO: [{message.id}] Message classified as OFF_TOPIC. Reasoning: {classification_result.reasoning}. No action taken."
         )
         return
 
-    elif classification_result.category == MessageCategory.UNCATEGORIZED:
+    if classification_result.category == MessageCategory.UNCATEGORIZED:
         print(
             f"WARN: [{message.id}] Message could not be categorized. Reasoning: {classification_result.reasoning}. No action taken."
         )
         return
 
-    elif classification_result.category == MessageCategory.PROJECT_QUESTION:
+    if classification_result.category == MessageCategory.PROJECT_QUESTION:
         print(
             f"DEBUG: [{message.id}] Message is a PROJECT_QUESTION. Reasoning: {classification_result.reasoning}. Proceeding with answer generation."
         )
@@ -493,12 +489,11 @@ async def process_new_message(event: events.NewMessage.Event, telegram_client: T
         print(f"DEBUG: Finished processing message {message.id}.")
         return
 
-    else:
-        print(
-            f"ERROR: [{message.id}] Unknown message category: {classification_result.category}. No action taken.",
-            file=sys.stderr,
-        )
-        return
+    print(
+        f"ERROR: [{message.id}] Unknown message category: {classification_result.category}. No action taken.",
+        file=sys.stderr,
+    )
+    return
 
 
 async def initialize_data_processing():

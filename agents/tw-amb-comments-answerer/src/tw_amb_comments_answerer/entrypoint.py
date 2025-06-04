@@ -1,21 +1,19 @@
-import time
 import re
-
+import time
 from contextlib import asynccontextmanager
+
+from base_agent.ray_entrypoint import BaseAgent
 from fastapi import FastAPI
 from ray import serve
-from base_agent.ray_entrypoint import BaseAgent
-
-from twitter_ambassador_utils.main import TwitterAuthClient, create_post
-from tweetscout_utils.main import get_conversation_from_tweet, create_conversation_string, search_tweets
 from redis_client.main import Post, ensure_delay_between_posts, get_redis_db
 from tw_amb_comments_answerer.commands import check_answer_is_needed, create_comment_to_comment
+from tweetscout_utils.main import create_conversation_string, get_conversation_from_tweet, search_tweets
+from twitter_ambassador_utils.main import TwitterAuthClient, create_post
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
-
 
 
 app = FastAPI(lifespan=lifespan)
@@ -32,16 +30,16 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
         await self.answer_on_project_tweets_comments(goal)
 
     async def answer_on_project_tweets_comments(
-            self,
-            goal: str,
+        self,
+        goal: str,
     ) -> bool:
         my_username = goal.split(".")[0]
         project_username = goal.split(".")[1]
-        keywords = re.findall(r'[a-zA-Z0-9]+', goal.split(".")[2])
-        themes = re.findall(r'[a-zA-Z0-9]+', goal.split(".")[3])
+        keywords = re.findall(r"[a-zA-Z0-9]+", goal.split(".")[2])
+        themes = re.findall(r"[a-zA-Z0-9]+", goal.split(".")[3])
         db = get_redis_db()
         try:
-            print(f'answer_on_project_tweets_comments {my_username=} {project_username=} {keywords=} {themes=}')
+            print(f"answer_on_project_tweets_comments {my_username=} {project_username=} {keywords=} {themes=}")
 
             # Формируем поисковые запросы
             search_queries = keywords + themes
@@ -52,17 +50,15 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
 
             for query in search_queries:
                 comments = await search_tweets(
-                    access_token=account_access_token,
-                    query=f"{query} is:reply to:{project_username}"
+                    access_token=account_access_token, query=f"{query} is:reply to:{project_username}"
                 )
                 all_project_comments.extend(comments)
 
-            commented_tweets_key = f'answered_comments:{my_username}:{project_username}'
+            commented_tweets_key = f"answered_comments:{my_username}:{project_username}"
             answered_comments_before = db.get_set(commented_tweets_key)
 
             tweets_to_comment = [
-                tweet for tweet in all_project_comments
-                if tweet.id_str not in answered_comments_before
+                tweet for tweet in all_project_comments if tweet.id_str not in answered_comments_before
             ]
 
             if not tweets_to_comment:
@@ -76,7 +72,7 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
                         comment_text=create_conversation_string(conversation),
                         keywords=keywords,
                         themes=themes,
-                        my_username=my_username
+                        my_username=my_username,
                     )
 
                     await ensure_delay_between_posts(my_username, delay=60)
@@ -88,7 +84,7 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
 
                     if tweet_posted:
                         post = Post(
-                            id=tweet_posted['data']['id'],
+                            id=tweet_posted["data"]["id"],
                             text=comment_text,
                             sender_username=my_username,
                             timestamp=int(time.time()),
@@ -96,12 +92,12 @@ class TwitterAmbassadorCommentsAnswerer(BaseAgent):
                         )
                         db.add_user_post(my_username, post)
                         db.add_to_set(commented_tweets_key, tweet.id_str)
-                        db.save_tweet_link('answer_on_project_tweets_comments', tweet.id_str)
-                        print(f'Posted reply to {tweet.id_str}: {comment_text}')
+                        db.save_tweet_link("answer_on_project_tweets_comments", tweet.id_str)
+                        print(f"Posted reply to {tweet.id_str}: {comment_text}")
 
             return True
         except Exception as error:
-            print(f'answer_on_project_tweets_comments error: {my_username=} {error=}')
+            print(f"answer_on_project_tweets_comments error: {my_username=} {error=}")
             raise
 
 

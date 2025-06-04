@@ -1,14 +1,15 @@
 import logging
-import aiohttp
-import asyncio
-from aiolimiter import AsyncLimiter
-from typing import Optional, Dict, Any
+import os
 from datetime import datetime, timedelta, timezone
+from typing import Any
 
+import aiohttp
+from agents_tools_logger.main import log
+from aiolimiter import AsyncLimiter
 from solana_new_pairs.DB.manager.coin_manager import AlchemyBaseCoinManager
 from solana_new_pairs.DB.manager.dex_tools_manager import AlchemyDexToolsManager
 from solana_new_pairs.DB.sqlalchemy_database_manager import get_db
-from agents_tools_logger.main import log
+
 logger = logging.getLogger(__name__)
 
 
@@ -53,13 +54,13 @@ class DextoolsAPIWrapper:
     async def close(self):
         await self._session.close()
 
-    async def _request(self, endpoint: str, params: Optional[Dict[str, Any]] = None):
+    async def _request(self, endpoint: str, params: dict[str, Any] | None = None):
         async with self._limiter:  # Ограничение запросов
             url = f"{self.url}{endpoint}"
             async with self._session.get(url, headers=self._headers, params=params) as response:
                 if response.status == 403:
                     response.raise_for_status()
-                    raise Exception(f"Access denied (403). Check your API key or request limits.")
+                    raise Exception("Access denied (403). Check your API key or request limits.")
                 response.raise_for_status()
                 return await response.json()
 
@@ -67,15 +68,15 @@ class DextoolsAPIWrapper:
         return await self._request(f"/blockchain/{chain}")
 
     async def get_blockchains(self, order="asc", sort="name", page=None, pageSize=None):
-        return await self._request("/blockchain",
-                                   params={"order": order, "sort": sort, "page": page, "pageSize": pageSize})
+        return await self._request(
+            "/blockchain", params={"order": order, "sort": sort, "page": page, "pageSize": pageSize}
+        )
 
     async def get_pool_by_address(self, chain: str, address: str):
         return await self._request(f"/pool/{chain}/{address}")
 
     async def get_pools(self, chain, from_, to, order="asc", sort="creationTime", page=None, pageSize=None):
-        """
-        {'creationTime': '2023-11-14T19:08:19.601Z',
+        """{'creationTime': '2023-11-14T19:08:19.601Z',
         'exchange': {'
                     name': 'Raydium',
                     'factory': '675kpx9mhtjs2zt1qfr1nyhuzelxfqm9h24wfsut1mp8'
@@ -107,16 +108,21 @@ class DextoolsAPIWrapper:
         return await self._request(f"/pool/{chain}", params=params)
 
 
-
-
 async def main():
-    API_KEY = "Kv7BZ8mwvU4vFoaaS8eEJ3UvmXG4x7Qk71uLesRF"  # Укажите ваш API-ключ
-    api = DextoolsAPIWrapper(api_key=API_KEY, plan='trial')  # Лимит: 2 запроса в секунду
+    API_KEY = os.getenv("DEXTOOLS_API_KEY", "your-api-key-here")  # Укажите ваш API-ключ
+    api = DextoolsAPIWrapper(api_key=API_KEY, plan="trial")  # Лимит: 2 запроса в секунду
 
     try:
         # print(await api.get_blockchains(order="asc", sort="name", page=1, pageSize=50))
-        data = await api.get_pools(chain="solana", from_="2023-11-14T19:00:00", to="2023-11-14T23:00:00", order="asc",
-                                   sort="creationTime", page=None, pageSize=None)
+        data = await api.get_pools(
+            chain="solana",
+            from_="2023-11-14T19:00:00",
+            to="2023-11-14T23:00:00",
+            order="asc",
+            sort="creationTime",
+            page=None,
+            pageSize=None,
+        )
 
     finally:
         await api.close()
@@ -126,24 +132,25 @@ async def main():
 # https://public-api.dextools.io/trial/v2/pool/ether
 # asyncio.run(main())
 
+
 async def collect_and_store_data(dex_tools_api: DextoolsAPIWrapper):
     now = datetime.now(timezone.utc)
-    from_ = (now - timedelta(seconds=60)).isoformat(timespec='seconds')  # Дата 10 секунд назад
-    to = now.isoformat(timespec='seconds')  # Текущая дата
+    from_ = (now - timedelta(seconds=60)).isoformat(timespec="seconds")  # Дата 10 секунд назад
+    to = now.isoformat(timespec="seconds")  # Текущая дата
     chain = "solana"
     data = await dex_tools_api.get_pools(chain, from_=from_, to=to)
     if data:
         log.info(f"Received {len(data.get('data', []))} pools in timeframe {from_} - {to}")
-        data = data.get('data').get('results')
+        data = data.get("data").get("results")
         async for session in get_db():
             coin_manager = AlchemyBaseCoinManager(session)
             dex_tools_manager = AlchemyDexToolsManager(session)
             for pool_data in data:
-                token_address = pool_data.get('mainToken').get('address')
+                token_address = pool_data.get("mainToken").get("address")
                 try:
                     new_coin = await coin_manager.create_base_coin(token_address)
                     await dex_tools_manager.create_dex_tools_data(new_coin.id, pool_data)
-                except Exception as e:
+                except Exception:
                     log.warning(f"We already have dextools data for {new_coin.id}")
 
     else:

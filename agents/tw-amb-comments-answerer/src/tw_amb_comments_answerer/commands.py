@@ -1,4 +1,5 @@
 import re
+
 from send_openai_request.main import send_openai_request
 
 PROMPT_FOR_COMMENT = """DONT USE HASHTAG You are a technology community manager. Your task is to create a reply to the conversation using provided knowledge base context.
@@ -58,27 +59,24 @@ async def add_blank_lines(text) -> str:
     messages = [
         {
             "role": "system",
-            "content": """You are a text formatter. Your task is only to format the text. 
-The text should be split into several paragraphs with a blank line between them. 
+            "content": """You are a text formatter. Your task is only to format the text.
+The text should be split into several paragraphs with a blank line between them.
 Do not change the content of the text, just insert blank lines to divide it into paragraphs.
 
 EXAMPLE INPUT:
-Discover $NFNT, where sci-fi meets reality! With NFINITY, even your dog's to-do list becomes autonomous. Who needs thumbs? Unleash the hyper-advanced AI bot and watch it fetch not just sticks but ROI. 🐶🔥 #NFINITY 
+Discover $NFNT, where sci-fi meets reality! With NFINITY, even your dog's to-do list becomes autonomous. Who needs thumbs? Unleash the hyper-advanced AI bot and watch it fetch not just sticks but ROI. 🐶🔥 #NFINITY
 
 EXAMPLE OUTPUT:
 Discover $NFNT, where sci-fi meets reality!
 
 With NFINITY, even your dog's to-do list becomes autonomous.
 
-Who needs thumbs? Unleash the hyper-advanced AI bot and watch it fetch not just sticks but ROI. 🐶🔥 
+Who needs thumbs? Unleash the hyper-advanced AI bot and watch it fetch not just sticks but ROI. 🐶🔥
 
 #NFINITY @nfinityAI 🚀
-"""
+""",
         },
-        {
-            "role": "user",
-            "content": text
-        }
+        {"role": "user", "content": text},
     ]
 
     formatter_prompt = (
@@ -95,15 +93,15 @@ Who needs thumbs? Unleash the hyper-advanced AI bot and watch it fetch not just 
         f"{text}"
     )
     text = await send_openai_request(messages=messages, temperature=1.0)
-    print(f'Tweet validating 2 {text}')
+    print(f"Tweet validating 2 {text}")
     return text
 
 
 async def format_text(text: str) -> str:
     text = await add_blank_lines(text)
 
-    text = re.sub(r'#\w+', '', text)
-    text = re.sub(r'\s+', ' ', text)
+    text = re.sub(r"#\w+", "", text)
+    text = re.sub(r"\s+", " ", text)
     text = text.strip()
 
     for _ in range(20):
@@ -113,13 +111,10 @@ async def format_text(text: str) -> str:
             {
                 "role": "system",
                 "content": "You are a text shortener. Your task is to reduce the text length, keeping "
-                           "its meaning and style unchanged. You can remove some sentences as long as it "
-                           "doesn't harm the overall meaning of the text. Also remove emojis. REMOVE HASHTAGS"
+                "its meaning and style unchanged. You can remove some sentences as long as it "
+                "doesn't harm the overall meaning of the text. Also remove emojis. REMOVE HASHTAGS",
             },
-            {
-                "role": "user",
-                "content": text
-            }
+            {"role": "user", "content": text},
         ]
 
         system_prompt = (
@@ -130,49 +125,31 @@ async def format_text(text: str) -> str:
         )
         text = await send_openai_request(messages=messages, temperature=1.0)
 
-        print(f'Tweet validating 1 {text}')
+        print(f"Tweet validating 1 {text}")
         text = await add_blank_lines(text)
 
-        text = re.sub(r'#\w+', '', text)
-        text = re.sub(r'\s+', ' ', text)
+        text = re.sub(r"#\w+", "", text)
+        text = re.sub(r"\s+", " ", text)
         text = text.strip()
 
-    raise ValueError('Generated text is too long')
+    raise ValueError("Generated text is too long")
 
 
 async def check_answer_is_needed(twitter_comment: str, my_username: str, prompt: str = PROMPT_CHECK_ANSWER) -> bool:
     formatted_prompt = prompt.format(
         twitter_comment=twitter_comment,
     )
-    messages = [
-        {
-            "role": "system",
-            "content": formatted_prompt
-        }
-    ]
+    messages = [{"role": "system", "content": formatted_prompt}]
     result = await send_openai_request(messages=messages, temperature=1.0)
-    return 'true' in result.lower()
+    return "true" in result.lower()
 
 
 async def create_comment_to_comment(
-        comment_text: str,
-        keywords: list[str],
-        themes: list[str],
-        my_username: str,
-        prompt: str = PROMPT_FOR_COMMENT
+    comment_text: str, keywords: list[str], themes: list[str], my_username: str, prompt: str = PROMPT_FOR_COMMENT
 ) -> str:
-    formatted_prompt = prompt.format(
-        comment_text=comment_text,
-        keywords=keywords,
-        themes=themes
-    )
+    formatted_prompt = prompt.format(comment_text=comment_text, keywords=keywords, themes=themes)
 
-    messages = [
-        {
-            "role": "system",
-            "content": formatted_prompt
-        }
-    ]
+    messages = [{"role": "system", "content": formatted_prompt}]
     result = await send_openai_request(messages=messages, temperature=1.0)
-    print(f'Created comment with prompt: {formatted_prompt}')
+    print(f"Created comment with prompt: {formatted_prompt}")
     return await format_text(result)

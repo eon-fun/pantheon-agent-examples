@@ -1,9 +1,9 @@
 from datetime import datetime
-from pydantic import BaseModel
-from sqlalchemy import BigInteger, Column, ForeignKey, Integer, TIMESTAMP, Text
-from sqlalchemy.orm import relationship
 
 from follow_unfollow_bot.DB.sqlalchemy_database_manager import Base
+from pydantic import BaseModel
+from sqlalchemy import TIMESTAMP, BigInteger, Column, Integer, Text
+from sqlalchemy.orm import relationship
 
 
 class AlchemyUser(Base):

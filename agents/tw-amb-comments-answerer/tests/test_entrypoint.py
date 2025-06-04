@@ -65,7 +65,7 @@ from tw_amb_comments_answerer.entrypoint import (
 def test_app():
     """Fixture for FastAPI test client."""
     client = TestClient(app)
-    yield client
+    return client
 
 
 @pytest.fixture
@@ -79,8 +79,7 @@ def agent():
 
 @pytest.mark.asyncio
 async def test_handle_post(monkeypatch):
-    """
-    Test the POST /{goal} endpoint.
+    """Test the POST /{goal} endpoint.
     Mocks all dependencies so no network calls are made.
     """
     # --- Patch all I/O dependencies ---
@@ -105,9 +104,7 @@ async def test_handle_post(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_answer_on_project_tweets_comments_logic(monkeypatch, agent):
-    """
-    Directly test the agent's main method with all network/db dependencies mocked.
-    """
+    """Directly test the agent's main method with all network/db dependencies mocked."""
     # Patch all external dependencies the method calls
     monkeypatch.setattr("tw_amb_comments_answerer.entrypoint.get_redis_db", MagicMock())
     monkeypatch.setattr(
@@ -150,9 +147,7 @@ async def test_answer_on_project_tweets_comments_logic(monkeypatch, agent):
 
 @pytest.mark.asyncio
 async def test_answer_on_project_tweets_comments_no_tweets(monkeypatch, agent):
-    """
-    Test the 'no tweets to comment' branch.
-    """
+    """Test the 'no tweets to comment' branch."""
     monkeypatch.setattr("tw_amb_comments_answerer.entrypoint.get_redis_db", MagicMock())
     monkeypatch.setattr(
         "tw_amb_comments_answerer.entrypoint.TwitterAuthClient.get_access_token", AsyncMock(return_value="token")

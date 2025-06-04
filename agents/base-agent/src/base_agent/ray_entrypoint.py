@@ -6,8 +6,6 @@ from typing import Any
 from urllib.parse import urljoin
 
 import requests
-from ray.serve.deployment import Application
-
 from base_agent import abc, const
 from base_agent.ai_registry import ai_registry_builder
 from base_agent.bootstrap import bootstrap_main
@@ -27,6 +25,7 @@ from base_agent.models import (
     Workflow,
 )
 from base_agent.prompt import prompt_builder
+from ray.serve.deployment import Application
 
 logger = getLogger(__name__)
 
@@ -97,12 +96,7 @@ class BaseAgent(abc.AbstractAgent):
         context: abc.BaseAgentInputModel | None = None,
     ) -> None:
         interaction = MemoryModel(
-            **{
-                "goal": goal,
-                "plan": plan,
-                "result": result.model_dump(),
-                "context": context.model_dump() if context else None,
-            }
+            goal=goal, plan=plan, result=result.model_dump(), context=context.model_dump() if context else None
         )
         self.memory_client.store(key=goal, interaction=interaction.model_dump())
 
@@ -159,10 +153,7 @@ class BaseAgent(abc.AbstractAgent):
         # )]
 
     def get_most_relevant_tools(self, goal: str, agents: list[AgentModel]) -> list[ToolModel]:
-        """
-        This method is used to find the most useful tools for the given goal.
-
-        """
+        """This method is used to find the most useful tools for the given goal."""
         response = self.ai_registry_client.post(
             endpoint=self.ai_registry_client.endpoints.find_tools,
             json=GoalModel(goal=goal).model_dump(),
@@ -430,7 +421,8 @@ class BaseAgent(abc.AbstractAgent):
 
     async def handoff(self, endpoint: str, goal: str, plan: dict):
         """This method means that agent can't find a solution (wrong route/wrong plan/etc)
-        and decide to handoff the task to another agent."""
+        and decide to handoff the task to another agent.
+        """
         return requests.post(urljoin(endpoint, goal), json=plan).json()
 
 

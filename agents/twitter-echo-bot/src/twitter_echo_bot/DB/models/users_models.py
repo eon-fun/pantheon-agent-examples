@@ -1,18 +1,15 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Text, TIMESTAMP, BigInteger
-from sqlalchemy.orm import relationship
 from datetime import datetime
-from pydantic import BaseModel, Field
-from datetime import datetime
-from typing import Optional
 
+from pydantic import Field
+from sqlalchemy import TIMESTAMP, BigInteger, Column, String, Text
+from sqlalchemy.orm import relationship
 from twitter_echo_bot.DB.models.base import BaseConfigModel
 from twitter_echo_bot.DB.sqlalchemy_database_manager import Base
 
 
 class AlchemyUser(Base):
-    """
-    Пользователи системы.
-    """
+    """Пользователи системы."""
+
     __tablename__ = "users"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
@@ -27,11 +24,10 @@ class AlchemyUser(Base):
 
 
 class PGUser(BaseConfigModel):
-    """
-    Модель пользователя.
-    """
+    """Модель пользователя."""
+
     id: int
     username: str
-    persona_descriptor: Optional[str] = None
-    prompt: Optional[str] = None
-    created_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
+    persona_descriptor: str | None = None
+    prompt: str | None = None
+    created_at: datetime | None = Field(default_factory=datetime.utcnow)

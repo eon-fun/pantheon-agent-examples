@@ -1,7 +1,6 @@
 from aiogram import Bot, Dispatcher, types
-from aiogram.types import Message
 from aiogram.filters import Command
-
+from aiogram.types import Message
 from solana_new_pairs.bot.message import build_message
 from solana_new_pairs.config.config import config
 from solana_new_pairs.service.collector_service import collect_full_data_about_coin
@@ -22,11 +21,14 @@ async def echo(message: types.Message):
     if img and len(message) < 1024:
         print("sending animation")
         print(len(message))
-        await bot.send_animation(chat_id=chat_id, animation=img, caption=message, parse_mode="MARKDOWN",
-                                 )
+        await bot.send_animation(
+            chat_id=chat_id,
+            animation=img,
+            caption=message,
+            parse_mode="MARKDOWN",
+        )
     else:
-        await bot.send_message(chat_id=chat_id, text=message, parse_mode="MARKDOWN",
-                               disable_web_page_preview=True)
+        await bot.send_message(chat_id=chat_id, text=message, parse_mode="MARKDOWN", disable_web_page_preview=True)
 
 
 @dp.message(Command("help"))

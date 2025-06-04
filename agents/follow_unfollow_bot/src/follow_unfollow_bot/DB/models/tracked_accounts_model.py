@@ -1,14 +1,9 @@
-
-
-
-
-
 from datetime import datetime
-from pydantic import BaseModel
-from sqlalchemy import BigInteger, Column, ForeignKey, Integer, TIMESTAMP
-from sqlalchemy.orm import relationship
 
 from follow_unfollow_bot.DB.sqlalchemy_database_manager import Base
+from pydantic import BaseModel
+from sqlalchemy import TIMESTAMP, BigInteger, Column, ForeignKey
+from sqlalchemy.orm import relationship
 
 
 class AlchemyTrackedAccount(Base):
@@ -19,8 +14,6 @@ class AlchemyTrackedAccount(Base):
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
 
     user = relationship("AlchemyUser", back_populates="tracked_accounts")
-
-
 
 
 class PGTrackedAccount(BaseModel):

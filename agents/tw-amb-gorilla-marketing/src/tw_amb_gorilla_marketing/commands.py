@@ -1,8 +1,7 @@
-from typing import Sequence
+from collections.abc import Sequence
 
-from twitter_ambassador_utils.main import set_like, TwitterAuthClient
-from tweetscout_utils.main import Tweet, search_tweets
 from send_openai_request.main import send_openai_request
+from tweetscout_utils.main import Tweet, search_tweets
 
 PROMPT_FOR_CHECK = """You are a technology and Web3 enthusiast focused on AI and blockchain innovations.
 
@@ -30,7 +29,7 @@ You need to create one comment for the twitter post.
 You are an autonomous AI Twitter Ambassador for the project NFINITY. Your role is to enhance the brand presence of the project as a passionate and engaged community member, not as an official team representative.
 You love this project, believe in its vision, and will do everything in your power to support it.
 
-Your task is to write a very brief comment (1-2 sentences) in response to a tweet. 
+Your task is to write a very brief comment (1-2 sentences) in response to a tweet.
 The comment should:
 - Express relevant thoughts based on the knowledge context
 - Use natural, human-like language
@@ -49,8 +48,7 @@ Tweet to respond to:
 
 
 async def find_tweets_for_gorilla_marketing(access_token: str) -> Sequence[Tweet]:
-    """
-    Find relevant tweets for gorilla marketing campaign.
+    """Find relevant tweets for gorilla marketing campaign.
     Searches for tweets related to specific terms that have at least 5 likes,
     are in English, and aren't replies or from the nfinityAI account.
 
@@ -59,6 +57,7 @@ async def find_tweets_for_gorilla_marketing(access_token: str) -> Sequence[Tweet
 
     Returns:
         A list of unique tweets matching the search criteria
+
     """
     tweets_dict = {}
     search_terms = [
@@ -75,10 +74,7 @@ async def find_tweets_for_gorilla_marketing(access_token: str) -> Sequence[Tweet
 
         try:
             # Передаем access_token как обязательный параметр
-            result = await search_tweets(
-                access_token=access_token,
-                query=query
-            )
+            result = await search_tweets(access_token=access_token, query=query)
 
             # Берем до трех твитов из результатов
             for tweet in result[:3]:
@@ -93,55 +89,29 @@ async def find_tweets_for_gorilla_marketing(access_token: str) -> Sequence[Tweet
 
 
 async def check_tweets_for_gorilla_marketing(
-        tweets: Sequence[Tweet],
-        keywords: list[str],
-        themes: list[str],
-        my_username: str,
-        prompt: str = PROMPT_FOR_CHECK
+    tweets: Sequence[Tweet], keywords: list[str], themes: list[str], my_username: str, prompt: str = PROMPT_FOR_CHECK
 ) -> Sequence[Tweet]:
     good_tweets = []
 
     for tweet in tweets:
-        formatted_prompt = prompt.format(
-            tweet_text=tweet.full_text,
-            keywords=keywords,
-            themes=themes
-        )
+        formatted_prompt = prompt.format(tweet_text=tweet.full_text, keywords=keywords, themes=themes)
 
-        messages = [
-            {
-                "role": "system",
-                "content": formatted_prompt
-            }
-        ]
+        messages = [{"role": "system", "content": formatted_prompt}]
 
         result = await send_openai_request(messages=messages, temperature=1.0)
 
-        if 'true' in result.lower():
+        if "true" in result.lower():
             good_tweets.append(tweet)
 
-    print(f'Count good tweets {len(good_tweets)=} {good_tweets}')
+    print(f"Count good tweets {len(good_tweets)=} {good_tweets}")
     return good_tweets
 
 
 async def create_text_for_gorilla_marketing(
-        tweet_text: str,
-        keywords: list[str],
-        themes: list[str],
-        my_username: str,
-        prompt: str = PROMPT_FOR_COMMENT
+    tweet_text: str, keywords: list[str], themes: list[str], my_username: str, prompt: str = PROMPT_FOR_COMMENT
 ) -> str:
-    formatted_prompt = prompt.format(
-        tweet_text=tweet_text,
-        keywords=keywords,
-        themes=themes
-    )
+    formatted_prompt = prompt.format(tweet_text=tweet_text, keywords=keywords, themes=themes)
 
-    messages = [
-        {
-            "role": "system",
-            "content": formatted_prompt
-        }
-    ]
+    messages = [{"role": "system", "content": formatted_prompt}]
     result = await send_openai_request(messages=messages, temperature=1.0)
     return result

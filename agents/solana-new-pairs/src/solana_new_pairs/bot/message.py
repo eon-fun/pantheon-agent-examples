@@ -1,10 +1,9 @@
 async def build_message(data):
-    """
-    {
-  "token_address": "J94jBu9K2zaMhuwjGAFmjzpj25LYGQmSNvsrcdzwpump",
-  "creation_time": "2025-03-21 13:23:22.167850",
-  "dex_tools_data": "base_coin_id=1 id=1 data={'address': 'J94jBu9K2zaMhuwjGAFmjzpj25LYGQmSNvsrcdzwpump', 'exchange': {'name': 'Pump.fun', 'factory': '6ef8rrecthr5dkzon8nwu78hrvfckubj14m5ubewf6p'}, 'mainToken': {'name': 'Stay Hydrated', 'symbol': 'Dalí', 'address': 'J94jBu9K2zaMhuwjGAFmjzpj25LYGQmSNvsrcdzwpump'}, 'sideToken': {'name': 'Wrapped SOL', 'symbol': 'SOL', 'address': 'So11111111111111111111111111111111111111112'}, 'creationTime': '2025-03-21T12:22:23.056Z', 'creationBlock': 328215952} updated_at=datetime.datetime(2025, 3, 21, 13, 23, 22, 173386)",
-  "rug_check_data": {
+    """{
+    "token_address": "J94jBu9K2zaMhuwjGAFmjzpj25LYGQmSNvsrcdzwpump",
+    "creation_time": "2025-03-21 13:23:22.167850",
+    "dex_tools_data": "base_coin_id=1 id=1 data={'address': 'J94jBu9K2zaMhuwjGAFmjzpj25LYGQmSNvsrcdzwpump', 'exchange': {'name': 'Pump.fun', 'factory': '6ef8rrecthr5dkzon8nwu78hrvfckubj14m5ubewf6p'}, 'mainToken': {'name': 'Stay Hydrated', 'symbol': 'Dalí', 'address': 'J94jBu9K2zaMhuwjGAFmjzpj25LYGQmSNvsrcdzwpump'}, 'sideToken': {'name': 'Wrapped SOL', 'symbol': 'SOL', 'address': 'So11111111111111111111111111111111111111112'}, 'creationTime': '2025-03-21T12:22:23.056Z', 'creationBlock': 328215952} updated_at=datetime.datetime(2025, 3, 21, 13, 23, 22, 173386)",
+    "rug_check_data": {
     "mint": "J94jBu9K2zaMhuwjGAFmjzpj25LYGQmSNvsrcdzwpump",
     "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
     "creator": "TSLvdd1pWpHVjahSpsvCXUbgwsL3JAcvokwaKt1eokM",
@@ -71,7 +70,7 @@ async def build_message(data):
     "markets": [
       {
         "pubkey": "9G6HaM5u
-yjWvEPVjHwTvKeNokfycQ1o3YSbBAUJ4rjBD",
+    yjWvEPVjHwTvKeNokfycQ1o3YSbBAUJ4rjBD",
         "marketType": "pump_fun",
         "mintA": "J94jBu9K2zaMhuwjGAFmjzpj25LYGQmSNvsrcdzwpump",
         "mintB": "So11111111111111111111111111111111111111112",
@@ -175,8 +174,8 @@ yjWvEPVjHwTvKeNokfycQ1o3YSbBAUJ4rjBD",
     "insiderNetworks": null,
     "detectedAt": "2025-03-21T12:22:21.724164989Z",
     "creatorTokens": null
-  }
-}
+    }
+    }
 
     """
     rug_check_data = data.get("rug_check_data", {})
@@ -196,9 +195,9 @@ yjWvEPVjHwTvKeNokfycQ1o3YSbBAUJ4rjBD",
     top_holders = rug_check_data.get("topHolders", [])
 
     risks = rug_check_data.get("risks", [])
-    risk_info = "\n".join(
-        [f"⚠️ {risk['name']}: {risk['description']}" for risk in risks]
-    ) if risks else "No risks detected."
+    risk_info = (
+        "\n".join([f"⚠️ {risk['name']}: {risk['description']}" for risk in risks]) if risks else "No risks detected."
+    )
 
     transfer_fee = rug_check_data.get("transferFee", {}).get("pct", 0)
     img = rug_check_data.get("fileMeta", {}).get("image", "")
@@ -208,7 +207,7 @@ yjWvEPVjHwTvKeNokfycQ1o3YSbBAUJ4rjBD",
         20: "🟢",  # Зеленый
         40: "🟡",  # Желтый
         60: "🟠",  # Оранжевый
-        80: "🔴"  # Красный
+        80: "🔴",  # Красный
     }
 
     emoji = next((emoji for threshold, emoji in score_levels.items() if score_normalised < threshold), "🔴")
@@ -229,7 +228,7 @@ yjWvEPVjHwTvKeNokfycQ1o3YSbBAUJ4rjBD",
     ├ 💸 **Transfer Fee:** {transfer_fee}%
     ├ 📊 **Score:** {score_normalised}
     ├ 🏛️ **Risks:**{risk_info}
-    
+
 [Dextools](https://www.dextools.io/app/solana/pair-explorer/{contract}) | [RugCheck](https://rugcheck.xyz/tokens/{contract}) | [DexScreener](https://dexscreener.com/solana/{contract})
 """
 

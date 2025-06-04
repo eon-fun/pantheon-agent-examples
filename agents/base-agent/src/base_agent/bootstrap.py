@@ -1,12 +1,11 @@
 from contextlib import asynccontextmanager
 from typing import Any
 
-from fastapi import FastAPI
-from ray.serve.deployment import Deployment
-
 from base_agent import abc
 from base_agent.card import card_builder
 from base_agent.orchestration import workflow_builder
+from fastapi import FastAPI
+from ray.serve.deployment import Deployment
 
 
 def bootstrap_main(agent_cls: type[abc.AbstractAgent]) -> type[Deployment]:

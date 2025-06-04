@@ -1,25 +1,25 @@
-import ray
 import asyncio
-import aiohttp
+import os
 from html import escape
-from aiogram.enums import ParseMode
+
+import aiohttp
+import ray
 from aiogram import Bot, Dispatcher
-from aiogram.types import Message
-from aiogram.filters import Command
+from aiogram.enums import ParseMode
 from database.redis.redis_client import RedisDB
 from services.ai_connectors.openai_client import send_openai_request
 
 # Constants
-TELEGRAM_BOT_TOKEN = "8039253205:AAEFwlG0c2AmhwIXnqC9Q5TsBo_x-7jM2a0"
-TELEGRAM_CHANNEL_ID = "@panteoncryptonews"
-TWITTER_BEARER_TOKEN = 'AAAAAAAAAAAAAAAAAAAAAALFxQEAAAAAccmjfpy9O9AoKsiWm3EiKRmlYW0%3DKxQgwMPoButLHfAL1Zoledy4bdko6ufQNLTQuxDpCfZxfgthkI'
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHANNEL_ID = os.getenv("TELEGRAM_CHANNEL_ID", "@your_channel")
+TWITTER_BEARER_TOKEN = os.getenv("TWITTER_BEARER_TOKEN")
 
 REDIS_LAST_PROCESSED_TWEETS = "last_processed_tweets"
 REDIS_SUBSCRIBED_TWITTER_ACCOUNTS = "subscribed_twitter_accounts"
 REDIS_TWEETS_TO_PROCESS = "tweets_to_process"
 
 AI_PROMPT = """
-You are a social media analyst and news summarizer for a cryptocurrency and celebrity news channel. Your task is to monitor tweets and create concise summaries that highlight key events, their potential consequences, and the involved parties. 
+You are a social media analyst and news summarizer for a cryptocurrency and celebrity news channel. Your task is to monitor tweets and create concise summaries that highlight key events, their potential consequences, and the involved parties.
 
 When summarizing tweets:
 - Combine related tweets into one coherent summary.
@@ -80,11 +80,7 @@ class TweetProcessor:
             new_tweets = []
             for tweet in tweets_data["data"]:
                 if str(tweet["id"]) not in processed_ids:
-                    tweet_data = {
-                        "id": str(tweet["id"]),
-                        "account": str(account),
-                        "text": str(tweet["text"])
-                    }
+                    tweet_data = {"id": str(tweet["id"]), "account": str(account), "text": str(tweet["text"])}
                     new_tweets.append(tweet_data)
 
             return new_tweets
@@ -108,7 +104,7 @@ class TweetProcessor:
     def get_redis_set_items(self, redis_key):
         """Helper function to get items from Redis set and convert them to strings."""
         items = db.get_set(redis_key)
-        return {item.decode('utf-8') if isinstance(item, bytes) else str(item) for item in items}
+        return {item.decode("utf-8") if isinstance(item, bytes) else str(item) for item in items}
 
 
 async def summarize_tweets(tweets):
@@ -120,7 +116,7 @@ async def summarize_tweets(tweets):
     combined_text = "\n\n".join(tweet_texts)
     messages = [
         {"role": "system", "content": AI_PROMPT},
-        {"role": "user", "content": f"Here are the tweets:\n\n{combined_text}"}
+        {"role": "user", "content": f"Here are the tweets:\n\n{combined_text}"},
     ]
 
     try:
@@ -144,16 +140,12 @@ async def periodic_task():
                 summary = await summarize_tweets(new_tweets)
                 if summary:
                     try:
-                        await bot.send_message(
-                            chat_id=TELEGRAM_CHANNEL_ID,
-                            text=summary,
-                            parse_mode=ParseMode.HTML
-                        )
+                        await bot.send_message(chat_id=TELEGRAM_CHANNEL_ID, text=summary, parse_mode=ParseMode.HTML)
                         print("✅ Summary sent successfully")
 
                         # Update processed tweets in Redis
                         for tweet in new_tweets:
-                            db.r.sadd(REDIS_LAST_PROCESSED_TWEETS, str(tweet['id']))
+                            db.r.sadd(REDIS_LAST_PROCESSED_TWEETS, str(tweet["id"]))
                     except Exception as e:
                         print(f"❌ Message sending error: {e}")
                 else:

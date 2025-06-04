@@ -43,3 +43,62 @@ The `TwitterLikerAgent` is designed to like tweets based on a given goal contain
 * FastAPI
 * Redis
 * Twitter API credentials
+
+## Installing & Running Pre-commit
+
+This repository uses pre-commit hooks to enforce code quality standards including formatting, linting, and type checking.
+
+### Installation
+
+1. **Install dependencies:**
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   pip install pre-commit ruff mypy
+   ```
+
+2. **Install pre-commit hooks:**
+   ```bash
+   pre-commit install
+   ```
+
+### Running Pre-commit
+
+* **Automatically on commit:** Pre-commit hooks will run automatically before each commit
+* **Manually on all files:**
+  ```bash
+  pre-commit run --all-files
+  ```
+* **Manually on specific files:**
+  ```bash
+  pre-commit run --files path/to/file.py
+  ```
+
+### Pre-commit Tools
+
+The repository uses the following tools:
+
+* **Ruff**: Lightning-fast Python linter and formatter (replaces black, flake8, isort)
+* **mypy**: Static type checker for Python
+* **Standard hooks**: YAML validation, end-of-file fixing, trailing whitespace removal
+
+### Code Quality Standards
+
+- All Python code is automatically formatted with Ruff
+- Type hints are enforced with mypy (in relaxed mode for legacy code)
+- Print statements are allowed for debugging and logging
+- Docstrings should end with periods and use proper punctuation
+
+### Troubleshooting
+
+If pre-commit fails:
+1. Review the error messages
+2. Fix the reported issues
+3. Run `pre-commit run --all-files` to verify fixes
+4. Commit your changes
+
+For persistent issues with specific files, you can temporarily skip hooks:
+```bash
+git commit --no-verify
+```
+**Note:** Use `--no-verify` sparingly and only when necessary.

@@ -1,26 +1,23 @@
-import time
-
-from aiogram import Bot, Dispatcher
-from aiogram.types import Message
-from aiogram.filters import Command
 import asyncio
 import json
-import requests
-from typing import Dict, List, Optional
+import os
+import time
 
-TELEGRAM_BOT_TOKEN = "7633131821:AAForOPCLS045IFHihMf49UozGwKL7IMbpU"
-ENSO_API_KEY = "1e02632d-6feb-4a75-a157-documentation"
+import requests
+from aiogram import Bot, Dispatcher
+from aiogram.filters import Command
+from aiogram.types import Message
+
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+ENSO_API_KEY = os.getenv("ENSO_API_KEY", "your-api-key-here")
 
 
 class APYAgent:
     def __init__(self, api_key: str):
         self.base_url = "https://api.enso.finance/api/v1"
-        self.headers = {
-            "accept": "application/json",
-            "Authorization": f"Bearer {api_key}"
-        }
+        self.headers = {"accept": "application/json", "Authorization": f"Bearer {api_key}"}
 
-    def get_token_price(self, token_address: str, chain_id: int = 1) -> Dict:
+    def get_token_price(self, token_address: str, chain_id: int = 1) -> dict:
         """Получает информацию о цене токена"""
         url = f"{self.base_url}/prices/{chain_id}/{token_address}"
         response = requests.get(url, headers=self.headers)
@@ -45,36 +42,32 @@ class APYAgent:
                 print("⚠️ Данные о цене устарели")
                 return False
 
-        print(f"✅ Токен активен:")
+        print("✅ Токен активен:")
         print(f"   - Цена: ${float(price):,.2f}")
         print(f"   - Название: {price_data.get('name')}")
         print(f"   - Символ: {price_data.get('symbol')}")
         return True
 
-    def get_protocols(self) -> List[Dict]:
+    def get_protocols(self) -> list[dict]:
         """Получает список поддерживаемых протоколов"""
         response = requests.get(f"{self.base_url}/protocols", headers=self.headers)
         return response.json()
 
-    def get_defi_tokens(self, chain_id: int = 1, protocol_slug: Optional[str] = None) -> Dict:
+    def get_defi_tokens(self, chain_id: int = 1, protocol_slug: str | None = None) -> dict:
         """Получает DeFi токены с их APY и дополнительной информацией"""
-        params = {
-            "chainId": chain_id,
-            "type": "defi",
-            "includeMetrics": "true"
-        }
+        params = {"chainId": chain_id, "type": "defi", "includeMetrics": "true"}
         if protocol_slug:
             params["protocolSlug"] = protocol_slug
 
         response = requests.get(f"{self.base_url}/tokens", headers=self.headers, params=params)
         return response.json()
 
-    def is_valid_pool(self, token: Dict, apy: float) -> bool:
+    def is_valid_pool(self, token: dict, apy: float) -> bool:
         """Проверяет, является ли пул надежным и безопасным для инвестирования"""
         print("\n🔍 Проверка безопасности пула:")
 
         if not apy:
-            print(f"⚠️ Отсутствует APY")
+            print("⚠️ Отсутствует APY")
             return False
 
         if apy > 100:
@@ -102,7 +95,7 @@ class APYAgent:
             print(f"⚠️ Отсутствуют обязательные поля: {', '.join(missing_fields)}")
             return False
 
-        print(f"✅ Пул прошел проверку безопасности:")
+        print("✅ Пул прошел проверку безопасности:")
         print(f"   - Протокол: {token['protocolSlug']}")
         print(f"   - APY: {apy}%")
         print(f"   - Тип: {token['type']}")
@@ -110,33 +103,28 @@ class APYAgent:
         print(f"   - Количество базовых токенов: {len(underlying_tokens)}")
         return True
 
-    async def find_best_pool(self, token_address: str, chain_id: int = 1) -> Dict:
+    async def find_best_pool(self, token_address: str, chain_id: int = 1) -> dict:
         """Находит пул с лучшим APY для заданного токена"""
         print(f"\n🔍 Начинаю поиск безопасных пулов для токена: {token_address}")
         protocols = self.get_protocols()
         print(f"📋 Получено протоколов: {len(protocols)}")
 
-        best_pool = {
-            "apy": 0,
-            "protocol": None,
-            "token_address": None,
-            "found_pools": []
-        }
+        best_pool = {"apy": 0, "protocol": None, "token_address": None, "found_pools": []}
 
         for protocol in protocols:
             try:
                 print(f"\n🔄 Проверяю протокол: {protocol['name']} ({protocol['slug']})")
 
-                if not any(chain['id'] == chain_id for chain in protocol['chains']):
+                if not any(chain["id"] == chain_id for chain in protocol["chains"]):
                     print(f"⏩ Пропускаю {protocol['slug']} - сеть {chain_id} не поддерживается")
                     continue
 
-                defi_tokens = self.get_defi_tokens(chain_id, protocol['slug'])
+                defi_tokens = self.get_defi_tokens(chain_id, protocol["slug"])
                 tokens = defi_tokens.get("data", [])
                 print(f"📊 Найдено {len(tokens)} токенов в {protocol['slug']}")
 
                 for token in tokens:
-                    underlying_addresses = [t['address'].lower() for t in token.get('underlyingTokens', [])]
+                    underlying_addresses = [t["address"].lower() for t in token.get("underlyingTokens", [])]
                     if token_address.lower() in underlying_addresses:
                         apy = token.get("apy")
                         print(f"\n🔎 Найден пул в {protocol['slug']} с параметрами:")
@@ -148,14 +136,14 @@ class APYAgent:
 
                         pool_info = {
                             "apy": apy,
-                            "protocol": protocol['slug'],
-                            "protocol_name": protocol['name'],
+                            "protocol": protocol["slug"],
+                            "protocol_name": protocol["name"],
                             "token_address": token["address"],
                             "primary_address": token.get("primaryAddress"),
                             "type": token.get("type"),
                             "tvl": token.get("tvl"),
                             "days_old": token.get("daysOld"),
-                            "transaction_count": token.get("transactionCount")
+                            "transaction_count": token.get("transactionCount"),
                         }
                         best_pool["found_pools"].append(pool_info)
 
@@ -167,21 +155,17 @@ class APYAgent:
                 continue
 
         print(f"\n📈 Всего найдено безопасных пулов: {len(best_pool['found_pools'])}")
-        if best_pool['protocol']:
+        if best_pool["protocol"]:
             print(f"🏆 Лучший пул: {best_pool['protocol_name']} с APY {best_pool['apy']}%")
 
         return best_pool
 
-    def format_investment_recommendation(self, best_pool: Dict) -> str:
+    def format_investment_recommendation(self, best_pool: dict) -> str:
         """Форматирует рекомендацию для отправки в Telegram"""
         if not best_pool["protocol"]:
             return "🔍 Не найдено подходящих пулов для инвестирования"
 
-        sorted_pools = sorted(
-            [pool for pool in best_pool["found_pools"]],
-            key=lambda x: x["apy"],
-            reverse=True
-        )[:5]
+        sorted_pools = sorted([pool for pool in best_pool["found_pools"]], key=lambda x: x["apy"], reverse=True)[:5]
 
         token_prices = {}
         for token in best_pool.get("underlyingTokens", []):
@@ -189,21 +173,22 @@ class APYAgent:
             if price_data:
                 token_prices[token["address"]] = {
                     "price": float(price_data.get("price", 0)),
-                    "symbol": price_data.get("symbol", "Unknown")
+                    "symbol": price_data.get("symbol", "Unknown"),
                 }
 
-        tokens_info = "\n".join([
-            f"    - {data['symbol']}: ${data['price']:,.2f}"
-            for addr, data in token_prices.items()
-        ])
+        tokens_info = "\n".join(
+            [f"    - {data['symbol']}: ${data['price']:,.2f}" for addr, data in token_prices.items()]
+        )
 
-        pools_text = "\n".join([
-            f"• *{pool['protocol_name']}*:\n"
-            f"  - APY: {pool['apy']:.2f}%\n"
-            f"  - Тип пула: {pool['type']}\n"
-            f"  - Контракт: `{pool['primary_address']}`"
-            for pool in sorted_pools
-        ])
+        pools_text = "\n".join(
+            [
+                f"• *{pool['protocol_name']}*:\n"
+                f"  - APY: {pool['apy']:.2f}%\n"
+                f"  - Тип пула: {pool['type']}\n"
+                f"  - Контракт: `{pool['primary_address']}`"
+                for pool in sorted_pools
+            ]
+        )
 
         recommendation = f"""
 🏆 *Найденные пулы для инвестирования:*
@@ -211,11 +196,11 @@ class APYAgent:
 {pools_text}
 
 📊 *Подробности лучшего пула:*
-• Протокол: `{best_pool['protocol_name']}`
-• APY: `{best_pool['apy']:.2f}%`
-• Тип: `{best_pool['type']}`
-• Адрес пула: `{best_pool['token_address']}`
-• Контракт: `{best_pool['primary_address']}`
+• Протокол: `{best_pool["protocol_name"]}`
+• APY: `{best_pool["apy"]:.2f}%`
+• Тип: `{best_pool["type"]}`
+• Адрес пула: `{best_pool["token_address"]}`
+• Контракт: `{best_pool["primary_address"]}`
 
 💰 *Токены в пуле:*
 {tokens_info}
@@ -264,7 +249,8 @@ async def find_pools(message: Message):
         print("⚠️ Пользователь не указал адрес токена")
         await message.answer(
             "⚠️ Пожалуйста, укажите адрес токена.\nПример: `/find_pools 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48`",
-            parse_mode="Markdown")
+            parse_mode="Markdown",
+        )
         return
     status_message = await message.answer("🔍 Ищу лучшие пулы для инвестирования...")
 

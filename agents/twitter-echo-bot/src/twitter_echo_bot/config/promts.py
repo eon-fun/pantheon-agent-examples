@@ -1,7 +1,5 @@
 async def get_prompt_for_create_user_prompt(words: str) -> list[dict[str, str]]:
-    """
-    Заглушка: создает промпт для пользователя.
-    """
+    """Заглушка: создает промпт для пользователя."""
     return [
         {
             "role": "system",
@@ -21,14 +19,15 @@ Make sure the persona feels unique and layered, with each trait contributing to 
 `Output Format:`
 Write the system prompt in second-person perspective (e.g., 'You are...').
 `Keep the tone consistent with the persona's traits.`
-Ensure the output is detailed, engaging, and true to the character's nature."""
+Ensure the output is detailed, engaging, and true to the character's nature.""",
         }
     ]
 
-async def get_prompt_by_user_for_creating_tweet(user_prompt,text) -> list[dict[str, str]]:
+
+async def get_prompt_by_user_for_creating_tweet(user_prompt, text) -> list[dict[str, str]]:
     return [
         {
             "role": "system",
-            "content": f"""using this prompt ({user_prompt}) make your own tweet based on this tweet ({text})"""
+            "content": f"""using this prompt ({user_prompt}) make your own tweet based on this tweet ({text})""",
         }
     ]

@@ -2,7 +2,6 @@ import os
 from typing import Any
 
 import yaml
-
 from base_agent.const import EntrypointGroup
 from base_agent.utils import get_entrypoint
 

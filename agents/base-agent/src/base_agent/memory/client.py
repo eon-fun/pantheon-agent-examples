@@ -1,9 +1,8 @@
 from typing import Any
 
+from base_agent.memory.config import MemoryConfig
 from loguru import logger
 from mem0 import Memory
-
-from base_agent.memory.config import MemoryConfig
 
 
 class MemoryClient:

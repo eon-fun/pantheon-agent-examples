@@ -1,8 +1,8 @@
-from aiogram import Dispatcher, Bot
-from pydantic_settings import BaseSettings
 from functools import lru_cache
 
+from aiogram import Bot, Dispatcher
 from database.redis.redis_client import RedisDB  # Вынести в либу
+from pydantic_settings import BaseSettings
 
 db = RedisDB()
 dp = Dispatcher()

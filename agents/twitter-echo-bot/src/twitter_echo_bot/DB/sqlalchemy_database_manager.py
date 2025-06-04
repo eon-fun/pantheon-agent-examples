@@ -1,15 +1,15 @@
 import asyncio
 import functools
+from collections.abc import Callable, Coroutine
 from contextlib import asynccontextmanager
-from typing import Any, Callable, Coroutine
+from typing import Any
 
+from loguru import logger
 from sqlalchemy import MetaData, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
-from typing_extensions import AsyncGenerator
-
 from twitter_echo_bot.config.config import config
-from loguru import logger
+from typing_extensions import AsyncGenerator
 
 DATABASE_URL = config.db.url
 
@@ -34,6 +34,7 @@ class Base(DeclarativeBase):
 async_engine = create_async_engine(DATABASE_URL, echo=False)
 async_session = async_sessionmaker(async_engine, expire_on_commit=False)
 
+
 @asynccontextmanager
 async def get_db2():
     async with async_engine.begin() as session:  # Начало транзакции
@@ -41,6 +42,7 @@ async def get_db2():
             yield session  # Возвращаем сессию для использования
         finally:
             await session.close()  # Закрываем сессию по завершении
+
 
 async def get_db() -> AsyncGenerator[AsyncSession, Any]:
     """Get a database session.
@@ -73,9 +75,7 @@ def decorate_all_methods(decorator):
     return decorate
 
 
-def handle_exceptions(
-        func: Callable[..., Coroutine[Any, Any, Any]]
-) -> Callable[..., Coroutine[Any, Any, Any]]:
+def handle_exceptions(func: Callable[..., Coroutine[Any, Any, Any]]) -> Callable[..., Coroutine[Any, Any, Any]]:
     @functools.wraps(func)
     async def wrapper(*args, **kwargs):
         try:

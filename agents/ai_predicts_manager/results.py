@@ -1,21 +1,14 @@
-from typing import Dict, List, Optional, Tuple
-from datetime import datetime
-import logging
 import asyncio
-from concurrent.futures import ThreadPoolExecutor
+import logging
 import random
 import time
-import json
-
-import redis
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 
 from database.redis.redis_client import db
 
 # Set up logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -31,16 +24,12 @@ class AsyncResultsAnalyzer:
         """Отладочная функция для проверки состояния сигналов в Redis"""
         try:
             # Получаем все сигналы для данного символа
-            signals = db.r.zrangebyscore(
-                'trading_signals',
-                '-inf',
-                '+inf',
-                withscores=True
-            )
+            signals = db.r.zrangebyscore("trading_signals", "-inf", "+inf", withscores=True)
 
             matching_signals = [
-                (s.decode('utf-8'), score) for s, score in signals
-                if s.decode('utf-8').startswith(f"{symbol}:{direction}")
+                (s.decode("utf-8"), score)
+                for s, score in signals
+                if s.decode("utf-8").startswith(f"{symbol}:{direction}")
             ]
 
             logger.info(f"Current signals for {symbol}:{direction}:")
@@ -53,7 +42,7 @@ class AsyncResultsAnalyzer:
             logger.error(f"Error checking signals: {str(e)}")
             return 0
 
-    async def process_and_save_signals(self, market_data: List[Dict], claude_analysis: str) -> Dict[str, Dict]:
+    async def process_and_save_signals(self, market_data: list[dict], claude_analysis: str) -> dict[str, dict]:
         """Обработка данных и сохранение сигналов с отладкой"""
         try:
             simplified_results = {}
@@ -66,7 +55,7 @@ class AsyncResultsAnalyzer:
             # Обрабатываем каждую монету
             tasks = []
             for coin_data in market_data:
-                symbol = coin_data.get('symbol', '')
+                symbol = coin_data.get("symbol", "")
                 if not symbol:
                     continue
 
@@ -87,21 +76,15 @@ class AsyncResultsAnalyzer:
 
                     # Сохраняем результат
                     simplified_results[symbol] = {
-                        'predicted_direction': direction,
-                        'confidence': confidence,
-                        'key_reasons': reasons,
-                        'timestamp': current_timestamp
+                        "predicted_direction": direction,
+                        "confidence": confidence,
+                        "key_reasons": reasons,
+                        "timestamp": current_timestamp,
                     }
 
                     # Сохраняем в Redis с обработкой ошибок
                     try:
-                        await self._save_signal_to_redis(
-                            symbol,
-                            direction,
-                            confidence,
-                            reasons,
-                            current_timestamp
-                        )
+                        await self._save_signal_to_redis(symbol, direction, confidence, reasons, current_timestamp)
                         logger.info(f"Successfully saved signal to Redis: {symbol}:{direction}")
 
                         # Проверяем, что сигнал действительно сохранился
@@ -122,12 +105,7 @@ class AsyncResultsAnalyzer:
             return {}
 
     async def _save_signal_to_redis(
-            self,
-            symbol: str,
-            direction: str,
-            confidence: float,
-            reasons: List[str],
-            timestamp: int = None
+        self, symbol: str, direction: str, confidence: float, reasons: list[str], timestamp: int = None
     ):
         """Сохранение сигнала в Redis с уникальным идентификатором"""
         if timestamp is None:
@@ -141,11 +119,7 @@ class AsyncResultsAnalyzer:
             signal_key = f"{symbol}:{direction}:{unique_timestamp}"
 
             # Сохраняем в сортированном множестве
-            db.add_to_sorted_set(
-                'trading_signals',
-                unique_timestamp,
-                signal_key
-            )
+            db.add_to_sorted_set("trading_signals", unique_timestamp, signal_key)
 
             logger.info(f"Successfully saved signal to Redis: {signal_key} at {unique_timestamp}")
 
@@ -153,7 +127,7 @@ class AsyncResultsAnalyzer:
             logger.error(f"Failed to save signal to Redis for {symbol}: {str(e)}")
             raise
 
-    async def _parse_claude_analysis(self, claude_analysis: str) -> Dict[str, Dict]:
+    async def _parse_claude_analysis(self, claude_analysis: str) -> dict[str, dict]:
         """Парсит анализ от Claude"""
         try:
             signals = {}
@@ -165,7 +139,7 @@ class AsyncResultsAnalyzer:
                 # Ищем сигналы для каждой монеты
                 for symbol in ["BTC", "ETH"]:
                     if f"${symbol}" in alerts_text:
-                        alert_lines = [line.strip() for line in alerts_text.split('\n') if line.strip()]
+                        alert_lines = [line.strip() for line in alerts_text.split("\n") if line.strip()]
                         for i, line in enumerate(alert_lines):
                             if f"${symbol}" in line:
                                 direction = "LONG" if "LONG" in line else "SHORT"
@@ -179,38 +153,38 @@ class AsyncResultsAnalyzer:
                                         risk_level = next_line.split("Risk Level:")[1].strip()
 
                                 signals[symbol] = {
-                                    'type': direction,
-                                    'thesis': thesis,
-                                    'risk_level': risk_level,
-                                    'direction': 'UP' if direction == 'LONG' else 'DOWN'
+                                    "type": direction,
+                                    "thesis": thesis,
+                                    "risk_level": risk_level,
+                                    "direction": "UP" if direction == "LONG" else "DOWN",
                                 }
 
             # Парсим общий анализ рынка
             market_data = {}
             if "MARKET ALPHA" in claude_analysis:
                 market_text = claude_analysis.split("MARKET ALPHA")[1]
-                market_lines = [line.strip() for line in market_text.split('\n') if line.strip()]
+                market_lines = [line.strip() for line in market_text.split("\n") if line.strip()]
 
                 for line in market_lines:
-                    if line and not line.startswith('🧠'):
-                        if not market_data.get('structure'):
-                            market_data['structure'] = line
-                        elif 'smart money' in line.lower():
-                            market_data['smart_money'] = line
-                        elif 'whale' in line.lower():
-                            market_data['whale_activity'] = line
+                    if line and not line.startswith("🧠"):
+                        if not market_data.get("structure"):
+                            market_data["structure"] = line
+                        elif "smart money" in line.lower():
+                            market_data["smart_money"] = line
+                        elif "whale" in line.lower():
+                            market_data["whale_activity"] = line
 
-            signals['market_sentiment'] = market_data
+            signals["market_sentiment"] = market_data
             return signals
 
         except Exception as e:
             logger.error(f"Error parsing Claude analysis: {e}")
             return {}
 
-    async def _process_coin_data(self, coin_data: Dict, claude_data: Dict) -> Tuple[str, str, float, List[str]]:
+    async def _process_coin_data(self, coin_data: dict, claude_data: dict) -> tuple[str, str, float, list[str]]:
         """Обработка данных одной монеты"""
         try:
-            symbol = coin_data.get('symbol', 'UNKNOWN')
+            symbol = coin_data.get("symbol", "UNKNOWN")
             logger.info(f"Processing {symbol} with Claude data: {claude_data}")
 
             # Получаем технические сигналы
@@ -224,7 +198,7 @@ class AsyncResultsAnalyzer:
 
             # Всегда добавляем тезис Claude первым, если он есть
             if claude_data and isinstance(claude_data, dict):
-                if claude_data.get('thesis'):
+                if claude_data.get("thesis"):
                     reasons.append(f"Claude: {claude_data['thesis'][:200]}...")
 
             # Добавляем технические причины
@@ -242,15 +216,15 @@ class AsyncResultsAnalyzer:
             logger.error(f"Error processing coin data for {symbol}: {e}")
             return symbol, "NEUTRAL", 0.51, ["Ошибка обработки данных"]
 
-    async def _collect_signals(self, coin_data: Dict) -> Dict[str, float]:
+    async def _collect_signals(self, coin_data: dict) -> dict[str, float]:
         """Собирает все сигналы"""
         try:
             signals = {}
-            data = coin_data.get('data', {})
+            data = coin_data.get("data", {})
 
             # Анализ временных интервалов
             timeframe_tasks = []
-            for timeframe in ['1h', '4h', '1d']:
+            for timeframe in ["1h", "4h", "1d"]:
                 if timeframe in data and data[timeframe]:
                     task = asyncio.create_task(self._analyze_timeframe(timeframe, data[timeframe]))
                     timeframe_tasks.append(task)
@@ -261,10 +235,10 @@ class AsyncResultsAnalyzer:
                 signals.update(result)
 
             # Анализ китов
-            whale_data = coin_data.get('whale_data', {})
+            whale_data = coin_data.get("whale_data", {})
             if whale_data:
-                buy_sell_ratio = whale_data.get('buy_sell_ratio', 1.0)
-                signals['whale_activity'] = 1.0 if buy_sell_ratio > 1.2 else (-1.0 if buy_sell_ratio < 0.8 else 0.0)
+                buy_sell_ratio = whale_data.get("buy_sell_ratio", 1.0)
+                signals["whale_activity"] = 1.0 if buy_sell_ratio > 1.2 else (-1.0 if buy_sell_ratio < 0.8 else 0.0)
 
             return signals
 
@@ -272,47 +246,44 @@ class AsyncResultsAnalyzer:
             logger.error(f"Error collecting signals: {e}")
             return {}
 
-    async def _analyze_timeframe(self, timeframe: str, candles: List[Dict]) -> Dict[str, float]:
+    async def _analyze_timeframe(self, timeframe: str, candles: list[dict]) -> dict[str, float]:
         """Асинхронный анализ временного интервала"""
         return await asyncio.get_event_loop().run_in_executor(
-            self.executor,
-            self._calculate_timeframe_signals,
-            timeframe,
-            candles
+            self.executor, self._calculate_timeframe_signals, timeframe, candles
         )
 
-    def _calculate_timeframe_signals(self, timeframe: str, candles: List[Dict]) -> Dict[str, float]:
+    def _calculate_timeframe_signals(self, timeframe: str, candles: list[dict]) -> dict[str, float]:
         """Расчет сигналов для временного интервала"""
         try:
             if not candles or len(candles) < 2:
                 return {}
 
             signals = {}
-            closes = [float(c['close']) for c in candles]
-            volumes = [float(c['volume']) for c in candles]
-            highs = [float(c['high']) for c in candles]
-            lows = [float(c['low']) for c in candles]
+            closes = [float(c["close"]) for c in candles]
+            volumes = [float(c["volume"]) for c in candles]
+            highs = [float(c["high"]) for c in candles]
+            lows = [float(c["low"]) for c in candles]
 
             # Моментум на основе нескольких факторов
             recent_momentum = (closes[-1] - closes[-2]) / closes[-2]
             price_range = (highs[-1] - lows[-1]) / closes[-1]
             volume_change = (volumes[-1] - volumes[-2]) / volumes[-2]
 
-            momentum = (recent_momentum * 0.5 + price_range * 0.3 + volume_change * 0.2)
-            signals[f'momentum_{timeframe}'] = 1.0 if momentum > 0 else -1.0
+            momentum = recent_momentum * 0.5 + price_range * 0.3 + volume_change * 0.2
+            signals[f"momentum_{timeframe}"] = 1.0 if momentum > 0 else -1.0
 
             # Объемный тренд
             if len(volumes) >= 5:
                 avg_volume = sum(volumes[-5:]) / 5
                 volume_trend = (volumes[-1] - avg_volume) / avg_volume
-                signals[f'volume_{timeframe}'] = 1.0 if volume_trend > 0 else -1.0
+                signals[f"volume_{timeframe}"] = 1.0 if volume_trend > 0 else -1.0
 
             # Тренд цены
             if len(closes) >= 20:
                 sma20 = sum(closes[-20:]) / 20
                 volatility = sum(abs(closes[i] - closes[i - 1]) / closes[i - 1] for i in range(-20, -1)) / 19
                 trend_strength = (closes[-1] - sma20) / (sma20 * volatility)
-                signals[f'trend_{timeframe}'] = 1.0 if trend_strength > 0 else -1.0
+                signals[f"trend_{timeframe}"] = 1.0 if trend_strength > 0 else -1.0
 
             return signals
 
@@ -320,8 +291,9 @@ class AsyncResultsAnalyzer:
             logger.error(f"Error calculating timeframe signals: {e}")
             return {}
 
-    async def _determine_direction(self, technical_signals: Dict[str, float], claude_data: Dict) -> Tuple[
-        str, float, List[str]]:
+    async def _determine_direction(
+        self, technical_signals: dict[str, float], claude_data: dict
+    ) -> tuple[str, float, list[str]]:
         """Определение направления движения с улучшенной обработкой сигналов"""
         try:
             total_score = 0
@@ -331,16 +303,16 @@ class AsyncResultsAnalyzer:
 
             # Базовые веса для разных типов сигналов
             base_weights = {
-                'momentum_1h': 1.0,
-                'momentum_4h': 0.8,
-                'momentum_1d': 0.6,
-                'trend_1h': 0.8,
-                'trend_4h': 0.9,
-                'trend_1d': 1.0,
-                'volume_1h': 0.7,
-                'volume_4h': 0.6,
-                'volume_1d': 0.5,
-                'whale_activity': 1.2
+                "momentum_1h": 1.0,
+                "momentum_4h": 0.8,
+                "momentum_1d": 0.6,
+                "trend_1h": 0.8,
+                "trend_4h": 0.9,
+                "trend_1d": 1.0,
+                "volume_1h": 0.7,
+                "volume_4h": 0.6,
+                "volume_1d": 0.5,
+                "whale_activity": 1.2,
             }
 
             # Обработка технических сигналов
@@ -356,18 +328,15 @@ class AsyncResultsAnalyzer:
                 if abs(signal_value) >= 0.5:
                     direction_text = "бычий" if signal_value > 0 else "медвежий"
                     signal_strength = "сильный" if abs(signal_value) > 0.8 else "умеренный"
-                    signals_weight.append((
-                        importance,
-                        f"{signal_name}: {signal_strength} {direction_text} сигнал"
-                    ))
+                    signals_weight.append((importance, f"{signal_name}: {signal_strength} {direction_text} сигнал"))
 
                 total_score += signal_value * weight
                 total_weight += weight
 
             # Учитываем сигнал от Claude
-            if claude_data.get('type'):
+            if claude_data.get("type"):
                 claude_weight = 1.5
-                claude_signal = 1.0 if claude_data['type'] == 'LONG' else -1.0
+                claude_signal = 1.0 if claude_data["type"] == "LONG" else -1.0
                 rand_factor = 1.0 + (random.random() - 0.5) * 0.1  # ±5% случайности
                 total_score += claude_signal * claude_weight * rand_factor
                 total_weight += claude_weight
@@ -393,19 +362,19 @@ class AsyncResultsAnalyzer:
             logger.error(f"Error determining direction: {e}")
             return "UP", 0.51, ["Ошибка анализа"]
 
-    async def format_output(self, results: Dict[str, Dict]) -> str:
+    async def format_output(self, results: dict[str, dict]) -> str:
         """Форматирование результатов"""
         try:
             output = []
             for symbol, data in results.items():
-                direction_emoji = "🟢" if data['predicted_direction'] == "UP" else "🔴"
+                direction_emoji = "🟢" if data["predicted_direction"] == "UP" else "🔴"
                 confidence_percentage = f"{data['confidence'] * 100:.1f}%"
 
                 summary = [
                     f"{direction_emoji} {symbol}: Следующая свеча {data['predicted_direction']} ({confidence_percentage})",
                     "Обоснование:",
-                    *[f"- {reason}" for reason in data['key_reasons']],
-                    ""
+                    *[f"- {reason}" for reason in data["key_reasons"]],
+                    "",
                 ]
                 output.append("\n".join(summary))
 

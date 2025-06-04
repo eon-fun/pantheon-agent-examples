@@ -1,18 +1,17 @@
 import asyncio
+from contextlib import asynccontextmanager
 from html import escape
 
 import aiohttp
-from contextlib import asynccontextmanager
-
 from aiogram.enums import ParseMode
-from fastapi import FastAPI
-from ray import serve
 from base_agent.ray_entrypoint import BaseAgent
-from redis_client.ray_entrypoint import main as redis_client
+from fastapi import FastAPI
 from openai_request.ray_entrypoint import main as send_openai_request
-
-from twitter_summary.config import HEADERS, get_settings, bot
+from ray import serve
+from redis_client.ray_entrypoint import main as redis_client
+from twitter_summary.config import HEADERS, bot, get_settings
 from twitter_summary.src.prompts import AI_PROMPT
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -35,9 +34,7 @@ class TweetProcessor(BaseAgent):
                 if summary:
                     print("✅ Tweet summary generated")
                     await bot.send_message(
-                        chat_id=get_settings().TELEGRAM_CHANNEL_ID,
-                        text=summary,
-                        parse_mode=ParseMode.HTML
+                        chat_id=get_settings().TELEGRAM_CHANNEL_ID, text=summary, parse_mode=ParseMode.HTML
                     )
                 else:
                     print("ℹ️ No new tweets to process")
@@ -49,7 +46,7 @@ class TweetProcessor(BaseAgent):
         result = set()
         for item in redis_set:
             if isinstance(item, bytes):
-                result.add(item.decode('utf-8'))
+                result.add(item.decode("utf-8"))
             else:
                 result.add(str(item))
         return result
@@ -118,12 +115,12 @@ class TweetProcessor(BaseAgent):
 
                 messages = [
                     {"role": "system", "content": AI_PROMPT},
-                    {"role": "user", "content": f"Here are the tweets:\n\n{combined_text}"}
+                    {"role": "user", "content": f"Here are the tweets:\n\n{combined_text}"},
                 ]
 
                 summary = await send_openai_request(messages)
                 for tweet in all_tweets:
-                    db.r.sadd(get_settings().REDIS_LAST_PROCESSED_TWEETS, tweet['id'])
+                    db.r.sadd(get_settings().REDIS_LAST_PROCESSED_TWEETS, tweet["id"])
                 print("✅ Tweets processed and summary generated")
                 return escape(summary.strip())
 

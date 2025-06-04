@@ -2,10 +2,9 @@ from enum import Enum
 from functools import lru_cache
 from typing import Annotated
 
+from base_agent.langchain.langfuse.config import BasicLangFuseConfig
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings
-
-from base_agent.langchain.langfuse.config import BasicLangFuseConfig
 
 
 class ProviderEnum(str, Enum):

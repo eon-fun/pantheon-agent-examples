@@ -1,12 +1,11 @@
 from functools import lru_cache
 from typing import Annotated
 
+from base_agent.const import EntrypointGroup
+from base_agent.utils import get_entrypoint
 from jinja2 import PackageLoader
 from pydantic import Field
 from pydantic_settings import BaseSettings
-
-from base_agent.const import EntrypointGroup
-from base_agent.utils import get_entrypoint
 
 
 def determine_template_path(default_path="base_agent") -> str:

@@ -1,9 +1,8 @@
-from aiogram import Dispatcher, Bot
-from aiogram.types import Message
+from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
+from aiogram.types import Message
 
 from .config import get_settings
-
 
 bot = Bot(token=get_settings().TELEGRAM_BOT_TOKEN_2)
 dp = Dispatcher()

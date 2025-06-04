@@ -1,7 +1,7 @@
-import ray
-import aiohttp
-import json
 from html import escape
+
+import aiohttp
+import ray
 from database.redis.redis_client import RedisDB
 from services.ai_connectors.openai_client import send_openai_request
 
@@ -18,7 +18,9 @@ When summarizing tweets:
 
 End the summary with an engaging closing line like "Stay tuned for updates! 🚀" or similar.
 """
-TWITTER_BEARER_TOKEN = 'AAAAAAAAAAAAAAAAAAAAAALFxQEAAAAAccmjfpy9O9AoKsiWm3EiKRmlYW0%3DKxQgwMPoButLHfAL1Zoledy4bdko6ufQNLTQuxDpCfZxfgthkI'
+TWITTER_BEARER_TOKEN = (
+    "AAAAAAAAAAAAAAAAAAAAAALFxQEAAAAAccmjfpy9O9AoKsiWm3EiKRmlYW0%3DKxQgwMPoButLHfAL1Zoledy4bdko6ufQNLTQuxDpCfZxfgthkI"
+)
 
 
 @ray.remote
@@ -33,7 +35,7 @@ class TweetProcessor:
         result = set()
         for item in redis_set:
             if isinstance(item, bytes):
-                result.add(item.decode('utf-8'))
+                result.add(item.decode("utf-8"))
             else:
                 result.add(str(item))
         return result
@@ -105,12 +107,12 @@ class TweetProcessor:
 
                 messages = [
                     {"role": "system", "content": TWITTER_PROMPT},
-                    {"role": "user", "content": f"Here are the tweets:\n\n{combined_text}"}
+                    {"role": "user", "content": f"Here are the tweets:\n\n{combined_text}"},
                 ]
 
                 summary = await send_openai_request(messages)
                 for tweet in all_tweets:
-                    self.db.r.sadd("last_processed_tweets", tweet['id'])
+                    self.db.r.sadd("last_processed_tweets", tweet["id"])
                 print("✅ Tweets processed and summary generated")
                 return escape(summary.strip())
 

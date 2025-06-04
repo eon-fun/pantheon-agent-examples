@@ -49,4 +49,4 @@ ray = { version = ">=2.42.1,<3.0.0", extras = ["serve"] }
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api" 
+build-backend = "poetry.core.masonry.api"

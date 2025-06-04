@@ -1,21 +1,18 @@
 import asyncio
-from contextlib import asynccontextmanager
-from typing import List
 import datetime
-from fastapi import FastAPI, APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-from starlette.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+
 from agents_tools_logger.main import log
-from ray import serve
-
-from follow_unfollow_bot.DB.managers.user_manager import AlchemyUsersManager
-from follow_unfollow_bot.DB.sqlalchemy_database_manager import init_models, get_db
+from base_agent.ray_entrypoint import BaseAgent
+from fastapi import Depends, FastAPI
 from follow_unfollow_bot.config.config import config
-
+from follow_unfollow_bot.DB.managers.user_manager import AlchemyUsersManager
+from follow_unfollow_bot.DB.sqlalchemy_database_manager import get_db, init_models
 from follow_unfollow_bot.service.user_service import add_user_service, delete_user_service
 from follow_unfollow_bot.tools.follow_for_like import process_follow_for_like
-
-from base_agent.ray_entrypoint import BaseAgent
+from ray import serve
+from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.middleware.cors import CORSMiddleware
 
 
 async def background_task():
@@ -27,7 +24,6 @@ async def background_task():
         except Exception as e:
             log.exception(f"Exception in background_task: {e}")
         await asyncio.sleep(3600)
-
 
 
 async def daily_task():
@@ -59,10 +55,7 @@ async def lifespan(application: FastAPI):
     await init_models()
 
     # Запуск фоновых задач
-    tasks = [
-        asyncio.create_task(background_task()),
-        asyncio.create_task(daily_task())
-    ]
+    tasks = [asyncio.create_task(background_task()), asyncio.create_task(daily_task())]
     try:
         await asyncio.gather(*tasks)
     except asyncio.CancelledError:
@@ -95,18 +88,13 @@ app.add_middleware(
 @serve.ingress(app)
 class FollowUnfollowBot(BaseAgent):
     @app.post("/{goal}")
-    async def handle(self, goal: str, plan: dict | None = None,
-                     session: AsyncSession = Depends(get_db)):
+    async def handle(self, goal: str, plan: dict | None = None, session: AsyncSession = Depends(get_db)):
         twitter_id = int(goal.split(".")[0])
         action = goal.split(".")[1]
-        if action.lower() is "add":
+        if action.lower() == "add":
             await add_user_service(session, twitter_id)
-        elif action.lower() is "delete":
+        elif action.lower() == "delete":
             await delete_user_service(session, twitter_id)
-
-
-
-
 
 
 app = FollowUnfollowBot.bind()

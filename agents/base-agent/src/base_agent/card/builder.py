@@ -1,7 +1,5 @@
 from typing import Annotated
 
-from pydantic import Field
-
 from base_agent.abc import (
     AbstractAgentCard,
     AbstractAgentInputModel,
@@ -12,6 +10,7 @@ from base_agent.abc import (
 )
 from base_agent.card.config import get_card_config
 from base_agent.card.models import AgentCard, AgentSKill
+from pydantic import Field
 
 
 class GoalHandleParamsModel(AbstractAgentParamsModel):

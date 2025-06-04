@@ -1,12 +1,7 @@
-from typing import Optional
-
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import datetime
 from solana_new_pairs.DB.manager.base import BaseAlchemyManager
-from solana_new_pairs.DB.models.coin_model import BaseCoin
 from solana_new_pairs.DB.models.dex_tools_model import DexToolsData
 from solana_new_pairs.utils.utils import clean_json
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class AlchemyDexToolsManager(BaseAlchemyManager):
