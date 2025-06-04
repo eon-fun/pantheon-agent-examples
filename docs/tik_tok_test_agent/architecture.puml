@@ -1,0 +1,33 @@
+@startuml TwitterAmbassadorCommentsAnswerer Architecture
+
+actor User as "API Client"
+participant FastAPI as "FastAPI\nEndpoint"
+participant RayServe as "Ray Serve\nDeployment"
+participant Agent as "TwitterAmbassador\nCommentsAnswerer"
+participant TikTokBot as "TikTokBot\n(Selenium)"
+database TwoCaptcha as "2captcha API"
+database TikTok as "TikTok"
+
+User -> FastAPI : POST /{goal}
+FastAPI -> RayServe : Forward request
+RayServe -> Agent : handle(goal)
+
+group TikTok Commenting Process
+    Agent -> TikTokBot : new(api_key)
+    TikTokBot -> TwoCaptcha : Solve captcha (if needed)
+    TwoCaptcha --> TikTokBot : Captcha solution
+    Agent -> TikTokBot : login(username, password)
+    TikTokBot -> TikTok : Submit credentials
+    TikTok --> TikTokBot : Authentication result
+    Agent -> TikTokBot : comment_on_video(video_url, comment)
+    TikTokBot -> TikTok : Load video page
+    TikTokBot -> TikTok : Submit comment
+    TikTok --> TikTokBot : Comment status
+    Agent -> TikTokBot : quit()
+end
+
+Agent --> RayServe : Return result
+RayServe --> FastAPI : JSON response
+FastAPI --> User : {"success": boolean}
+
+@enduml

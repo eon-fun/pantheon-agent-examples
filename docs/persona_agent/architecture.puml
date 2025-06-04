@@ -1,0 +1,23 @@
+@startuml
+title PersonaAgent - Main Flow
+
+actor "Client" as Client
+participant "FastAPI" as API
+participant "PersonaAgent" as Agent
+database "Redis" as Redis
+database "Qdrant" as Qdrant
+participant "OpenAI" as OpenAI
+
+Client -> API: POST /{persona}\n{prompt}
+API -> Agent: handle(persona, prompt)
+Agent -> Redis: Check persona exists
+Redis --> Agent: Persona description
+Agent -> Qdrant: Search similar tweets
+Qdrant --> Agent: Top 5 similar tweets
+Agent -> OpenAI: Generate text\n(with persona context)
+OpenAI --> Agent: Generated text
+Agent --> API: Formatted response
+API --> Client: Return result
+
+@enduml
+

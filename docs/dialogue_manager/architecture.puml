@@ -1,0 +1,33 @@
+@startuml
+title DialogueManager - Architecture
+
+component "FastAPI" as API {
+    [HTTP Interface]
+}
+
+component "Telethon" as Telethon {
+    [Message Handler]
+    [Command Processor]
+}
+
+database "Redis" as Redis {
+    [Message Store]
+    [Read States]
+}
+
+[OpenAI] as AI
+
+API --> Telethon: Message events
+Telethon --> Redis: Store messages
+Telethon --> AI: Generate summaries
+AI --> Telethon: Return summaries
+Telethon --> Redis: Update read states
+
+note right of Telethon
+    Processing Flow:
+    1. Message reception
+    2. Storage in Redis
+    3. Summary generation
+    4. Read state updates
+end note
+@enduml

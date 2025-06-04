@@ -1,0 +1,38 @@
+@startuml
+title TwitterPostingAgent - Content Generation Flow
+
+actor "Client" as Client
+participant "TwitterPostingAgent" as Agent
+database "Redis" as Redis
+participant "Twitter API" as Twitter
+participant "OpenAI" as OpenAI
+
+Client -> Agent: POST /{username.keywords.themes}
+Agent -> Redis: Get user's previous posts
+Redis --> Agent: Post history
+
+alt No previous posts
+    Agent -> OpenAI: Generate first tweet
+else Has posts
+    Agent -> Twitter: Fetch project tweets
+    Twitter --> Agent: Recent tweets
+    
+    opt Last post wasn't news
+        Agent -> OpenAI: Generate news summary
+    end
+    
+    opt No quotes in last 2 posts
+        Agent -> Agent: Find tweet for quoting
+        Agent -> OpenAI: Generate quote tweet
+    end
+    
+    alt No conditions met
+        Agent -> OpenAI: Generate regular tweet
+    end
+end
+
+OpenAI --> Agent: Generated content
+Agent -> Twitter: Post tweet
+Twitter --> Agent: Post confirmation
+Agent -> Redis: Store new post
+@enduml

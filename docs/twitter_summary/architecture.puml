@@ -1,0 +1,36 @@
+@startuml
+title TwitterSummary - Architecture
+
+component "FastAPI" as API {
+    [HTTP Interface]
+}
+
+component "Background Task" as Task {
+    [Tweet Fetcher]
+    [AI Summarizer]
+}
+
+database "Redis" as Redis {
+    [Tracked Accounts]
+    [Processed IDs]
+}
+
+[Twitter API] as Twitter
+[OpenAI] as OpenAI
+[Telegram] as Telegram
+
+API -> Redis: Manage accounts
+Task -> Twitter: Fetch tweets
+Task -> OpenAI: Generate summaries
+Task -> Redis: Store processed IDs
+Task -> Telegram: Send summaries
+
+note right of Task
+    Execution Flow:
+    1. Fetch new tweets
+    2. Filter duplicates
+    3. Generate summary
+    4. Deliver to Telegram
+    Every 6 hours
+end note
+@enduml

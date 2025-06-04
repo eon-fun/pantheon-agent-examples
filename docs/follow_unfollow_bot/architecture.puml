@@ -1,0 +1,31 @@
+@startuml
+title FollowUnfollowBot - Architecture
+
+component "FastAPI" as API {
+    [HTTP Interface]
+}
+
+component "Background Tasks" as Tasks {
+    [FollowForLike]
+    [DailyReset]
+}
+
+database "PostgreSQL" as DB {
+    [Users]
+    [FollowLimits]
+}
+
+[Twitter API] as Twitter
+
+API -> Tasks: Triggers
+Tasks -> DB: Read/Write
+Tasks -> Twitter: API Calls
+API -> DB: Direct Access
+
+note right of Tasks
+    Continuous:
+    - Follow-for-like strategy
+    Daily:
+    - Reset follow limits
+end note
+@enduml

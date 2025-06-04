@@ -1,0 +1,21 @@
+@startuml
+title TwitterAmbassadorCommentator - Main Flow
+
+actor Client
+
+Client -> Agent : POST /{goal}
+Agent -> Agent : Parse my_username, project_username
+Agent -> TwitterAuthClient : get_access_token(my_username)
+TwitterAuthClient -> TwitterAPI : Request OAuth token
+
+Agent -> Redis : get_set(user_comments:{my_username})
+Agent -> tweetscout_utils : fetch_user_tweets(project_username)
+Agent -> Agent : Collect recent tweets
+
+Agent -> Agent : Filter tweets already commented on
+Agent -> OpenAI : generate_comment(tweet_text)
+Agent -> TwitterAPI : post_reply(token, tweet_id, comment)
+TwitterAPI --> Agent : {"reply_posted": true}
+Agent -> Redis : add_to_set(user_comments:{my_username}, tweet_id)
+
+@enduml

@@ -1,0 +1,35 @@
+@startuml
+title AsyncCryptoAISystem - Architecture
+
+component "AsyncCryptoAISystem" as System {
+    [Data Collector]
+    [AI Analyzer]
+    [Results Processor]
+}
+
+database "Redis" as Redis {
+    [Market Data]
+    [Analysis Results]
+}
+
+[Market APIs] as Market
+[Anthropic Claude] as AI
+
+System -> Market: Fetch OHLCV data
+System -> Market: Get order books
+System -> Market: Retrieve whale activity
+Market --> System: Raw market data
+System -> AI: Send analysis requests
+AI --> System: Generated insights
+System --> Redis: Store results
+
+note right of System
+    Analysis Pipeline:
+    1. Data collection
+    2. Technical analysis
+    3. AI processing
+    4. Result storage
+    Runs every 5 minutes
+end note
+@enduml
+

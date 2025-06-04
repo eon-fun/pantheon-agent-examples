@@ -1,0 +1,30 @@
+@startuml
+title APYAgent - Architecture
+
+actor "Telegram User" as User
+component "Telegram Bot" as Bot
+component "APYAgent" as Agent
+database "Enso API" as Enso {
+    [Protocols]
+    [Tokens]
+    [Prices]
+}
+
+User -> Bot: /find_pools <token>
+Bot -> Agent: Handle request
+Agent -> Enso: Get protocols
+Agent -> Enso: Get token data
+Agent -> Enso: Get prices
+Enso --> Agent: Return data
+Agent --> Agent: Validate pools
+Agent --> Bot: Formatted recommendation
+Bot --> User: Investment advice
+
+note right of Agent
+    Validation checks:
+    - APY range (0.1%-100%)
+    - Active underlying tokens
+    - Complete pool data
+    - Recent price data
+end note
+@enduml

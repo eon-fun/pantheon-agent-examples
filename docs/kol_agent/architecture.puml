@@ -1,0 +1,35 @@
+@startuml
+title KolAgent - Main Flow
+
+actor "Client" as Client
+participant "FastAPI" as API
+participant "KolAgent" as Agent
+database "Redis" as Redis
+participant "Twitter API" as Twitter
+participant "Langfuse" as Langfuse
+
+Client -> API: POST /{goal}\n(target tweet, accounts)
+API -> Agent: handle(raid parameters)
+Agent -> Langfuse: Initiate trace
+Agent -> Redis: Get account data
+Redis --> Agent: Account credentials
+loop For each bot account
+    Agent -> Twitter: Authenticate
+    Twitter --> Agent: Access token
+    Agent -> Twitter: Post engagement
+end
+Agent --> Langfuse: Log results
+Agent --> API: Confirmation
+API --> Client: Success response
+
+Client -> API: GET /all_accounts
+API -> Agent: all_accounts()
+Agent -> Redis: Get all accounts
+Redis --> Agent: Account list
+loop For each account
+    Agent -> Twitter: Verify access
+    Twitter --> Agent: Account status
+end
+Agent --> API: Account data
+API --> Client: Return status
+@enduml

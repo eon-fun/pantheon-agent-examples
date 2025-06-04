@@ -1,0 +1,29 @@
+@startuml
+title WalletTrackingAgent - Architecture
+
+component "Ray" as Ray {
+    [WalletTrackingAgent]
+}
+
+database "Redis" as Redis {
+    [Watched Wallets]
+    [Processed TXs]
+}
+
+[Ankr API] as Ankr
+[Blockchain] as Chain
+
+Ray -> Redis: Wallet management
+Ray -> Ankr: Transaction queries
+Ankr -> Chain: Read data
+Ray --> Redis: Store processed TXs
+
+note right of Ray
+    Supported Chains:
+    - Ethereum
+    - BSC
+    - Polygon
+    - Arbitrum
+    - Optimism
+end note
+@enduml

@@ -1,0 +1,36 @@
+@startuml
+title BaseAgent - Architecture
+
+component "BaseAgent" as Agent {
+    [Workflow Runner]
+    [Prompt Builder]
+    [Agent Executor]
+}
+
+database "Redis" as Redis {
+    [Memory]
+    [Chat History]
+}
+
+database "LightRAG" as RAG {
+    [Knowledge Base]
+}
+
+component "AI Registry" as Registry {
+    [Agents]
+    [Tools]
+}
+
+Agent --> Redis: Stores/retrieves\nmemories
+Agent --> RAG: Queries knowledge\nstores insights
+Agent --> Registry: Discovers\nagents & tools
+Agent <-- Registry: Registers self
+
+note right of Agent
+    Core Capabilities:
+    - Plan generation
+    - Workflow execution
+    - Intent classification
+    - Handoff management
+end note
+@enduml

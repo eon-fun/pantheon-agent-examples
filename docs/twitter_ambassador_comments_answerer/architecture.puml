@@ -1,0 +1,35 @@
+@startuml
+skinparam monochrome true
+hide empty description
+
+title Twitter Comment Answerer Flow
+
+actor User
+rectangle "Agent" {
+  component "API" as api
+  component "Processor" as proc
+  component "Twitter" as tw
+  component "AI" as ai
+}
+
+database Redis
+
+User -> api : "POST /{goal}"
+api -> proc : "process"
+proc -> tw : "get replies"
+tw --> proc : "comments"
+proc -> ai : "generate reply"
+ai --> proc : "response"
+proc -> tw : "post comment"
+proc -> Redis : "store IDs"
+
+note right of proc
+  **Workflow:**
+  1. Receive target account
+  2. Find relevant replies
+  3. Filter unanswered
+  4. Generate response
+  5. Post with delay
+end note
+
+@enduml

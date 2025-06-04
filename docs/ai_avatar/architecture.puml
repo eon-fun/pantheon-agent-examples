@@ -1,0 +1,21 @@
+@startuml
+title AIAvatar - Main Flow
+
+actor "Telegram User" as User
+participant "AIAvatar Bot" as Bot
+participant "Telegram API" as TelegramAPI
+participant "OpenAI API" as OpenAIAPI
+participant "Redis" as Redis
+
+User -> Bot: Send message or /new_style
+Bot -> TelegramAPI: Fetch recent user messages
+TelegramAPI --> Bot: Up to 100 messages
+Bot -> Redis: Store/fetch user context (user:<user_id>)
+Redis --> Bot: Recent messages or last response
+Bot -> Bot: Prepare prompt with user style
+Bot -> OpenAIAPI: Send prompt with messages
+OpenAIAPI --> Bot: Generated response
+Bot -> Redis: Store response (user:<user_id>)
+Bot -> User: Send response via Telegram
+
+@enduml

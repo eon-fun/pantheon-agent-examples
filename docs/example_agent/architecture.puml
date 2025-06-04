@@ -1,0 +1,24 @@
+@startuml
+title ExampleAgent - Architecture
+
+component "FastAPI" as API {
+    [HTTP Interface]
+}
+
+component "Ray Serve" as Ray {
+    [ExampleAgent]
+    [SubAgent]
+}
+
+API -> ExampleAgent: Routes requests
+ExampleAgent -> SubAgent: Internal calls
+SubAgent -> ExampleAgent: Returns results
+
+note right of Ray
+    SubAgent demonstrates:
+    - Internal processing
+    - Ray scaling
+    - Non-exposed endpoints
+end note
+@enduml
+

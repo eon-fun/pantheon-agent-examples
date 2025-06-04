@@ -1,0 +1,27 @@
+    @startuml
+    title APYAgent - Main Flow
+
+    actor "Telegram User" as User
+    participant "APYAgent Bot" as Bot
+    participant "Enso Finance API" as EnsoAPI
+    participant "Redis" as Redis
+
+    User -> Bot: /find_pools <token_address>
+    Bot -> Bot: Validate token_address
+    Bot -> EnsoAPI: GET /protocols
+    EnsoAPI --> Bot: List of protocols
+
+    loop For each protocol
+        Bot -> EnsoAPI: GET /tokens?chainId=1&protocolSlug=<slug>
+        EnsoAPI --> Bot: DeFi tokens data
+        Bot -> Bot: Filter tokens with token_address
+        Bot -> EnsoAPI: GET /prices/<chain_id>/<token_address>
+        EnsoAPI --> Bot: Price data
+        Bot -> Bot: Validate pool (APY, tokens, fields)
+    end
+
+    Bot -> Bot: Select best pool and top 5 alternatives
+    Bot -> User: Send formatted recommendation
+    note right of Redis: Redis not used in current implementation
+
+    @enduml

@@ -1,0 +1,31 @@
+@startuml
+title TwitterEchoBot - Architecture
+
+component "FastAPI" as API {
+    [HTTP Interface]
+}
+
+component "Background Tasks" as Tasks {
+    [Tweet Collector]
+    [Content Generator]
+}
+
+database "PostgreSQL" as DB {
+    [Users]
+    [Tracked Accounts]
+}
+
+[Twitter API] as Twitter
+
+API -> DB: User Management
+Tasks -> Twitter: API Calls
+Tasks -> DB: Store Data
+Twitter --> Tasks: Tweets
+DB --> API: User Data
+
+note right of Tasks
+    Continuous Processes:
+    - Tweet collection (every 500s)
+    - Content generation (every 5s)
+end note
+@enduml
