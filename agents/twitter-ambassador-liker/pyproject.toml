@@ -13,10 +13,6 @@ dependencies = [
     "loguru==0.7.3",
     "requests (>=2.32.3)",
     "jinja2 (==3.1.5)",
-    "redis-client (>=0.1.6)",
-    "twitter-ambassador-utils (>=0.1.6)",
-    "tweetscout-utils (==0.0.4)",
-    "send-openai-request (==0.1.1)",
 ]
 
 [tool.poetry]
@@ -25,21 +21,18 @@ packages = [{include = "*", from="src"}]
 [[tool.poetry.source]]
 name = "pantheon"
 url = "https://pantheon-688567299207.d.codeartifact.eu-west-1.amazonaws.com/pypi/pantheon/simple/"
-priority = "primary"
-
-
-[tool.poetry.dependencies]
-redis-client = {source = "pantheon"}
-twitter-ambassador-utils = {source = "pantheon"}
-base-agent = {source = "pantheon"}
-tweetscout-utils = {source = "pantheon"}
+priority = "supplemental"
 
 [project.entry-points."agent.entrypoint"]
 target = "twitter_ambassador_liker.entrypoint:get_agent"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"
-ray = { version = ">=2.42.1,<3.0.0", extras = ["serve"] }
+pytest-cov = "^4.0.0"
+pytest-asyncio = "^0.21.0"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
 
 [build-system]
 requires = ["poetry-core"]

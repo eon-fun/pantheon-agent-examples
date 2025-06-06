@@ -1,4 +1,12 @@
+import sys
+from unittest.mock import MagicMock
+
 import pytest
+
+# Mock all external dependencies
+sys.modules["send_openai_request"] = MagicMock()
+sys.modules["send_openai_request.main"] = MagicMock()
+
 from tw_amb_comments_answerer import commands
 
 

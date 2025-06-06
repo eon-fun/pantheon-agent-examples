@@ -1,0 +1,24 @@
+[project]
+name = "ai-avatar"
+version = "0.1.0"
+description = "AI Avatar for Telegram with style adaptation"
+authors = [{ name = "Pantheon Team", email = "team@pantheon.com" }]
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "telethon>=1.30.0",
+    "ray>=2.0.0",
+    "redis>=4.0.0",
+    "openai>=1.0.0",
+]
+
+[tool.poetry]
+package-mode = false
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.4"
+pytest-cov = "^5.0.0"
+pytest-asyncio = "^0.24.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

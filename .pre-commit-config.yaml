@@ -5,8 +5,11 @@ repos:
     hooks:
     -   id: check-yaml
         exclude: ^agents/base-agent/chart/
+        files: ^agents/.*\.(py|yaml|yml)$
     -   id: end-of-file-fixer
+        files: ^agents/.*\.py$
     -   id: trailing-whitespace
+        files: ^agents/.*\.py$
     -   id: check-merge-conflict
     -   id: check-added-large-files
         exclude: repomix-output.xml

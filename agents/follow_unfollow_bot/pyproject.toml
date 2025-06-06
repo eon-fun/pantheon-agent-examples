@@ -9,15 +9,15 @@ readme = "README.md"
 requires-python = ">=3.11,<4.0"
 dependencies = [
     "pydantic (>=2.10.6,<3.0.0)",
-    "sqlalchemy (>=2.0.38,<3.0.0)",
+    "pydantic-settings",
     "fastapi (>=0.115.11,<0.116.0)",
-    "agents-tools-logger (>=0.1.0)",
-    "tweetscout_utils (>=0.1.0)",
-    "follow_unfollow_bot_get_likes_on_post (>=0.1.0)",
-    "twitter_ambassador_utils (>=0.1.0)",
-    "twitter_follow (>=0.1.0)",
 ]
 
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-cov = "^4.0.0"
+pytest-asyncio = "^0.21.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

@@ -1,7 +1,12 @@
+import os
 import sys
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+
+# Mock environment variables before importing
+os.environ.setdefault("CREATIVITY_API_ID", "test-id")
+os.environ.setdefault("CREATIVITY_API_KEY", "test-key")
 
 
 def ingress_decorator_factory(app):
@@ -30,7 +35,7 @@ sys.modules["ray"] = MagicMock(serve=serve_mock)
 sys.modules["ray.serve"] = serve_mock
 
 # ---- Don't change! The mocks should come first ----
-from creativity_agent.entrypoint import (  # noqa: E402
+from src.creativity_agent.entrypoint import (  # noqa: E402
     AIShortRequest,
     CreativityService,
     LipsyncPreviewRequest,
@@ -41,7 +46,7 @@ from creativity_agent.entrypoint import (  # noqa: E402
 
 @pytest.fixture
 def creativity_service():
-    with patch("creativity_agent.entrypoint.httpx.AsyncClient") as mock_httpx_client:
+    with patch("src.creativity_agent.entrypoint.httpx.AsyncClient") as mock_httpx_client:
         mock_client = AsyncMock()
         mock_httpx_client.return_value = mock_client
         service = CreativityService()
