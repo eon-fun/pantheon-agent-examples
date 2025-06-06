@@ -2,17 +2,17 @@
 # See https://help.github.com/articles/about-codeowners/
 
 # Default owners for everything in the repo
-*       @golemxiv @k1llzz @polkadot21
+* @GolemXlV @k1llzz @polkadot21
 
-# Agent implementations
-/agents/    @k1llzz @polkadot21
+/docs/ @GolemXlV @polkadot21 @k1llzz
+*.md @GolemXlV @polkadot21 @k1llzz
+/README.md @GolemXlV @polkadot21 @k1llzz
 
-# Documentation
-/docs/      @golemxiv @drobotukhin
+/pyproject.toml @GolemXlV @mrvladd-d
+/.github/ @GolemXlV @mrvladd-d
 
-# GitHub configurations
-/.github/   @drobotukhin @golemxiv
+/agents/ @GolemXlV @k1llzz
 
-# Build and dependency configurations
-/pyproject.toml     @k1llzz @drobotukhin
-/poetry.lock        @k1llzz @drobotukhin
+/.github/workflows/ @GolemXlV @mrvladd-d
+
+/LICENSE @GolemXlV @k1llzz @polkadot21 @mrvladd-d
