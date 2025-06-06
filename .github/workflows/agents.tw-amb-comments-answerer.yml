@@ -1,0 +1,16 @@
+name: Agent - tw-amb-comments-answerer
+
+on:
+  push:
+    branches: [main]
+    tags: [ 'v*.*.*' ]
+
+jobs:
+  publish:
+    uses: ./.github/workflows/reusable.agent-publish.yml
+    with:
+      path: agents/tw-amb-comments-answerer
+      agent_name: tw-amb-comments-answerer
+    secrets:
+      REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+      OCI_REGISTRY_TOKEN: ${{ secrets.OCI_REGISTRY_TOKEN }}

@@ -1,0 +1,16 @@
+name: Agent - solana-new-pairs
+
+on:
+  push:
+    branches: [main]
+    tags: [ 'v*.*.*' ]
+
+jobs:
+  publish:
+    uses: ./.github/workflows/reusable.agent-publish.yml
+    with:
+      path: agents/solana-new-pairs
+      agent_name: solana-new-pairs
+    secrets:
+      REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+      OCI_REGISTRY_TOKEN: ${{ secrets.OCI_REGISTRY_TOKEN }}

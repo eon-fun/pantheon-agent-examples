@@ -1,0 +1,16 @@
+name: Agent - tik-tok-test-agent
+
+on:
+  push:
+    branches: [main]
+    tags: [ 'v*.*.*' ]
+
+jobs:
+  publish:
+    uses: ./.github/workflows/reusable.agent-publish.yml
+    with:
+      path: agents/tik-tok-test-agent
+      agent_name: tik-tok-test-agent
+    secrets:
+      REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+      OCI_REGISTRY_TOKEN: ${{ secrets.OCI_REGISTRY_TOKEN }}

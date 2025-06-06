@@ -1,0 +1,84 @@
+name: Reusable - Agent Publish (Python & Docker)
+
+on:
+  workflow_call:
+    inputs:
+      path:
+        required: true
+        type: string
+      agent_name:
+        required: true
+        type: string
+      docker_registry:
+        required: false
+        type: string
+        default: 'pantheon.ai'
+      docker_repo:
+        required: false
+        type: string
+        default: 'agents'
+    secrets:
+      REGISTRY_TOKEN:
+        required: true
+      OCI_REGISTRY_TOKEN:
+        required: true
+
+jobs:
+  publish-python:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.path }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root
+
+      - name: Run tests
+        run: poetry run pytest
+
+      - name: Build package
+        run: poetry build
+
+      - name: Publish to PyPI
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.REGISTRY_TOKEN }}
+        run: poetry publish --no-interaction --build
+
+      - name: Check Dockerfile exists
+        id: dockerfile
+        run: |
+          if [ -f Dockerfile ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Log in to Docker registry (Harbor)
+        if: steps.dockerfile.outputs.exists == 'true' && startsWith(github.ref, 'refs/tags/v') && inputs.docker_registry != ''
+        run: |
+          echo "${{ secrets.OCI_REGISTRY_TOKEN }}" | docker login ${{ inputs.docker_registry }} -u "ci" --password-stdin
+
+      - name: Build Docker image
+        if: steps.dockerfile.outputs.exists == 'true' && startsWith(github.ref, 'refs/tags/v') && inputs.docker_registry != ''
+        run: |
+          IMAGE_TAG=${GITHUB_REF_NAME}
+          IMAGE_REPO=${{ inputs.docker_registry }}/${{ inputs.docker_repo }}/${{ inputs.agent_name }}
+          docker build -t "${IMAGE_REPO}:${IMAGE_TAG}" .
+
+      - name: Push Docker image
+        if: steps.dockerfile.outputs.exists == 'true' && startsWith(github.ref, 'refs/tags/v') && inputs.docker_registry != ''
+        run: |
+          IMAGE_TAG=${GITHUB_REF_NAME}
+          IMAGE_REPO=${{ inputs.docker_registry }}/${{ inputs.docker_repo }}/${{ inputs.agent_name }}
+          docker push "${IMAGE_REPO}:${IMAGE_TAG}"
