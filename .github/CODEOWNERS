@@ -1,0 +1,18 @@
+# PanthEON Agent Examples Code Owners
+# See https://help.github.com/articles/about-codeowners/
+
+# Default owners for everything in the repo
+*       @golemxiv @k1llzz @polkadot21
+
+# Agent implementations
+/agents/    @k1llzz @polkadot21
+
+# Documentation
+/docs/      @golemxiv @drobotukhin
+
+# GitHub configurations
+/.github/   @drobotukhin @golemxiv
+
+# Build and dependency configurations
+/pyproject.toml     @k1llzz @drobotukhin
+/poetry.lock        @k1llzz @drobotukhin
