@@ -44,7 +44,7 @@ jobs:
         run: poetry install --no-interaction --no-root
 
       - name: Run tests
-        run: poetry run pytest
+        run: poetry run make test
 
       - name: Build package
         run: poetry build
