@@ -58,6 +58,7 @@ jobs:
     strategy:
       matrix:
         agent: [
+          "ai_apy_pool_agent",
           "base-agent",
           "example-agent",
           "persona-agent",
@@ -90,7 +91,7 @@ jobs:
         working-directory: agents/${{ matrix.agent }}
         run: |
           if [ -f "pyproject.toml" ]; then
-            poetry install
+            poetry install --with dev
           else
             echo "No pyproject.toml found in agents/${{ matrix.agent }}"
           fi
@@ -101,7 +102,16 @@ jobs:
           if [ -f "Makefile" ]; then
             poetry run make test
           elif [ -d "tests" ]; then
-            poetry run pytest tests/ -v
+            echo "Running tests from tests/ directory for ${{ matrix.agent }}"
+            poetry run pytest tests/ --cov=. --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=80 -v
           else
             echo "No tests found for ${{ matrix.agent }}"
           fi
+
+      - name: Upload coverage report for ${{ matrix.agent }}
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-${{ matrix.agent }}
+          path: agents/${{ matrix.agent }}/coverage.xml
+          retention-days: 7
