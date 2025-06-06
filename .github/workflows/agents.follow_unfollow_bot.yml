@@ -3,7 +3,7 @@ name: Agent - follow_unfollow_bot
 on:
   push:
     branches: [main]
-    tags: [ 'v*.*.*' ]
+    tags: [ 'agents/follow_unfollow_bot-v*.*.*' ]
 
 jobs:
   publish:

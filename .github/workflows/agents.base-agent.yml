@@ -3,7 +3,7 @@ name: Agent - base-agent
 on:
   push:
     branches: [main]
-    tags: [ 'v*.*.*' ]
+    tags: [ 'agents/base-agent-v*.*.*' ]
 
 jobs:
   publish:

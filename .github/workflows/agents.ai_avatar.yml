@@ -3,7 +3,7 @@ name: Agent - ai_avatar
 on:
   push:
     branches: [main]
-    tags: [ 'v*.*.*' ]
+    tags: [ 'agents/ai_avatar-v*.*.*' ]
 
 jobs:
   publish:

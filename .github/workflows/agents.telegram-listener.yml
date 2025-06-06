@@ -3,7 +3,7 @@ name: Agent - telegram-listener
 on:
   push:
     branches: [main]
-    tags: [ 'v*.*.*' ]
+    tags: [ 'agents/telegram-listener-v*.*.*' ]
 
 jobs:
   publish:

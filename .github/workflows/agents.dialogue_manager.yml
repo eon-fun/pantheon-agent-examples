@@ -3,7 +3,7 @@ name: Agent - dialogue_manager
 on:
   push:
     branches: [main]
-    tags: [ 'v*.*.*' ]
+    tags: [ 'agents/dialogue_manager-v*.*.*' ]
 
 jobs:
   publish:

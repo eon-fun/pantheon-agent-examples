@@ -3,7 +3,7 @@ name: Agent - twitter_summary
 on:
   push:
     branches: [main]
-    tags: [ 'v*.*.*' ]
+    tags: [ 'agents/twitter_summary-v*.*.*' ]
 
 jobs:
   publish:

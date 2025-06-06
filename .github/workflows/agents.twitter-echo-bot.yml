@@ -3,7 +3,7 @@ name: Agent - twitter-echo-bot
 on:
   push:
     branches: [main]
-    tags: [ 'v*.*.*' ]
+    tags: [ 'agents/twitter-echo-bot-v*.*.*' ]
 
 jobs:
   publish:

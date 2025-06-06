@@ -3,7 +3,7 @@ name: Agent - twitter-ambassador-liker
 on:
   push:
     branches: [main]
-    tags: [ 'v*.*.*' ]
+    tags: [ 'agents/twitter-ambassador-liker-v*.*.*' ]
 
 jobs:
   publish:

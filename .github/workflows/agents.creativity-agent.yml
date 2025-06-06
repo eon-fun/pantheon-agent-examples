@@ -3,7 +3,7 @@ name: Agent - creativity-agent
 on:
   push:
     branches: [main]
-    tags: [ 'v*.*.*' ]
+    tags: [ 'agents/creativity-agent-v*.*.*' ]
 
 jobs:
   publish:

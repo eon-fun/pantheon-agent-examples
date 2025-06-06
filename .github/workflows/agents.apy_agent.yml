@@ -3,7 +3,7 @@ name: Agent - apy_agent
 on:
   push:
     branches: [main]
-    tags: [ 'v*.*.*' ]
+    tags: [ 'agents/apy_agent-v*.*.*' ]
 
 jobs:
   publish:
