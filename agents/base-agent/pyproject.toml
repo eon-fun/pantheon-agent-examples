@@ -67,6 +67,8 @@ basic = "base_agent.card.builder:get_agent_card"
 [tool.poetry.group.dev.dependencies]
 ray = { extras = ["serve"], version = "2.42.1" }
 pytest = "^8.3.4"
+pytest-cov = "^5.0.0"
+pytest-asyncio = "^0.24.0"
 pyarrow = "^19.0.1"
 
 [build-system]

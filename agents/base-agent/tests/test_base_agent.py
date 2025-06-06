@@ -1,8 +1,15 @@
 import datetime
+import sys
 from unittest.mock import MagicMock, patch
 
-import base_agent.ray_entrypoint as ray_entrypoint
 import pytest
+
+# Mock Ray before any imports that use it
+sys.modules["ray"] = MagicMock()
+sys.modules["ray.serve"] = MagicMock()
+sys.modules["ray.serve.deployment"] = MagicMock()
+
+import base_agent.ray_entrypoint as ray_entrypoint
 from base_agent.config import BasicAgentConfig
 from base_agent.const import ExtraQuestions, Intents
 from base_agent.models import AgentModel, InsightModel

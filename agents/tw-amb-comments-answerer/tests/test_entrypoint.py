@@ -1,6 +1,6 @@
 import sys
 from types import ModuleType
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -8,6 +8,18 @@ from fastapi.testclient import TestClient
 fake_ray = ModuleType("ray")
 fake_serve = ModuleType("ray.serve")
 fake_deployment = ModuleType("ray.serve.deployment")
+
+# Mock all external dependencies
+sys.modules["base_agent"] = MagicMock()
+sys.modules["base_agent.ray_entrypoint"] = MagicMock()
+sys.modules["redis_client"] = MagicMock()
+sys.modules["redis_client.main"] = MagicMock()
+sys.modules["twitter_ambassador_utils"] = MagicMock()
+sys.modules["twitter_ambassador_utils.main"] = MagicMock()
+sys.modules["tweetscout_utils"] = MagicMock()
+sys.modules["tweetscout_utils.main"] = MagicMock()
+sys.modules["send_openai_request"] = MagicMock()
+sys.modules["send_openai_request.main"] = MagicMock()
 
 
 # Mock the decorators

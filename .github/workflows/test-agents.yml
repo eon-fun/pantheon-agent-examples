@@ -1,0 +1,47 @@
+name: Test Agents
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        agent: [
+          ai_apy_pool_agent, ai_avatar, ai_dialogue_manager,
+          ai_predicts_manager, ai_smm_manager, ai_twitter_summary,
+          apy_agent, base-agent, creativity-agent, dialogue_manager,
+          example-agent, follow_unfollow_bot, kol-agent, persona-agent,
+          solana-new-pairs, telegram-listener, tik-tok-test-agent,
+          tw-amb-comments-answerer, tw-amb-gorilla-marketing,
+          tw-amb-mention-answerer, twitter-ambassador-commentator,
+          twitter-ambassador-liker, twitter-ambassador-posting-agent,
+          twitter-echo-bot, twitter_summary, wallet_tracker_agent
+        ]
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    - uses: snok/install-poetry@v1
+
+    - name: Test
+      run: |
+        cd agents/${{ matrix.agent }}
+        if [ -f pyproject.toml ]; then
+          echo "📦 Installing dependencies for ${{ matrix.agent }}..."
+          poetry install --no-root 2>/dev/null || poetry install
+          if [ -d tests ] && [ "$(ls -A tests 2>/dev/null | grep -v __pycache__ | wc -l)" -gt 0 ]; then
+            echo "🧪 Running tests for ${{ matrix.agent }}..."
+            if [ -d src ]; then
+              poetry run pytest tests/ -v --cov=src --cov-report=term-missing
+            else
+              poetry run pytest tests/ -v --cov=. --cov-report=term-missing
+            fi
+          else
+            echo "⚠️ No tests found for ${{ matrix.agent }}"
+          fi
+        else
+          echo "⚠️ No pyproject.toml found for ${{ matrix.agent }}"
+        fi
