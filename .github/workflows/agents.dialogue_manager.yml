@@ -1,0 +1,16 @@
+name: Agent - dialogue_manager
+
+on:
+  push:
+    branches: [main]
+    tags: [ 'agents/dialogue_manager-v*.*.*' ]
+
+jobs:
+  publish:
+    uses: ./.github/workflows/reusable.agent-publish.yml
+    with:
+      path: agents/dialogue_manager
+      agent_name: dialogue_manager
+    secrets:
+      REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+      OCI_REGISTRY_TOKEN: ${{ secrets.OCI_REGISTRY_TOKEN }}

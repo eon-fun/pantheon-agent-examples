@@ -1,0 +1,16 @@
+name: Agent - ai_avatar
+
+on:
+  push:
+    branches: [main]
+    tags: [ 'agents/ai_avatar-v*.*.*' ]
+
+jobs:
+  publish:
+    uses: ./.github/workflows/reusable.agent-publish.yml
+    with:
+      path: agents/ai_avatar
+      agent_name: ai_avatar
+    secrets:
+      REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+      OCI_REGISTRY_TOKEN: ${{ secrets.OCI_REGISTRY_TOKEN }}

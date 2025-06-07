@@ -1,0 +1,16 @@
+name: Agent - telegram-listener
+
+on:
+  push:
+    branches: [main]
+    tags: [ 'agents/telegram-listener-v*.*.*' ]
+
+jobs:
+  publish:
+    uses: ./.github/workflows/reusable.agent-publish.yml
+    with:
+      path: agents/telegram-listener
+      agent_name: telegram-listener
+    secrets:
+      REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+      OCI_REGISTRY_TOKEN: ${{ secrets.OCI_REGISTRY_TOKEN }}
