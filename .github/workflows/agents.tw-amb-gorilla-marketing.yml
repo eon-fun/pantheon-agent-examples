@@ -1,0 +1,16 @@
+name: Agent - tw-amb-gorilla-marketing
+
+on:
+  push:
+    branches: [main]
+    tags: [ 'agents/tw-amb-gorilla-marketing-v*.*.*' ]
+
+jobs:
+  publish:
+    uses: ./.github/workflows/reusable.agent-publish.yml
+    with:
+      path: agents/tw-amb-gorilla-marketing
+      agent_name: tw-amb-gorilla-marketing
+    secrets:
+      REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+      OCI_REGISTRY_TOKEN: ${{ secrets.OCI_REGISTRY_TOKEN }}

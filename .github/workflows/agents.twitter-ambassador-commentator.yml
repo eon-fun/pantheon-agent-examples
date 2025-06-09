@@ -1,0 +1,16 @@
+name: Agent - twitter-ambassador-commentator
+
+on:
+  push:
+    branches: [main]
+    tags: [ 'agents/twitter-ambassador-commentator-v*.*.*' ]
+
+jobs:
+  publish:
+    uses: ./.github/workflows/reusable.agent-publish.yml
+    with:
+      path: agents/twitter-ambassador-commentator
+      agent_name: twitter-ambassador-commentator
+    secrets:
+      REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+      OCI_REGISTRY_TOKEN: ${{ secrets.OCI_REGISTRY_TOKEN }}

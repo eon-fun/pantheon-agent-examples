@@ -1,0 +1,16 @@
+name: Agent - wallet_tracker_agent
+
+on:
+  push:
+    branches: [main]
+    tags: [ 'agents/wallet_tracker_agent-v*.*.*' ]
+
+jobs:
+  publish:
+    uses: ./.github/workflows/reusable.agent-publish.yml
+    with:
+      path: agents/wallet_tracker_agent
+      agent_name: wallet_tracker_agent
+    secrets:
+      REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+      OCI_REGISTRY_TOKEN: ${{ secrets.OCI_REGISTRY_TOKEN }}

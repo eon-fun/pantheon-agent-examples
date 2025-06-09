@@ -1,0 +1,16 @@
+name: Agent - follow_unfollow_bot
+
+on:
+  push:
+    branches: [main]
+    tags: [ 'agents/follow_unfollow_bot-v*.*.*' ]
+
+jobs:
+  publish:
+    uses: ./.github/workflows/reusable.agent-publish.yml
+    with:
+      path: agents/follow_unfollow_bot
+      agent_name: follow_unfollow_bot
+    secrets:
+      REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+      OCI_REGISTRY_TOKEN: ${{ secrets.OCI_REGISTRY_TOKEN }}

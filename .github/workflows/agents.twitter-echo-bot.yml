@@ -1,0 +1,16 @@
+name: Agent - twitter-echo-bot
+
+on:
+  push:
+    branches: [main]
+    tags: [ 'agents/twitter-echo-bot-v*.*.*' ]
+
+jobs:
+  publish:
+    uses: ./.github/workflows/reusable.agent-publish.yml
+    with:
+      path: agents/twitter-echo-bot
+      agent_name: twitter-echo-bot
+    secrets:
+      REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+      OCI_REGISTRY_TOKEN: ${{ secrets.OCI_REGISTRY_TOKEN }}

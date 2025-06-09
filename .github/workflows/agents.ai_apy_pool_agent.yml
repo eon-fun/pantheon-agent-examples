@@ -1,0 +1,16 @@
+name: Agent - ai_apy_pool_agent
+
+on:
+  push:
+    branches: [main]
+    tags: [ 'agents/ai_apy_pool_agent-v*.*.*' ]
+
+jobs:
+  publish:
+    uses: ./.github/workflows/reusable.agent-publish.yml
+    with:
+      path: agents/ai_apy_pool_agent
+      agent_name: ai_apy_pool_agent
+    secrets:
+      REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+      OCI_REGISTRY_TOKEN: ${{ secrets.OCI_REGISTRY_TOKEN }}
