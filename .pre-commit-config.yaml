@@ -5,7 +5,7 @@ repos:
     hooks:
     -   id: check-yaml
         exclude: ^agents/base-agent/chart/
-        files: ^agents/.*\.(py|yaml|yml)$
+        files: ^agents/.*\.(yaml|yml)$
     -   id: end-of-file-fixer
         files: ^agents/.*\.py$
     -   id: trailing-whitespace
